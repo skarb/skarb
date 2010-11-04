@@ -2,10 +2,15 @@ AC_PREREQ([2.67])
 AC_INIT([inzynierka], [snapshot])
 AM_INIT_AUTOMAKE([1.11 foreign])
 AC_PROG_AWK
-AC_CHECK_PROGS(PDFLATEX, [pdflatex])
-if test -z "$PDFLATEX"; then
-	AC_MSG_ERROR([cannot find neither rubber nor pdflatex])
+AC_CHECK_PROGS(RUBBER, [rubber])
+if test -z "$RUBBER"; then
+	AC_CHECK_PROGS(PDFLATEX, [pdflatex])
+	if test -z "$PDFLATEX"; then
+		AC_MSG_ERROR([cannot find neither rubber nor pdflatex])
+	fi
+	AC_SUBST(LATEXC, ["\$(top_srcdir)/scripts/twice.sh $PDFLATEX"])
+else
+	AC_SUBST(LATEXC, ["$RUBBER -d"])
 fi
-AC_SUBST(LATEXC, [$PDFLATEX])
 AC_CONFIG_FILES([Makefile doc/Makefile])
 AC_OUTPUT
