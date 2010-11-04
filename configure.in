@@ -1,0 +1,11 @@
+AC_PREREQ([2.67])
+AC_INIT([inzynierka], [snapshot])
+AM_INIT_AUTOMAKE([1.11 foreign])
+AC_PROG_AWK
+AC_CHECK_PROGS(PDFLATEX, [pdflatex])
+if test -z "$PDFLATEX"; then
+	AC_MSG_ERROR([cannot find neither rubber nor pdflatex])
+fi
+AC_SUBST(LATEXC, [$PDFLATEX])
+AC_CONFIG_FILES([Makefile doc/Makefile])
+AC_OUTPUT
