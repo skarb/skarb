@@ -12,5 +12,9 @@ if test -z "$RUBBER"; then
 else
 	AC_SUBST(LATEXC, ["$RUBBER -d"])
 fi
+AC_CHECK_PROGS(PERL, [perl])
+if test -z "$PERL"; then
+	AC_MSG_ERROR([cannot find Perl])
+fi
 AC_CONFIG_FILES([Makefile doc/Makefile])
 AC_OUTPUT
