@@ -1,6 +1,6 @@
-AC_PREREQ([2.67])
+AC_PREREQ([2.65])
 AC_INIT([inzynierka], [snapshot])
-AM_INIT_AUTOMAKE([1.11 foreign])
+AM_INIT_AUTOMAKE([1.10 foreign])
 AC_PROG_AWK
 AC_CHECK_PROGS(RUBBER, [rubber])
 if test -z "$RUBBER"; then
