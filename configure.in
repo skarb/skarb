@@ -6,12 +6,13 @@ AC_CHECK_PROGS(RUBBER, [rubber])
 if test -z "$RUBBER"; then
 	AC_CHECK_PROGS(PDFLATEX, [pdflatex])
 	if test -z "$PDFLATEX"; then
-		AC_MSG_ERROR([cannot find neither rubber nor pdflatex])
+		AC_MSG_NOTICE([cannot find neither rubber nor pdflatex])
 	fi
 	AC_SUBST(LATEXC, ["\$(top_srcdir)/scripts/twice.sh $PDFLATEX"])
 else
 	AC_SUBST(LATEXC, ["$RUBBER -d"])
 fi
+AM_CONDITIONAL([HAVE_LATEXC], [test x != "x$LATEXC"])
 AC_CHECK_PROGS(PERL, [perl])
 if test -z "$PERL"; then
 	AC_MSG_ERROR([cannot find Perl])
