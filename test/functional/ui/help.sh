@@ -2,4 +2,4 @@
 #Usage: rubyc [options] input
 #Options:
 #    -h                               Show this message
-rubyc
+rubyc -h
