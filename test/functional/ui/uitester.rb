@@ -6,7 +6,7 @@ def extract_expected_output(file)
   lines = File.open(file).readlines
   lines.shift if lines.first =~ /^#!/
   lines = lines.take_while{ |line| line =~ /^#/ }
-  lines.map { |line| line.sub(/^#\s*/, '') } .join
+  lines.map { |line| line.sub(/^#/, '') } .join
 end
 
 describe 'UI' do
