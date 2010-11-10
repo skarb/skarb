@@ -1,6 +1,9 @@
 #!/usr/bin/env ruby
 require 'optparse'
-require 'ruby_parser'
+require 'compiler'
+require 'emitter'
+require 'translator'
+require 'parser'
 
 ARGV.push '-h' if ARGV.empty?
 
@@ -14,9 +17,11 @@ OptionParser.new do |opts|
   end
 end.parse!
 
-begin
-  RubyParser.new.parse(File.read(ARGV.first))
-rescue ParseError, SyntaxError
-  puts "Input is not correct ruby source. Aborting."
-  exit 1
-end
+input = if ARGV[0] == '-'
+          STDIN
+        else
+          File.open ARGV.pop
+        end
+
+Compiler.new.compile(Emitter.new.emit(
+  Translator.new.translate(Parser.new.parse(input))))
