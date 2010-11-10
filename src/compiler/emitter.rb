@@ -220,8 +220,12 @@ class Emitter
 	end
 
 	def emit_generic_elem(sexp)
-		emit_method=method("emit_"+sexp[0].to_s)
-		emit_method.call(sexp)
+		begin
+			emit_method=method("emit_"+sexp[0].to_s)
+			emit_method.call(sexp)
+		rescue NameError
+			raise "Invalid tree node"
+		end
 	end
 
 	def emit_block(sexp)
