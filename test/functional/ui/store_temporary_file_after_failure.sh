@@ -1,4 +1,5 @@
 #!/bin/sh
-#Input is not correct ruby source. Aborting.
-echo ")\")this isn't ruby" | rubyc -
+#The C compiler failed. Aborting.
+export CC=sorry_but_there_is_no_such_compiler
+echo puts 1 | rubyc -
 test -f output.c || echo fail

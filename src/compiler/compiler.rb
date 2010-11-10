@@ -1,10 +1,13 @@
 require 'tempfile'
 require 'fileutils'
+require 'helpers'
 
 # Files created by Tempfile are placed in the /tmp directory. As a result all
 # files produced during the compilation process (excl. the output binary) are
 # created in the /tmp directory.
 class Compiler
+  include Helpers
+
   def compile(code)
     Tempfile.open ['rubyc', '.c'] do |file|
       file.write code
@@ -15,7 +18,7 @@ class Compiler
         clean_up file.path
       rescue => e
         File.open('output.c', 'w').write(code)
-        raise e
+        die 'The C compiler failed. Aborting.'
       end
     end
   end
@@ -29,7 +32,7 @@ class Compiler
 
   def spawn_cc(filename)
     if (child = fork).nil?
-      exec cc + " -c -o #{object_file filename} #{filename}"
+      exec_or_exit cc + " -c -o #{object_file filename} #{filename}"
     end
     Process.wait child
     raise_if_child_failed 'cc failed!'
@@ -37,10 +40,19 @@ class Compiler
 
   def spawn_linker(filename)
     if (child = fork).nil?
-      exec cc + " -o a.out #{filename}"
+      exec_or_exit cc + " -o a.out #{filename}"
     end
     Process.wait child
     raise_if_child_failed 'linker failed!'
+  end
+
+  # Calls exec and in case of failure calls exit afterwards.
+  def exec_or_exit(cmd)
+    begin
+      exec cmd
+    rescue SystemCallError
+      exit 1
+    end
   end
 
   # Removes artifacts after a successful compilation.
