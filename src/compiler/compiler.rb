@@ -29,7 +29,7 @@ class Compiler
 
   def spawn_cc(filename)
     if (child = fork).nil?
-      exec "gcc -c -o #{object_file filename} #{filename}"
+      exec cc + " -c -o #{object_file filename} #{filename}"
     end
     Process.wait child
     raise_if_child_failed 'cc failed!'
@@ -37,7 +37,7 @@ class Compiler
 
   def spawn_linker(filename)
     if (child = fork).nil?
-      exec "gcc -o a.out #{filename}"
+      exec cc + " -o a.out #{filename}"
     end
     Process.wait child
     raise_if_child_failed 'linker failed!'
@@ -51,5 +51,10 @@ class Compiler
   # Raises a given error if the child exited with a non-zero status.
   def raise_if_child_failed(msg)
     raise msg if $?.exitstatus != 0
+  end
+
+  # Returns a command starting a C compiler
+  def cc
+    ENV['CC'] || 'cc'
   end
 end
