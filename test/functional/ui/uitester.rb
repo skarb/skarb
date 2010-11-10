@@ -1,6 +1,8 @@
 require 'rspec'
 
-compiler = ARGV.shift
+compiler = ENV['RUBYC']
+srcdir = ENV['srcdir']
+tests = ENV['TESTS'].split.map { |f| srcdir + '/' + f }
 
 def extract_expected_output(file)
   lines = File.open(file).readlines
@@ -10,7 +12,7 @@ def extract_expected_output(file)
 end
 
 describe 'UI' do
-  Dir.glob('*.sh').reject { |f| f == 'testlib.sh' } .each do |file|
+  tests.each do |file|
     it "should pass #{file}" do
       output = IO.popen("sed -e 's,rubyc,#{compiler},g' #{file} | sh").read
       output.should == extract_expected_output(file)

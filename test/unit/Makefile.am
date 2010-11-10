@@ -1,2 +1,3 @@
-check-local:
-	$(RUBY) -I$(top_srcdir)/src/compiler *_spec.rb
+TESTS_ENVIRONMENT = $(RUBY) -I$(top_srcdir)/src/compiler
+TESTS = emitter_spec.rb
+dist_noinst_DATA = $(TESTS)
