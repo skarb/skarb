@@ -1,5 +1,8 @@
 require 'tempfile'
 
+# Files created by Tempfile are placed in the /tmp directory. As a result all
+# files produced during the compilation process (excl. the output binary) are
+# created in the /tmp directory.
 class Compiler
   def compile(code)
     Tempfile.open ['rubyc', '.c'] do |file|
