@@ -8,7 +8,8 @@ require 'helpers'
 class Compiler
   include Helpers
 
-  def compile(code)
+  def compile(code, opts = {})
+    @output = opts[:output] || 'a.out'
     Tempfile.open ['rubyc', '.c'] do |file|
       file.write code
       file.close
@@ -40,7 +41,7 @@ class Compiler
 
   def spawn_linker(filename)
     if (child = fork).nil?
-      exec_or_exit cc + " -o a.out #{filename}"
+      exec_or_exit cc + " -o #{@output} #{filename}"
     end
     Process.wait child
     raise_if_child_failed 'linker failed!'

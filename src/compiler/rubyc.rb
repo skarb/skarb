@@ -7,9 +7,15 @@ require 'parser'
 
 ARGV.push '-h' if ARGV.empty?
 
+options = {}
+
 OptionParser.new do |opts|
   opts.banner = "Usage: rubyc [options] input"
   opts.separator "Options:"
+
+  opts.on("-o FILE", "Place the output into FILE") do |output|
+    options[:output] = output
+  end
 
   opts.on("-h", "Show this message") do
     puts opts.help
@@ -24,4 +30,4 @@ input = if ARGV[0] == '-'
         end
 
 Compiler.new.compile(Emitter.new.emit(
-  Translator.new.translate(Parser.new.parse(input))))
+  Translator.new.translate(Parser.new.parse(input))), options)
