@@ -1,3 +1,3 @@
 #!/bin/sh
 #Input is not correct ruby source. Aborting.
-rubyc errorous_source.rb
+rubyc $srcdir/errorous_source.rb
