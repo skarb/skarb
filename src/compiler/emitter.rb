@@ -244,6 +244,7 @@ class Emitter
 	end
 
 	def emit(sexp)
+		return nil if sexp == nil
 		@out = StringIO.new
 		emit_generic_elem(sexp)
 		return @out.string

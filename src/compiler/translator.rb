@@ -2,6 +2,7 @@ require 'sexp_processor'
 
 class Translator
   def translate(sexp)
-    sexp
+    nil
+    #sexp
   end
 end
