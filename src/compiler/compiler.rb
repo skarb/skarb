@@ -9,9 +9,14 @@ class Compiler
     Tempfile.open ['rubyc', '.c'] do |file|
       file.write code
       file.close
-      spawn_cc file.path
-      spawn_linker object_file file.path
-      clean_up file.path
+      begin
+        spawn_cc file.path
+        spawn_linker object_file file.path
+        clean_up file.path
+      rescue => e
+        File.open('output.c', 'w').write(code)
+        raise e
+      end
     end
   end
 
