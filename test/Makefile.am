@@ -1,1 +1,1 @@
-SUBDIRS = functional
+SUBDIRS = unit functional

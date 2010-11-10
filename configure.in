@@ -29,5 +29,6 @@ AC_CONFIG_FILES([
 				test/Makefile
 				test/functional/Makefile
 				test/functional/ui/Makefile
+				test/unit/Makefile
 				])
 AC_OUTPUT
