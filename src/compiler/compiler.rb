@@ -2,7 +2,7 @@ require 'tempfile'
 
 class Compiler
   def compile(code)
-    Tempfile.open 'rubyc.c' do |file|
+    Tempfile.open ['rubyc', '.c'] do |file|
       file.write code
       file.close
       spawn_cc file.path
@@ -14,7 +14,7 @@ class Compiler
 
   def spawn_cc(filename)
     if (child = fork).nil?
-      exec "gcc -x c -c -o #{filename}.o #{filename}"
+      exec "gcc -c -o #{filename}.o #{filename}"
     end
     Process.wait child
     raise "gcc failed!" if $?.exitstatus != 0
