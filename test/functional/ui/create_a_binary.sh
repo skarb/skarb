@@ -1,3 +1,3 @@
 #!/bin/sh
-rubyc uitester.rb
+rubyc uitester.rb || echo fail
 ./a.out || echo error!
