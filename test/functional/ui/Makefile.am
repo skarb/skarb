@@ -1,6 +1,7 @@
 TESTSCRIPTS = compile_from_stdin.sh create_a_binary.sh error_parse.sh \
               fail_from_stdin.sh help.sh no_options.sh set_compiler.sh \
-              store_temporary_file_after_failure.sh output_binary_name.sh
+              store_temporary_file_after_failure.sh output_binary_name.sh \
+              emit_c_only.sh
 TESTS_ENVIRONMENT = RUBYLIB=$(top_srcdir)/src/compiler \
                     RUBYC="$(RUBY) $(top_srcdir)/src/compiler/rubyc.rb" \
                     TESTS="$(TESTSCRIPTS)" $(RUBY)
