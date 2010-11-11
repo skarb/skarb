@@ -8,10 +8,15 @@ require 'helpers'
 class Compiler
   include Helpers
 
+  # Launches the compilation process for the given code. Following options are
+  # optional.
+  # - +emit_only+ should be true when the C compiler shouldn't be run. The
+  #   default value is false.
+  # - +dont_link+ should be true when the linking shouldn't be done. It's false
+  #   by default.
+  # - +output+ contains the name of the target output file.
   def compile(code, opts = {})
-    @emit_only = opts[:emit_only] || false
-    @dont_link = (not @emit_only and opts[:dont_link]) || false
-    @output = opts[:output] || default_output
+    parse_options opts
     @code = code
     if @emit_only
       output_code File.open(@output, 'w')
@@ -21,6 +26,13 @@ class Compiler
   end
 
   private
+
+  # Parses the options hash passed to the compile method.
+  def parse_options(opts)
+    @emit_only = opts[:emit_only] || false
+    @dont_link = (not @emit_only and opts[:dont_link]) || false
+    @output = opts[:output] || default_output
+  end
 
   # Returns the output file name depending on whether we are doing a full
   # compilation process.
@@ -32,7 +44,7 @@ class Compiler
     end
   end
 
-  # Outputs the code to a given opened file
+  # Outputs the code to a given opened file and close it afterwards.
   def output_code(file)
      file.write @code
      file.close
@@ -41,20 +53,30 @@ class Compiler
   # Performs a full compilation: saves the code in a temporary file, runs a C
   # compiler and a linker.
   def full_compilation
-    Tempfile.open ['rubyc', '.c'] do |file|
-      output_code file
-      path = file.path
+    with_code_in_a_tempfile do |path|
       begin
         spawn_cc path
-        unless @dont_link
-          spawn_linker object_file path
-          clean_up path
-        end
-      rescue => e
+        link path unless @dont_link
+      rescue => err
         output_code File.open('output.c', 'w')
         die 'The C compiler failed. Aborting.'
       end
     end
+  end
+
+  # Writes the code to a temporary file and passes its path to a given block.
+  def with_code_in_a_tempfile
+    Tempfile.open ['rubyc', '.c'] do |file|
+      output_code file
+      yield file.path
+    end
+  end
+
+  # Links the object file and cleans up afterwards.
+  def link(c_filename)
+    obj_filename = object_file c_filename
+    spawn_linker obj_filename
+    FileUtils.rm_f obj_filename
   end
 
   # Returns an object file name for a given source file name.
@@ -66,20 +88,24 @@ class Compiler
     end
   end
 
+  # Creates the object file by starting the C compiler in a child process.
   def spawn_cc(filename)
-    if (child = fork).nil?
-      exec_or_exit cc + " -c -o #{object_file filename} #{filename}"
-    end
-    Process.wait child
+    fork_and_wait cc + " -c -o #{object_file filename} #{filename}"
     raise_if_child_failed 'cc failed!'
   end
 
+  # Links the object file by starting the C compiler in a child process.
   def spawn_linker(filename)
+    fork_and_wait cc + " -o #{@output} #{filename}"
+    raise_if_child_failed 'linker failed!'
+  end
+
+  # Forks, execs the given command and waits for the child process to finish.
+  def fork_and_wait(cmd)
     if (child = fork).nil?
-      exec_or_exit cc + " -o #{@output} #{filename}"
+      exec_or_exit cmd
     end
     Process.wait child
-    raise_if_child_failed 'linker failed!'
   end
 
   # Calls exec and in case of failure calls exit afterwards.
@@ -89,11 +115,6 @@ class Compiler
     rescue SystemCallError
       exit 1
     end
-  end
-
-  # Removes artifacts after a successful compilation.
-  def clean_up(filename)
-    FileUtils.rm_f object_file filename
   end
 
   # Raises a given error if the child exited with a non-zero status.
