@@ -11,21 +11,11 @@ class Compiler
   def compile(code, opts = {})
     @emit_only = opts[:emit_only] || false
     @output = opts[:output] || default_output
+    @code = code
     if @emit_only
-      File.open(@output, 'w').write(code)
-      return
-    end
-    Tempfile.open ['rubyc', '.c'] do |file|
-      file.write code
-      file.close
-      begin
-        spawn_cc file.path
-        spawn_linker object_file file.path
-        clean_up file.path
-      rescue => e
-        File.open('output.c', 'w').write(code)
-        die 'The C compiler failed. Aborting.'
-      end
+      output_code File.open(@output, 'w')
+    else
+      full_compilation
     end
   end
 
@@ -38,6 +28,29 @@ class Compiler
       'out.c'
     else
       'a.out'
+    end
+  end
+
+  # Outputs the code to a given opened file
+  def output_code(file)
+     file.write @code
+     file.close
+  end
+
+  # Performs a full compilation: saves the code in a temporary file, runs a C
+  # compiler and a linker.
+  def full_compilation
+    Tempfile.open ['rubyc', '.c'] do |file|
+      output_code file
+      path = file.path
+      begin
+        spawn_cc path
+        spawn_linker object_file path
+        clean_up path
+      rescue => e
+        output_code File.open('output.c', 'w')
+        die 'The C compiler failed. Aborting.'
+      end
     end
   end
 
