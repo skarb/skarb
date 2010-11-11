@@ -247,8 +247,10 @@ class Emitter
 		end	
 	end
 
+	MinimalCode = "int main(){return 0;}"
+
 	def emit(sexp)
-		return nil if sexp == nil
+		return MinimalCode if sexp == nil
 		@out = StringIO.new
 		emit_generic_elem(sexp)
 		return @out.string
