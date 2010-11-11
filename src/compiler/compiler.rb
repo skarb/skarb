@@ -10,6 +10,7 @@ class Compiler
 
   def compile(code, opts = {})
     @emit_only = opts[:emit_only] || false
+    @dont_link = (not @emit_only and opts[:dont_link]) || false
     @output = opts[:output] || default_output
     @code = code
     if @emit_only
@@ -45,8 +46,10 @@ class Compiler
       path = file.path
       begin
         spawn_cc path
-        spawn_linker object_file path
-        clean_up path
+        unless @dont_link
+          spawn_linker object_file path
+          clean_up path
+        end
       rescue => e
         output_code File.open('output.c', 'w')
         die 'The C compiler failed. Aborting.'
@@ -56,7 +59,11 @@ class Compiler
 
   # Returns an object file name for a given source file name.
   def object_file(source_file)
-    source_file.sub /\.c$/, '.o'
+    if @dont_link
+      'out.o'
+    else
+      source_file.sub /\.c$/, '.o'
+    end
   end
 
   def spawn_cc(filename)
