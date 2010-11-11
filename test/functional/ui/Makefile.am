@@ -6,5 +6,3 @@ TESTS_ENVIRONMENT = RUBYLIB=$(top_srcdir)/src/compiler \
                     TESTS="$(TESTSCRIPTS)" $(RUBY)
 TESTS = uitester.rb
 dist_noinst_DATA = $(TESTSCRIPTS) $(TESTS) fake_cc errorous_source.rb
-clean-local:
-	-rm -f a.out output.c
