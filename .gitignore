@@ -8,6 +8,7 @@ config.status
 configure
 doc/Makefile
 doc/Makefile.in
+doc/rdoc
 install-sh
 missing
 test/coverage
