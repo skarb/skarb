@@ -17,6 +17,10 @@ OptionParser.new do |opts|
     options[:output] = output
   end
 
+  opts.on('-C', 'Output the C code and exit') do
+    options[:emit_only] = true
+  end
+
   opts.on("-h", "Show this message") do
     puts opts.help
     exit 0

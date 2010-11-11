@@ -9,7 +9,12 @@ class Compiler
   include Helpers
 
   def compile(code, opts = {})
-    @output = opts[:output] || 'a.out'
+    @emit_only = opts[:emit_only] || false
+    @output = opts[:output] || default_output
+    if @emit_only
+      File.open(@output, 'w').write(code)
+      return
+    end
     Tempfile.open ['rubyc', '.c'] do |file|
       file.write code
       file.close
@@ -25,6 +30,16 @@ class Compiler
   end
 
   private
+
+  # Returns the output file name depending on whether we are doing a full
+  # compilation process.
+  def default_output
+    if @emit_only
+      'out.c'
+    else
+      'a.out'
+    end
+  end
 
   # Returns an object file name for a given source file name.
   def object_file(source_file)
