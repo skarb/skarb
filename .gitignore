@@ -10,3 +10,4 @@ doc/Makefile
 doc/Makefile.in
 install-sh
 missing
+test/coverage
