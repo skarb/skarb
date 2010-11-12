@@ -1,5 +1,6 @@
 require 'rspec'
 require 'emitter'
+require 'emitter/errors'
 require 'sexp_processor'
 
 describe Array do
@@ -205,4 +206,9 @@ describe Emitter do
     emit(Sexp.new(:label, :abc)).should == 'abc: '
   end
 
+  it 'should not accept a sexp with an unexpected type' do
+    expect do
+      emit Sexp.new(:no_such_sexp)
+    end .to raise_error Emitter::Errors::UnexpectedSexpError
+  end
 end
