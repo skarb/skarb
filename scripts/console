@@ -1,0 +1,2 @@
+#!/bin/sh
+irb -I `dirname $0`/../src/compiler -remitter -rtranslator
