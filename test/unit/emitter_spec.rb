@@ -132,7 +132,7 @@ describe Emitter do
   end
 
   it 'should emit a do while loop' do
-    emit(Sexp.new(:do, Sexp.new(:call, :x),
+    emit(Sexp.new(:do, Sexp.new(:call, :x, Sexp.new(:arglist, nil)),
                            Sexp.new(:var, :y))) == "do x(); while (y);\n"
   end
 

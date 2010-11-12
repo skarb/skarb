@@ -1,3 +1,4 @@
+require 'emitter/helpers'
 # Flow control
 # - :if -- three child nodes: condition (:arg_expr), block (:block), "else" block (:block)
 # - :for -- four child nodes: init (:arg_expr), condition (:arg_expr),
@@ -13,6 +14,8 @@
 # - :return
 # - :default
 module Emitter::FlowControl
+  include Emitter::Helpers
+
   def emit_if(sexp)
     @out << 'if '
     in_parentheses { emit_arg_expr(sexp[1]) }
@@ -75,4 +78,9 @@ module Emitter::FlowControl
     emit_generic_elem(sexp[1])
     colon_space
   end 
+
+  alias :emit_continue :output_type_and_children
+  alias :emit_break :output_type_and_children
+  alias :emit_return :output_type_and_children
+  alias :emit_goto :output_type_and_children
 end

@@ -60,4 +60,13 @@ module Emitter::Helpers
   def newline
     @out << "\n"
   end
+
+  # Emits the sexp's type and its elements separated with spaces.
+  def output_type_and_children(sexp)
+    @out << sexp[0]
+    sexp.rest.each do |elem|
+      space
+      emit_generic_elem elem
+    end
+  end
 end
