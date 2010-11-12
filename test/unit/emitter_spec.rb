@@ -2,6 +2,23 @@ require 'rspec'
 require 'emitter'
 require 'sexp_processor'
 
+describe Array do
+  before do
+    @array = [1, 2, 3, 4, 5, 6]
+  end
+
+  it 'should implement rest function' do
+    @array.rest.should ==
+      [2, 3, 4, 5, 6]    
+  end
+
+  it 'should implement middle function' do
+    @array.middle.should ==
+      [2, 3, 4, 5]    
+  end
+  
+end
+
 describe Emitter do
   before do
     @emitter = Emitter.new
@@ -10,6 +27,21 @@ describe Emitter do
 	Sexp.new(:decl, :'char**', :args)), @hellow_body)
     @hellow_body.push(Sexp.new(:call, :printf, Sexp.new(:actual_args, Sexp.new(:str, "Hello world!"))))
     @hellow_body.push(Sexp.new(:return, Sexp.new(:lit, 0)))
+  end
+
+  it 'should emit include declaration' do
+    @emitter.emit(Sexp.new(:include, "<stdio.h>")).should ==
+      "#include <stdio.h>"
+  end
+
+  it 'should emit define declaration' do
+    @emitter.emit(Sexp.new(:define , "x (y/z)")).should ==
+      "#define x (y/z)"
+  end
+
+  it 'should emit goto' do
+    @emitter.emit(Sexp.new(:goto, :abc)).should ==
+      "goto abc"
   end
 
   it 'should emit a hello world' do
