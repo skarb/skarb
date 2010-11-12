@@ -14,7 +14,7 @@ module Emitter::Operators
 
   def emit_binary_oper(sexp)
     emit_arg_expr(sexp[2])
-    @out << " " << sexp[1] << " "
+    output_with_spaces sexp[1]
     emit_arg_expr(sexp[3])
   end
 

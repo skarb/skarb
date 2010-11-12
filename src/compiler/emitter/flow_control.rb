@@ -14,63 +14,65 @@
 # - :default
 module Emitter::FlowControl
   def emit_if(sexp)
-    @out << "if ("
-    emit_arg_expr(sexp[1])
-    @out << ")\n"
+    @out << 'if '
+    in_parentheses { emit_arg_expr(sexp[1]) }
+    newline
     emit_generic_elem(sexp[2])
-    unless sexp[3]==nil
+    unless sexp[3].nil?
       @out << "else\n"
       emit_generic_elem(sexp[3])
     end
   end
 
   def emit_while(sexp)
-    @out << "while ("
-    emit_arg_expr(sexp[1])
-    @out << ")\n"
+    @out << 'while '
+    in_parentheses { emit_arg_expr(sexp[1]) }
+    newline
     emit_generic_elem(sexp[2])
-    @out << "\n"
+    newline
   end
 
   def emit_do(sexp)
     @out << "do\n"
     emit_generic_elem(sexp[2])
-    @out << "\n"
-    @out << "while ("
-    emit_arg_expr(sexp[1])
-    @out << ");\n"
+    newline
+    @out << 'while '
+    in_parentheses { emit_arg_expr(sexp[1]) }
+    @out << ";\n"
   end
 
   def emit_for(sexp)
-    @out << "for ("
-    emit_generic_elem(sexp[1])
-    @out << "; "
-    emit_generic_elem(sexp[2])
-    @out << "; "
-    emit_generic_elem(sexp[3])
-    @out << ")\n"
+    @out << 'for '
+    in_parentheses do
+      emit_generic_elem(sexp[1])
+      semicolon_space
+      emit_generic_elem(sexp[2])
+      semicolon_space
+      emit_generic_elem(sexp[3])
+    end
+    newline
     emit_generic_elem(sexp[4])
   end
 
   def emit_switch(sexp)
-    @out << "switch ("
-    emit_generic_elem(sexp[1])
-    @out << ")\n"
+    @out << 'switch '
+    in_parentheses { emit_generic_elem(sexp[1]) }
+    newline
     emit_generic_elem(sexp[2])
   end
 
   def emit_default(sexp)
-    @out << "default: "
+    @out << 'default: '
   end
 
   def emit_case(sexp)
     @out << "case "
     emit_generic_elem(sexp[1])
-    @out << ": "
+    colon_space
   end
 
   def emit_label(sexp)
     emit_generic_elem(sexp[1])
-    @out << ": "
+    colon_space
   end 
 end
