@@ -48,12 +48,10 @@ end
 #:default
 #
 #== Operators ==
-#:aoper -- arithmetic operator
-#:boper -- bitwise operator
-#:loper -- logical operator
+#:binary_oper -- arithmetic, bitwise or logical operator
 #:short_if -- "?" operator
-#:inc_oper -- incrementation operator
-#:dec_oper -- decrementation operator
+#:l_unary_oper -- left incrementation, decrementation and unary minus operator
+#:r_unary_oper -- right incrementation and decrementation operator
 #
 #== Types ==
 #:void
@@ -70,22 +68,21 @@ end
 #:union
 #:struct -- structure definition
 #:prototype -- function prototype
-#:struct_field -- reference to field of a struct
-#:ptr_struct_field -- reference to field of a struct via pointer
+#
+#:var
+#:svar_fld -- reference to field of a struct
+#:svar_fld_ptr -- reference to field of a struct via pointer
+#
 #:asgn -- assignment
 #:call -- function call
 #:defn -- function definition
 #:abstract_args -- abstract parameters list
 #:actual_args -- actual parameters list
-#:arg_expr -- expression passed as actual parameter
+#
 #:scope -- lexical scope of a function
 #:block -- block of code consisting of multiple lines terminated by ';'
 
 class Emitter
-
-  def emit_br(sexp)
-    @out << "\n"
-  end
 
   def emit_struct(sexp)
     @out << "typedef struct\n"
@@ -102,7 +99,7 @@ class Emitter
 
   def emit_if(sexp)
     @out << "if ("
-    emit_arg_elem(sexp[1])
+    emit_arg_expr(sexp[1])
     @out << ") "
     if sexp[2]==:block
       @out << "\n{\n"
@@ -126,32 +123,32 @@ class Emitter
   end
 
   def emit_or(sexp)
-    emit_arg_elem(sexp[1])
+    emit_arg_expr(sexp[1])
     @out << " || "
-    emit_arg_elem(sexp[2])
+    emit_arg_expr(sexp[2])
   end
 
   def emit_and(sexp)
-    emit_arg_elem(sexp[1])
+    emit_arg_expr(sexp[1])
     @out << " && "
-    emit_arg_elem(sexp[2])
+    emit_arg_expr(sexp[2])
   end
 
   def emit_not(sexp)
     @out << "!("
-    emit_arg_elem(sexp[1])
+    emit_arg_expr(sexp[1])
     @out << ")"
   end
 
   def emit_short_if(sexp)
-    emit_arg_elem(sexp[1])
+    emit_arg_expr(sexp[1])
     @out << " ? "
-    emit_arg_elem(sexp[2])
+    emit_arg_expr(sexp[2])
     @out << " : "
-    emit_arg_elem(sexp[3])
+    emit_arg_expr(sexp[3])
   end
 
-  def emit_args(sexp)
+  def emit_abstract_args(sexp)
     sexp.middle.each { |x| @out << x.first << " " << x.last << ", " }
     if sexp.last!=nil
       @out << sexp.last.first << " " << sexp.last.last
@@ -161,7 +158,7 @@ class Emitter
   def emit_while(sexp)
     if sexp[3]
       @out << "while ("
-      emit_arg_elem(sexp[1])
+      emit_arg_expr(sexp[1])
       @out << ")\n"
       @out << "{\n"
       emit_generic_elem(sexp[2])
@@ -172,14 +169,14 @@ class Emitter
       emit_generic_elem(sexp[2])
       @out << "}\n"
       @out << "while ("
-      emit_arg_elem(sexp[1])
+      emit_arg_expr(sexp[1])
       @out << ");\n"
     end
   end
 
   def emit_defn(sexp)
     @out << sexp[1] << " " << sexp[2] << "("
-    emit_args(sexp[3])
+    emit_abstract_args(sexp[3])
     @out << ")\n"
     emit_scope(sexp[4])
   end
@@ -192,27 +189,25 @@ class Emitter
 
   def emit_return(sexp)
     @out << "return "
-    emit_arg_elem(sexp[1])
+    emit_arg_expr(sexp[1])
     @out << ";\n"
   end
 
-  def emit_arg_elem(elem)
+  #Universal function for emitting any argument expression
+  #with correct parenthesis
+  def emit_arg_expr(elem)
     case elem[0]
     when :call
       @out << "("
       emit_call(elem)
       @out << ")"
-    when :lasgn
+    when :asgn
       @out << "("
-      emit_lasgn(elem)
+      emit_asgn(elem)
       @out << ")"
-    when :iasgn
+    when :binary_oper
       @out << "("
-      emit_iasgn(elem)
-      @out << ")"
-    when :oper
-      @out << "("
-      emit_oper(elem)
+      emit_binary_oper(elem)
       @out << ")"
     when :if
       @out << "("
@@ -239,19 +234,19 @@ class Emitter
     end
   end
 
-  def emit_arglist(sexp)
+  def emit_actual_args(sexp)
     return if sexp.last == nil
 
     sexp.middle(1,-1).each do |elem|
-      emit_arg_elem(elem)
+      emit_arg_expr(elem)
       @out << ", "
     end
-    emit_arg_elem(sexp.last)
+    emit_arg_expr(sexp.last)
   end
 
   def emit_call(sexp)
     @out << sexp[1] << "("
-    emit_arglist(sexp[2])
+    emit_actual_args(sexp[2])
     @out << ")"
   end
 
@@ -262,11 +257,7 @@ class Emitter
   end
 
   def emit_int(sexp)
-    @out << "int " << sexp[1] << ";\n"
-  end
-
-  def emit_str(sexp)
-    @out << "str " << sexp[1] << ";\n"
+    @out << "int " << sexp[1]
   end
 
   def emit_include(sexp)
@@ -275,7 +266,7 @@ class Emitter
 
   def emit_asgn(sexp)
     @out << sexp[1] << " = "
-    emit_arg_elem(sexp[2])
+    emit_arg_expr(sexp[2])
   end
 
   def emit_struct_field(sexp)
@@ -286,18 +277,29 @@ class Emitter
     @out << sexp[1] << "->" << sexp[2]
   end
 
-  def emit_oper(sexp)
-    emit_arg_elem(sexp[1])
+  def emit_binary_oper(sexp)
+    emit_arg_expr(sexp[1])
     @out << " " << sexp[2] << " "
-    emit_arg_elem(sexp[3])
+    emit_arg_expr(sexp[3])
   end
 
+  def emit_l_unary_oper(sexp)
+    @out << sexp[1]
+    emit_arg_expr(sexp[2])
+  end
+
+  def emit_r_unary_oper(sexp)
+    emit_arg_expr(sexp[1])
+    @out << sexp[2]
+  end
+
+  #Executes method "emit_..." according to sexp[0] symbol
   def emit_generic_elem(sexp)
     begin
       emit_method=method("emit_"+sexp[0].to_s)
       emit_method.call(sexp)
     rescue NameError
-      raise "Invalid tree node"
+      raise "Invalid tree node: "+sexp[0].to_s
     end
   end
 
@@ -308,11 +310,8 @@ class Emitter
       when :call
         emit_call(elem)
         @out << ";\n"
-      when :lasgn
-        emit_lasgn(elem)
-        @out << ";\n"
-      when :iasgn
-        emit_iasgn(elem)
+      when :asgn
+        emit_asgn(elem)
         @out << ";\n"
       else
         emit_generic_elem(elem)
