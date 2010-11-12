@@ -1,16 +1,16 @@
 require 'stringio'
 
-#Extensions for standard Array class
+# Extensions for standard Array class
 class Array
-  
-  #Returns a slice from the middle of the array
-  #a - index of first char of the slice
-  #b - negative index of last char of the slice
+
+  # Returns a slice from the middle of the array
+  # - a -- index of first char of the slice
+  # - b -- negative index of last char of the slice
   def middle(a=1, b=-1)
     return self[a..self.length+b-1]
   end
 
-  #Returns fragment from supplied index to the end of the array
+  # Returns fragment from supplied index to the end of the array
   def rest(index=1)
     return self[index..self.length-1] if index >= 0
     return self[0, self.length+index]
@@ -18,69 +18,69 @@ class Array
 
 end
 
-#Generates code from given C abstract syntax tree. It does
-#not perform any validation.
+# Generates code from given C abstract syntax tree. It does
+# not perform any validation.
 #
-#== Modifiers ==
-#Modifiers encapsulate variables definitions, they can be nested in
-#each other.
-#:unsigned
-#:signed
-#:const
-#:volatile
-#:static
-#:auto
-#:extern
-#:register
+# == Modifiers
+# Modifiers encapsulate variables definitions, they can be nested in
+# each other.
+# - :unsigned
+# - :signed
+# - :const
+# - :volatile
+# - :static
+# - :auto
+# - :extern
+# - :register
 #
-#== Flow control ==
-#:if -- three child nodes: condition (:arg_expr), block (:block), "else" block (:block)
-#:for -- four child nodes: init (:arg_expr), condition (:arg_expr),
-#                          assignment (:arg_expr), code (:block)
-#:while -- two child nodes: condition (:arg_expr), code (:block)
-#:do -- two child nodes: condition (:arg_expr), code (:block)
-#:switch -- two child nodes: expression (:arg_expr), code (:block)
-#:case
-#:goto
-#:break
-#:continue
-#:return
-#:default
+# == Flow control
+# - :if -- three child nodes: condition (:arg_expr), block (:block), "else" block (:block)
+# - :for -- four child nodes: init (:arg_expr), condition (:arg_expr),
+#   assignment (:arg_expr), code (:block)
+# - :while -- two child nodes: condition (:arg_expr), code (:block)
+# - :do -- two child nodes: condition (:arg_expr), code (:block)
+# - :switch -- two child nodes: expression (:arg_expr), code (:block)
+# - :case
+# - :goto
+# - :break
+# - :continue
+# - :return
+# - :default
 #
-#== Operators ==
-#:binary_oper -- arithmetic, bitwise or logical operator
-#:short_if -- "?" operator
-#:l_unary_oper -- left incrementation, decrementation and unary minus operator
-#:r_unary_oper -- right incrementation and decrementation operator
+# == Operators
+# - :binary_oper -- arithmetic, bitwise or logical operator
+# - :short_if -- "?:" operator
+# - :l_unary_oper -- left incrementation, decrementation and unary minus operator
+# - :r_unary_oper -- right incrementation and decrementation operator
 #
-#== Types ==
-#:void
-#:char
-#:short
-#:int
-#:long
-#:float
-#:double
-#:ctype -- custom type declared with typedef
+# == Types
+# - :void
+# - :char
+# - :short
+# - :int
+# - :long
+# - :float
+# - :double
+# - :ctype -- custom type declared with typedef
 #
-#:typedef
-#:enum
-#:union
-#:struct -- structure definition
-#:prototype -- function prototype
+# - :typedef
+# - :enum
+# - :union
+# - :struct -- structure definition
+# - :prototype -- function prototype
 #
-#:var
-#:svar_fld -- reference to field of a struct
-#:svar_fld_ptr -- reference to field of a struct via pointer
+# - :var
+# - :svar_fld -- reference to field of a struct
+# - :svar_fld_ptr -- reference to field of a struct via pointer
 #
-#:asgn -- assignment
-#:call -- function call
-#:defn -- function definition
-#:abstract_args -- abstract parameters list
-#:actual_args -- actual parameters list
+# - :asgn -- assignment
+# - :call -- function call
+# - :defn -- function definition
+# - :abstract_args -- abstract parameters list
+# - :actual_args -- actual parameters list
 #
-#:scope -- lexical scope of a function
-#:block -- block of code consisting of multiple lines terminated by ';'
+# - :scope -- lexical scope of a function
+# - :block -- block of code consisting of multiple lines terminated by ';'
 
 class Emitter
 
@@ -193,8 +193,8 @@ class Emitter
     @out << ";\n"
   end
 
-  #Universal function for emitting any argument expression
-  #with correct parenthesis
+  # Universal function for emitting any argument expression
+  # with correct parenthesis
   def emit_arg_expr(elem)
     case elem[0]
     when :call
@@ -252,7 +252,7 @@ class Emitter
 
   def emit_define(sexp)
     @out << "#define " << sexp[1] << " "
-    #to do
+    # TODO
     @out << sexp[2] << "\n"
   end
 
@@ -293,7 +293,7 @@ class Emitter
     @out << sexp[2]
   end
 
-  #Executes method "emit_..." according to sexp[0] symbol
+  # Executes method "emit_..." according to sexp[0] symbol
   def emit_generic_elem(sexp)
     begin
       emit_method=method("emit_"+sexp[0].to_s)
