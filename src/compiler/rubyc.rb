@@ -21,6 +21,10 @@ OptionParser.new do |opts|
     options[:emit_only] = true
   end
 
+  opts.on('-c', 'Don\'t link, only compile') do
+    options[:dont_link] = true
+  end
+
   opts.on("-h", "Show this message") do
     puts opts.help
     exit 0
