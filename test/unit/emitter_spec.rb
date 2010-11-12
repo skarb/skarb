@@ -126,6 +126,19 @@ describe Emitter do
      "for (a = 2; 1; a++)\nreturn 1;\n"
   end 
 
+  it 'should emit a while loop' do
+    @emitter.emit(Sexp.new(:while, Sexp.new(:var, :x),
+                           Sexp.new(:subblock,
+                           Sexp.new(:l_unary_oper, :'--', :x)))) ==
+                           "while (x)\nx--;\n"
+  end
+
+  it 'should emit a do while loop' do
+    @emitter.emit(Sexp.new(:do, Sexp.new(:call, :x),
+                           Sexp.new(:var, :y))) ==
+                           "do x(); while (y);\n"
+  end
+
   it 'should emit binary operator' do
     @emitter.emit(Sexp.new(:binary_oper, :>, Sexp.new(:lit, 1),
                            Sexp.new(:lit, 1))).should ==
