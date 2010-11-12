@@ -108,6 +108,14 @@ describe Emitter do
       "a = 2"
   end
 
+  it 'should emit special assignment' do
+    %w{|| && + - / ^ %}.each do |op|
+      @emitter.emit(Sexp.new(:aasgn, op + '=',
+                             Sexp.new(:var, :x),
+                             Sexp.new(:var, :y))).should == "x #{op}= y"
+    end
+  end
+
   it 'should emit for clause, assignment, right unary operator, lvar' do
     @emitter.emit(Sexp.new(:for, Sexp.new(:asgn, Sexp.new(:var, :a),
                                           Sexp.new(:lit, 2)),

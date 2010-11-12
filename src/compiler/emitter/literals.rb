@@ -5,7 +5,7 @@
 # - :decl -- variable declaration, two child nodes: type and name
 module Emitter::Literals
   def emit_str(sexp)
-    @out << '"' << sexp[1] << '"'
+    output_with_double_quotes sexp[1]
   end
 
   def emit_lit(sexp)

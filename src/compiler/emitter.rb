@@ -21,10 +21,22 @@ end
 # Generates code from given C abstract syntax tree. It does
 # not perform any validation.
 class Emitter
-  %w{assignments blocks flow_control functions literals macros operators
+  def emit(sexp)
+    return MinimalCode if sexp.nil?
+    @out = StringIO.new
+    emit_generic_elem(sexp)
+    return @out.string
+  end
+
+  private
+
+  MinimalCode = "int main(){return 0;}"
+
+  %w{assignments blocks flow_control functions literals macros operators helpers
   }.each do |file|
     require 'emitter/' + file
   end
+
   include Assignments
   include Blocks
   include FlowControl
@@ -32,15 +44,7 @@ class Emitter
   include Literals
   include Macros
   include Operators
-
-  MinimalCode = "int main(){return 0;}"
-
-  def emit(sexp)
-    return MinimalCode if sexp == nil
-    @out = StringIO.new
-    emit_generic_elem(sexp)
-    return @out.string
-  end
+  include Helpers
 
   # Universal function for emitting any argument expression
   # with correct parenthesis
@@ -49,9 +53,7 @@ class Emitter
     when :str, :lit, :var
       emit_generic_elem(elem)
     else
-      @out << "("
-      emit_generic_elem(elem)
-      @out << ")"
+      in_parentheses { emit_generic_elem(elem) }
     end
   end
 
@@ -61,12 +63,11 @@ class Emitter
       @out << sexp
     elsif sexp.class==Sexp
       begin
-        emit_method=method("emit_"+sexp[0].to_s)
-        emit_method.call(sexp)
+        self.send 'emit_' + sexp[0].to_s, sexp
       rescue NameError
         @out << sexp[0]
         sexp.rest.each do |elem|
-          @out << " "
+          space
           emit_generic_elem(elem)
         end
       end

@@ -25,6 +25,7 @@ INZ_CHECK_GEMS([rspec sexp_processor ruby_parser simplecov])
 AC_CONFIG_FILES([
 				Makefile
 				src/Makefile
+				src/compiler/emitter/Makefile
 				src/compiler/Makefile
 				doc/Makefile
 				test/Makefile
