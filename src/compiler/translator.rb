@@ -91,6 +91,7 @@ class Translator
     ).with_value_symbol var
   end
 
+  # TODO: DRY, translate_if is almost identical.
   def translate_if_else(sexp)
     var = next_var_name
     assign_to_var = lambda { |val| s(:asgn, s(:var, var), val) }
@@ -107,21 +108,25 @@ class Translator
     ).with_value_symbol var
   end
 
+  # Returns a block sexp with all empty statements sexps removed.
   def filtered_block(*args)
     s(:block, *(filter_empty_sexps args))
   end
 
+  # Returns a stmts sexp with all empty statements sexps removed.
   def filtered_stmts(*args)
     s(:stmts, *(filter_empty_sexps args))
   end
 
+  # Returns an array of sexps with all empty statements sexps, that is s(:stmts)
+  # deleted.
   def filter_empty_sexps(sexps)
     sexps.delete_if { |sexp| sexp == s(:stmts) }
   end
 
   # Each call to this method returns a new, unique var name.
   def next_var_name
-    @n ||= 0
-    "var#{@n += 1}".to_sym
+    @next_id ||= 0
+    "var#{@next_id += 1}".to_sym
   end
 end
