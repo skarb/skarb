@@ -33,6 +33,7 @@ class Emitter
   MinimalCode = "int main(){return 0;}"
 
   %w{assignments blocks flow_control functions literals macros operators helpers
+    modifiers composite errors
   }.each do |file|
     require 'emitter/' + file
   end
@@ -45,6 +46,9 @@ class Emitter
   include Macros
   include Operators
   include Helpers
+  include Modifiers
+  include Composite
+  include Errors
 
   # Universal function for emitting any argument expression
   # with correct parenthesis
@@ -64,32 +68,9 @@ class Emitter
     elsif sexp.class==Sexp
       begin
         self.send 'emit_' + sexp[0].to_s, sexp
-      rescue NameError
-        @out << sexp[0]
-        sexp.rest.each do |elem|
-          space
-          emit_generic_elem(elem)
-        end
+      rescue NoMethodError
+        raise UnexpectedSexpError.new sexp[0]
       end
     end
   end
-
-  # == Composite types
-  # - :typedef
-  # - :enum
-  # - :union
-  # - :struct
-
-  # == Modifiers
-  # Modifiers encapsulate variables definitions, they can be nested in
-  # each other.
-  # - :unsigned
-  # - :signed
-  # - :const
-  # - :volatile
-  # - :static
-  # - :auto
-  # - :extern
-  # - :register
-
 end

@@ -1,5 +1,6 @@
 require 'rspec'
 require 'emitter'
+require 'emitter/errors'
 require 'sexp_processor'
 
 describe Array do
@@ -131,7 +132,7 @@ describe Emitter do
   end
 
   it 'should emit a do while loop' do
-    emit(Sexp.new(:do, Sexp.new(:call, :x),
+    emit(Sexp.new(:do, Sexp.new(:call, :x, Sexp.new(:arglist, nil)),
                            Sexp.new(:var, :y))) == "do x(); while (y);\n"
   end
 
@@ -205,4 +206,9 @@ describe Emitter do
     emit(Sexp.new(:label, :abc)).should == 'abc: '
   end
 
+  it 'should not accept a sexp with an unexpected type' do
+    expect do
+      emit Sexp.new(:no_such_sexp)
+    end .to raise_error Emitter::Errors::UnexpectedSexpError
+  end
 end
