@@ -26,10 +26,11 @@ class Translator
   # the returned value are Sexps from the sexp_processor gem.
   def translate(sexp)
     c_sexp = translate_generic_sexp sexp
-    if c_sexp.is_empty_block?
-      main_function(s(:return, c_sexp.value))
+    ret = s(:return, c_sexp.value_symbol)
+    if c_sexp.first == :stmts
+      main_function(*(c_sexp.drop 1), ret)
     else
-      main_function(*c_sexp, s(:return, c_sexp.value))
+      main_function(c_sexp, ret)
     end
   end
 
@@ -40,18 +41,14 @@ class Translator
   # variable. Hence we add an attribute to Sexp.
   class ::Sexp
     # A C sexp (a literal or a variable) which stores the value of the sexp
-    # after evaluation.
-    attr_accessor :value
+    # after evaluation. It should have been named +value+ but this method name
+    # is unfortunately already taken by RubyParser.
+    attr_accessor :value_symbol
 
-    # Syntactic sugar. Sets the value and returns self.
-    def with_value(value)
-      @value = value
+    # Syntactic sugar. Sets the value_symbol and returns self.
+    def with_value_symbol(value_symbol)
+      @value_symbol = value_symbol
       self
-    end
-
-    # True if self == s(:block)
-    def is_empty_block?
-      first == :block and count == 1
     end
   end
 
@@ -64,6 +61,11 @@ class Translator
     s(:defn, :int, :main, args, s(:block, *body))
   end
 
+  # Calls translate_generic_sexp with value_matters = true
+  #def translate_generic_sexp_with_value(sexp)
+  #  translate_generic_sexp sexp, true
+  #end
+
   # Calls one of translate_* methods depending on the given sexp's type.
   def translate_generic_sexp(sexp)
     send "translate_#{sexp[0]}", sexp
@@ -72,6 +74,40 @@ class Translator
   # Translates a literal numeric to an empty block with a value equal to a :lit
   # sexp equal to the given literal.
   def translate_lit(sexp)
-    s(:block).with_value sexp
+    s(:stmts).with_value_symbol sexp
+  end
+
+  def translate_if(sexp)
+    var = next_var_name
+    assign_to_var = lambda { |val| s(:asgn, s(:var, var), val) }
+    cond = translate_generic_sexp sexp[1]
+    if_true = translate_generic_sexp sexp[2]
+    if_false = translate_generic_sexp sexp[3]
+    filtered_stmts(
+      s(:decl, :int, var),
+      cond,
+      s(:if,
+        cond.value_symbol,
+        filtered_block(if_true, assign_to_var.call(if_true.value_symbol)),
+        filtered_block(if_false, assign_to_var.call(if_false.value_symbol)))
+    ).with_value_symbol var
+  end
+
+  def filtered_block(*args)
+    s(:block, *(filter_empty_sexps args))
+  end
+
+  def filtered_stmts(*args)
+    s(:stmts, *(filter_empty_sexps args))
+  end
+
+  def filter_empty_sexps(sexps)
+    sexps.delete_if { |sexp| sexp == s(:stmts) }
+  end
+
+  # Each call to this method returns a new, unique var name.
+  def next_var_name
+    @n ||= 0
+    "var#{@n += 1}".to_sym
   end
 end
