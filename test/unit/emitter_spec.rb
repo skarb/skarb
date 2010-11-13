@@ -121,7 +121,7 @@ describe Emitter do
   end
 
   it 'should emit a while loop' do
-    emit(s(:while, s(:var, :x), s(:block, s(:r_unary_oper, :'--', :x)))
+    emit(s(:while, s(:var, :x), s(:block, s(:r_unary_oper, :'--', s(:var, :x))))
         ).should == "while (x)\n{\nx--;\n}\n"
   end
 
