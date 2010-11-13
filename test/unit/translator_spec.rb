@@ -32,6 +32,7 @@ describe Translator do
            s(:if,
              s(:lit, 1),
              s(:block, s(:asgn, s(:var, :var1), s(:lit, 2))),
-             s(:block, s(:asgn, s(:var, :var1), s(:lit, 3)))))
+             s(:block, s(:asgn, s(:var, :var1), s(:lit, 3))),
+            ), s(:return, :var1))
   end
 end
