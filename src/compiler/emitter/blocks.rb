@@ -1,14 +1,8 @@
 # Blocks
-# - :subblock -- multiple lines ended by ";"
-# - :block -- "{" + subblock + "}"
+# - :block -- "{" + statements + "}"
 module Emitter::Blocks
   def emit_block(sexp)
     @out << "{\n"
-    emit_subblock(sexp)
-    @out << "}\n"
-  end
-
-  def emit_subblock(sexp)
     sexp.rest.each do |elem|
       case elem[0]
       when :define, :include, :defn
@@ -18,5 +12,6 @@ module Emitter::Blocks
         @out << ";\n"
       end
     end
+    @out << "}\n"
   end
 end
