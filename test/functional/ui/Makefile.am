@@ -6,4 +6,4 @@ TESTS_ENVIRONMENT = RUBYLIB=$(top_srcdir)/src/compiler RUBY=$(RUBY) \
                     RUBYC="$(RUBY) $(top_srcdir)/src/compiler/rubyc.rb" \
                     TESTS="$(TESTSCRIPTS)" $(RUBY)
 TESTS = uitester.rb
-dist_noinst_DATA = $(TESTSCRIPTS) $(TESTS) cc errorous_source.rb
+dist_noinst_DATA = $(TESTSCRIPTS) $(TESTS) cc errorous_source.rb test_code.rb
