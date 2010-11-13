@@ -78,6 +78,20 @@ class Translator
   end
 
   def translate_if(sexp)
+    return translate_if_else sexp if sexp[3]
+    var = next_var_name
+    assign_to_var = lambda { |val| s(:asgn, s(:var, var), val) }
+    cond = translate_generic_sexp sexp[1]
+    if_true = translate_generic_sexp sexp[2]
+    filtered_stmts(
+      s(:decl, :int, var),
+      cond,
+      s(:if, cond.value_symbol,
+        filtered_block(if_true, assign_to_var.call(if_true.value_symbol)))
+    ).with_value_symbol var
+  end
+
+  def translate_if_else(sexp)
     var = next_var_name
     assign_to_var = lambda { |val| s(:asgn, s(:var, var), val) }
     cond = translate_generic_sexp sexp[1]

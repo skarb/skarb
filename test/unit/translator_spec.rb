@@ -27,6 +27,15 @@ describe Translator do
   end
 
   it 'should translate if' do
+    translate_code('if 1; 2 end').should ==
+      main(s(:decl, :int, :var1),
+           s(:if,
+             s(:lit, 1),
+             s(:block, s(:asgn, s(:var, :var1), s(:lit, 2)))
+            ), s(:return, :var1))
+  end
+
+  it 'should translate if else' do
     translate_code('if 1; 2 else 3 end').should ==
       main(s(:decl, :int, :var1),
            s(:if,
