@@ -92,13 +92,20 @@ describe Emitter do
         ).should == 'register int a'
   end 
 
+  it 'should emit a block with two statements' do
+    emit(s(:block,
+           s(:call, :fun, s(:abstract_args, nil)),
+           s(:call, :asdf, s(:abstract_args, s(:var, :x)))),
+        ).should == "{\nfun();\nasdf(x);\n}\n"
+  end
+
   it 'should emit if clause' do
     emit(Sexp.new(:if, Sexp.new(:lit, 1),
-                           Sexp.new(:subblock,
+                           Sexp.new(:block,
                            Sexp.new(:return, Sexp.new(:lit, 1))),
-                           Sexp.new(:subblock,
+                           Sexp.new(:block,
                            Sexp.new(:return, Sexp.new(:lit, 0))))
-        ).should == "if (1)\nreturn 1;\nelse\nreturn 0;\n"
+        ).should == "if (1)\n{\nreturn 1;\n}\nelse\n{\nreturn 0;\n}\n"
   end 
 
   it 'should emit assignment' do
@@ -119,16 +126,16 @@ describe Emitter do
                                           Sexp.new(:lit, 2)),
                            Sexp.new(:lit, 1), Sexp.new(:r_unary_oper, :'++',
                                                        Sexp.new(:var, :a)),
-                           Sexp.new(:subblock, Sexp.new(:return,
+                           Sexp.new(:block, Sexp.new(:return,
                                                      Sexp.new(:lit, 1))))
-        ).should == "for (a = 2; 1; a++)\nreturn 1;\n"
+        ).should == "for (a = 2; 1; a++)\n{\nreturn 1;\n}\n"
   end 
 
   it 'should emit a while loop' do
     emit(Sexp.new(:while, Sexp.new(:var, :x),
-                           Sexp.new(:subblock,
+                           Sexp.new(:block,
                            Sexp.new(:l_unary_oper, :'--', :x)))) ==
-                           "while (x)\nx--;\n"
+                           "while (x)\n{\nx--;\n}\n"
   end
 
   it 'should emit a do while loop' do
