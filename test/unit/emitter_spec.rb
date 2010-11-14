@@ -48,7 +48,7 @@ describe Emitter do
                        s(:actual_args, s(:str, 'Hello world!'))))
     hellow_body.push(s(:return, s(:lit, 0)))
     emit(hellow_main).should ==
-      "int main(int argc, char** args)\n{\nprintf(\"Hello world!\");\nreturn 0;\n}\n"
+      "int main(int argc,char** args){printf(\"Hello world!\");return 0;}"
   end
 
   it 'should emit variable declaration' do
@@ -91,23 +91,23 @@ describe Emitter do
     emit(s(:block,
            s(:call, :fun, s(:abstract_args, nil)),
            s(:call, :asdf, s(:abstract_args, s(:var, :x)))),
-        ).should == "{\nfun();\nasdf(x);\n}\n"
+        ).should == "{fun();asdf(x);}"
   end
 
   it 'should emit if clause' do
     emit(s(:if, s(:lit, 1),
            s(:block, s(:return, s(:lit, 1))),
            s(:block, s(:return, s(:lit, 0))))
-        ).should == "if (1)\n{\nreturn 1;\n}\nelse\n{\nreturn 0;\n}\n"
+        ).should == "if(1){return 1;}else{return 0;}"
   end
 
   it 'should emit assignment' do
-    emit(s(:asgn, s(:var, :a), s(:lit, 2))).should == 'a = 2'
+    emit(s(:asgn, s(:var, :a), s(:lit, 2))).should == 'a=2'
   end
 
   it 'should emit special assignment' do
     %w{|| && + - / ^ %}.each do |op|
-      emit(s(:aasgn, op + '=', s(:var, :x), s(:var, :y))).should == "x #{op}= y"
+      emit(s(:aasgn, op + '=', s(:var, :x), s(:var, :y))).should == "x#{op}=y"
     end
   end
 
@@ -117,21 +117,21 @@ describe Emitter do
            s(:lit, 1),
            s(:r_unary_oper, :'++', s(:var, :a)),
            s(:block, s(:return, s(:lit, 1))))
-        ).should == "for (a = 2; 1; a++)\n{\nreturn 1;\n}\n"
+        ).should == "for(a=2;1;a++){return 1;}"
   end
 
   it 'should emit a while loop' do
     emit(s(:while, s(:var, :x), s(:block, s(:r_unary_oper, :'--', s(:var, :x))))
-        ).should == "while (x)\n{\nx--;\n}\n"
+        ).should == "while(x){x--;}"
   end
 
   it 'should emit a do while loop' do
     emit(s(:do, s(:call, :x, s(:arglist, nil)), s(:var, :y))
-        ).should == "do x(); while (y);\n"
+        ).should == "do x();while(y);"
   end
 
   it 'should emit binary operator' do
-    emit(s(:binary_oper, :>, s(:lit, 1), s(:lit, 3))).should == '1 > 3'
+    emit(s(:binary_oper, :>, s(:lit, 1), s(:lit, 3))).should == '1>3'
   end
 
   it 'should emit left unary operator' do
@@ -139,11 +139,11 @@ describe Emitter do
   end
 
   it 'should emit switch' do
-    emit(s(:switch, s(:lit, 1), s(:block))).should == "switch (1)\n{\n}\n"
+    emit(s(:switch, s(:lit, 1), s(:block))).should == "switch(1){}"
   end
 
   it 'should emit default' do
-    emit(s(:default)).should == 'default: '
+    emit(s(:default)).should == 'default:'
   end
 
   it 'should emit break' do
@@ -159,11 +159,11 @@ describe Emitter do
   end
 
   it 'should emit case' do
-    emit(s(:case, s(:lit, 1))).should == 'case 1: '
+    emit(s(:case, s(:lit, 1))).should == 'case 1:'
   end
 
   it 'should emit short if' do
-    emit(s(:short_if, s(:lit, 1), s(:lit, 2), s(:lit, 3))).should == '1 ? 2 : 3'
+    emit(s(:short_if, s(:lit, 1), s(:lit, 2), s(:lit, 3))).should == '1?2:3'
   end
 
   it 'should emit typedef' do
@@ -172,21 +172,21 @@ describe Emitter do
 
   it 'should emit typedef with struct' do
     emit(s(:typedef, s(:struct, nil, s(:block, s(:decl, :int, :a))), :my_struct)
-        ).should == "typedef struct  {\nint a;\n}\n my_struct"
+        ).should == "typedef struct {int a;} my_struct"
   end
 
   it 'should emit union' do
     emit(s(:union, :my_union, s(:block, s(:decl, :int, :a)))
-        ).should == "union my_union {\nint a;\n}\n"
+        ).should == "union my_union {int a;}"
   end
 
   it 'should emit prototype' do
     emit(s(:prototype, :int, :foo, s(:abstract_args, s(:decl, :int, :a)))
-        ).should == 'int foo (int a)'
+        ).should == 'int foo(int a)'
   end
 
   it 'should emit goto label' do
-    emit(s(:label, :abc)).should == 'abc: '
+    emit(s(:label, :abc)).should == 'abc:'
   end
 
   it 'should not accept a sexp with an unexpected type' do
