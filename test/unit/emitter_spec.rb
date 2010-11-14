@@ -40,12 +40,12 @@ describe Emitter do
 
   it 'should emit a hello world' do
     hellow_body = s(:block)
-    args = s(:abstract_args,
+    args = s(:args,
              s(:decl, :int, :argc),
              s(:decl, :'char**', :args))
     hellow_main = s(:defn, :int, :main, args, hellow_body)
     hellow_body.push(s(:call, :printf,
-                       s(:actual_args, s(:str, 'Hello world!'))))
+                       s(:args, s(:str, 'Hello world!'))))
     hellow_body.push(s(:return, s(:lit, 0)))
     emit(hellow_main).should ==
       "int main(int argc,char** args){printf(\"Hello world!\");return 0;}"
@@ -89,8 +89,8 @@ describe Emitter do
 
   it 'should emit a block with two statements' do
     emit(s(:block,
-           s(:call, :fun, s(:abstract_args, nil)),
-           s(:call, :asdf, s(:abstract_args, s(:var, :x)))),
+           s(:call, :fun, s(:args, nil)),
+           s(:call, :asdf, s(:args, s(:var, :x)))),
         ).should == "{fun();asdf(x);}"
   end
 
@@ -181,7 +181,7 @@ describe Emitter do
   end
 
   it 'should emit prototype' do
-    emit(s(:prototype, :int, :foo, s(:abstract_args, s(:decl, :int, :a)))
+    emit(s(:prototype, :int, :foo, s(:args, s(:decl, :int, :a)))
         ).should == 'int foo(int a)'
   end
 
