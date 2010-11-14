@@ -17,18 +17,6 @@ module Emitter::Helpers
     @out << ')'
   end
 
-  # Adds a given string to the output enclosed in spaces.
-  def output_with_spaces(str)
-    space
-    @out << str
-    space
-  end
-
-  # Adds a double quotation mark to the output.
-  def space
-    @out << ' '
-  end
-
   # Adds a given string to the output enclosed in double quotes.
   def output_with_double_quotes(str)
     double_quote
@@ -60,7 +48,7 @@ module Emitter::Helpers
   def output_type_and_children(sexp)
     @out << sexp[0]
     sexp.rest.each do |elem|
-      space
+      @out << ' '
       emit_generic_elem elem
     end
   end
