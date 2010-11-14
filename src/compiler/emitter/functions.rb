@@ -6,15 +6,14 @@
 # - :actual_args -- actual parameters list
 module Emitter::Functions
   def emit_prototype(sexp)
-    @out << sexp[1]
-    output_with_spaces sexp[2]
+    @out << sexp[1] << " " << sexp[2]
     in_parentheses { emit_abstract_args(sexp[3]) }
   end
 
   def emit_abstract_args(sexp)
     sexp.middle.each do |x|
       emit_generic_elem(x)
-      comma_space
+      comma
     end
     emit_generic_elem(sexp.last) unless sexp.last.nil?
   end
@@ -22,7 +21,6 @@ module Emitter::Functions
   def emit_defn(sexp)
     @out << sexp[1] << " " << sexp[2]
     in_parentheses { emit_abstract_args(sexp[3]) }
-    newline
     emit_generic_elem(sexp[4])
   end
 
@@ -31,7 +29,7 @@ module Emitter::Functions
 
     sexp.middle(1,-1).each do |elem|
       emit_arg_expr(elem)
-      comma_space
+      comma
     end
     emit_arg_expr(sexp.last)
   end

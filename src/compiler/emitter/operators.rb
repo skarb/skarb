@@ -6,15 +6,15 @@
 module Emitter::Operators
   def emit_short_if(sexp)
     emit_arg_expr(sexp[1])
-    @out << " ? "
+    @out << '?'
     emit_arg_expr(sexp[2])
-    @out << " : "
+    colon
     emit_arg_expr(sexp[3])
   end
 
   def emit_binary_oper(sexp)
     emit_arg_expr(sexp[2])
-    output_with_spaces sexp[1]
+    @out << sexp[1]
     emit_arg_expr(sexp[3])
   end
 

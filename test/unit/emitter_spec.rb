@@ -172,7 +172,7 @@ describe Emitter do
 
   it 'should emit typedef with struct' do
     emit(s(:typedef, s(:struct, nil, s(:block, s(:decl, :int, :a))), :my_struct)
-        ).should == "typedef struct {int a;} my_struct"
+        ).should == "typedef struct  {int a;} my_struct"
   end
 
   it 'should emit union' do

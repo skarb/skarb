@@ -41,24 +41,19 @@ module Emitter::Helpers
     @out << '"'
   end
 
-  # Adds a comma and a space to the output.
-  def comma_space
-    @out << ', '
+  # Adds a comma to the output.
+  def comma
+    @out << ','
   end
 
-  # Adds a semicolon and a space to the output.
-  def semicolon_space
-    @out << '; '
+  # Adds a semicolon to the output.
+  def semicolon
+    @out << ';'
   end
 
-  # Adds a colon and a space to the output.
-  def colon_space
-    @out << ': '
-  end
-
-  # Adds a new line character to the output.
-  def newline
-    @out << "\n"
+  # Adds a colon to the output.
+  def colon
+    @out << ':'
   end
 
   # Emits the sexp's type and its elements separated with spaces.

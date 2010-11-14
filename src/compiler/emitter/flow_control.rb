@@ -17,66 +17,60 @@ module Emitter::FlowControl
   include Emitter::Helpers
 
   def emit_if(sexp)
-    @out << 'if '
+    @out << 'if'
     in_parentheses { emit_arg_expr(sexp[1]) }
-    newline
     emit_generic_elem(sexp[2])
     unless sexp[3].nil?
-      @out << "else\n"
+      @out << 'else'
       emit_generic_elem(sexp[3])
     end
   end
 
   def emit_while(sexp)
-    @out << 'while '
+    @out << 'while'
     in_parentheses { emit_arg_expr(sexp[1]) }
-    newline
     emit_generic_elem(sexp[2])
-    newline
   end
 
   def emit_do(sexp)
-    @out << "do\n"
+    @out << 'do'
     emit_generic_elem(sexp[1])
-    newline
-    @out << 'while '
+    @out << 'while'
     in_parentheses { emit_arg_expr(sexp[2]) }
-    @out << ";\n"
+    semicolon
   end
 
   def emit_for(sexp)
-    @out << 'for '
+    @out << 'for'
     in_parentheses do
       emit_generic_elem(sexp[1])
-      semicolon_space
+      semicolon
       emit_generic_elem(sexp[2])
-      semicolon_space
+      semicolon
       emit_generic_elem(sexp[3])
     end
-    newline
     emit_generic_elem(sexp[4])
   end
 
   def emit_switch(sexp)
-    @out << 'switch '
+    @out << 'switch'
     in_parentheses { emit_generic_elem(sexp[1]) }
-    newline
     emit_generic_elem(sexp[2])
   end
 
   def emit_default(sexp)
-    @out << 'default: '
+    @out << 'default:'
   end
 
   def emit_case(sexp)
     @out << "case "
     emit_generic_elem(sexp[1])
-    colon_space
+    colon
   end
 
   def emit_label(sexp)
     emit_generic_elem(sexp[1])
-    colon_space
+    colon
   end 
 
   alias :emit_continue :output_type_and_children
