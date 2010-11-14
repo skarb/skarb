@@ -37,10 +37,10 @@ module Emitter::FlowControl
 
   def emit_do(sexp)
     @out << "do\n"
-    emit_generic_elem(sexp[2])
+    emit_generic_elem(sexp[1])
     newline
     @out << 'while '
-    in_parentheses { emit_arg_expr(sexp[1]) }
+    in_parentheses { emit_arg_expr(sexp[2]) }
     @out << ";\n"
   end
 
