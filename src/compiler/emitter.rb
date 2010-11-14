@@ -63,9 +63,9 @@ class Emitter
 
   # Emits symbol or executes method "emit_..." according sexp[0] symbol
   def emit_generic_elem(sexp)
-    if sexp.class==Symbol
+    if sexp.is_a? Symbol
       @out << sexp
-    elsif sexp.class==Sexp
+    elsif sexp.is_a? Sexp
       begin
         self.send 'emit_' + sexp[0].to_s, sexp
       rescue NoMethodError
