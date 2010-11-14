@@ -126,8 +126,8 @@ describe Emitter do
   end
 
   it 'should emit a do while loop' do
-    emit(s(:do, s(:call, :x, s(:arglist, nil)), s(:var, :y))
-        ).should == "do x();while(y);"
+    emit(s(:do, s(:block, s(:call, :x, s(:arglist, nil))), s(:var, :y))
+        ).should == "do{x();}while(y);"
   end
 
   it 'should emit binary operator' do
