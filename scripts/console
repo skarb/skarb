@@ -1,2 +1,4 @@
 #!/bin/sh
-irb -I `dirname $0`/../src/compiler -remitter -rtranslator
+required_libs='emitter translator ruby_parser'
+required_libs=`echo " $required_libs" | sed 's/ / -r/g'`
+irb -I `dirname $0`/../src/compiler $required_libs
