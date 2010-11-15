@@ -22,6 +22,16 @@ class Translator
     
   end
 
+  def initialize
+    @symbol_table = SymbolTable.new
+    @cclass = :Object
+    @cfunction = :_main
+    @symbol_table[@cclass] = Hash.new
+    @symbol_table[@cclass][:functions] = SymbolTable.new
+    @symbol_table[@cclass][:functions][@cfunction] = Hash.new
+    @symbol_table[@cclass][:functions][@cfunction][:lvars] = Hash.new
+  end
+
   # Analyses a given Ruby AST tree and returns a C AST. Both the argument and
   # the returned value are Sexps from the sexp_processor gem.
   def translate(sexp)
@@ -34,6 +44,11 @@ class Translator
     end
   end
 
+  # For debugging purposes only
+  def _translate_generic_debug(sexp)
+    translate_generic_sexp sexp
+  end
+
   private
 
   # Nearly all Ruby statements have a value. It has to be stored in a variable
@@ -43,13 +58,27 @@ class Translator
     # A C sexp (a literal or a variable) which stores the value of the sexp
     # after evaluation. It should have been named +value+ but this method name
     # is unfortunately already taken by RubyParser.
-    attr_accessor :value_symbol
+    attr_accessor :value_symbol, :value_types
 
     # Syntactic sugar. Sets the value_symbol and returns self.
     def with_value_symbol(value_symbol)
       @value_symbol = value_symbol
       self
     end
+    
+    # Syntactic sugar. Sets the value_types and returns self.
+    def with_value_types(value_types)
+      @value_types = value_types
+      self
+    end
+  
+    # Syntactic sugar. Sets the value_symbol, value_types and returns self.
+    def with_value(symbol, types)
+      @value_types = types
+      @value_symbol = symbol
+      self
+    end
+
   end
 
   # Wraps a given body with a 'main' function. The body is expected to be a
@@ -74,7 +103,20 @@ class Translator
   # Translates a literal numeric to an empty block with a value equal to a :lit
   # sexp equal to the given literal.
   def translate_lit(sexp)
-    s(:stmts).with_value_symbol sexp
+    s(:stmts).with_value(sexp, [sexp[1].class.to_s.to_sym])
+  end
+
+  # TODO: Translation
+  def translate_lasgn(sexp)
+    arg = translate_generic_sexp(sexp[2])
+    add_lvar sexp[1] unless lvars_table.has_key? sexp[1]
+    lvars_table[sexp[1]][:types] = arg.value_types
+    s().with_value(arg.value_symbol, arg.value_types)
+  end
+
+  # TODO: Translation
+  def translate_lvar(sexp)
+    s(:stmts).with_value(s(:var, sexp[1]), lvars_table[sexp[1]][:types])
   end
 
   def translate_if(sexp)
@@ -107,6 +149,21 @@ class Translator
         filtered_block(if_false, assign_to_var.call(if_false.value_symbol)))
     ).with_value_symbol var
   end
+
+  # Returns symbol table according to current context.
+  def functions_table
+    @symbol_table[@cclass][:functions]
+  end
+
+  def lvars_table
+    functions_table[@cfunction][:lvars]
+  end
+
+  
+  def add_lvar(lvar)
+    lvars_table[lvar] = Hash.new
+  end
+
 
   # Returns a block sexp with all empty statements sexps removed.
   def filtered_block(*args)

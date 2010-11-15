@@ -14,6 +14,10 @@ describe Translator do
     @translator.translate @rp.parse code
   end
 
+  def translate_code_only(code)
+    @translator._translate_generic_debug @rp.parse code
+  end
+
   # Returns a sexp representing a 'main' function with a given body.
   def main(*body)
     args = s(:abstract_args,
@@ -44,4 +48,18 @@ describe Translator do
              s(:block, s(:asgn, s(:var, :var1), s(:lit, 3))),
             ), s(:return, :var1))
   end
+
+  it 'should detect type of fixnum literal' do
+    translate_code_only('2').value_types.first.should == :Fixnum
+  end
+
+  it 'should detect type of float literal' do
+    translate_code_only('2.5').value_types.first.should == :Float
+  end
+
+  it 'should detect type of variable' do
+    translate_code_only('b=2')
+    translate_code_only('b').value_types.first.should == :Fixnum
+  end
+
 end
