@@ -19,17 +19,47 @@ class Translator
   # Symbol tables are nested in each other:
   # Classes --> Functions --> Local variables
   class SymbolTable < Hash
-    
+    def initialize
+      cclass = Object
+      cfunction = :_main
+      self[@cclass] = {}
+      self[@cclass][:functions] = {}
+      self[@cclass][:functions][@cfunction] = {}
+      self[@cclass][:functions][@cfunction][:lvars] = {}
+    end
+
+    def cclass=(value)
+      @cclass = value
+      self[@cclass] = {}
+      self[@cclass][:functions] = {}
+    end
+
+    def cfunction=(value)
+      @cfunction = value
+      self[@cclass][:functions][@cfunction] = {}
+      self[@cclass][:functions][@cfunction][:lvars] = {}
+    end
+
+    def add_lvar(lvar)
+      lvars_table[lvar] = {}
+    end
+
+    def lvars_table
+      functions_table[@cfunction][:lvars]
+    end
+
+    private
+
+    # Returns symbol table according to current context.
+    def functions_table
+      self[@cclass][:functions]
+    end
   end
 
   def initialize
     @symbol_table = SymbolTable.new
-    @cclass = Object
-    @cfunction = :_main
-    @symbol_table[@cclass] = Hash.new
-    @symbol_table[@cclass][:functions] = SymbolTable.new
-    @symbol_table[@cclass][:functions][@cfunction] = Hash.new
-    @symbol_table[@cclass][:functions][@cfunction][:lvars] = Hash.new
+    @symbol_table.cclass = Object
+    @symbol_table.cfunction = :_main
   end
 
   # Analyses a given Ruby AST tree and returns a C AST. Both the argument and
@@ -75,7 +105,6 @@ class Translator
       @value_symbol = symbol
       self
     end
-
   end
 
   # Wraps a given body with a 'main' function. The body is expected to be a
@@ -106,14 +135,15 @@ class Translator
   # TODO: Translation
   def translate_lasgn(sexp)
     arg = translate_generic_sexp(sexp[2])
-    add_lvar sexp[1] unless lvars_table.has_key? sexp[1]
-    lvars_table[sexp[1]][:types] = arg.value_types
+    @symbol_table.add_lvar sexp[1] unless @symbol_table.lvars_table.has_key? sexp[1]
+    @symbol_table.lvars_table[sexp[1]][:types] = arg.value_types
     s().with_value(arg.value_symbol, arg.value_types)
   end
 
   # TODO: Translation
   def translate_lvar(sexp)
-    s(:stmts).with_value(s(:var, sexp[1]), lvars_table[sexp[1]][:types])
+    s(:stmts).with_value(s(:var, sexp[1]),
+                         @symbol_table.lvars_table[sexp[1]][:types])
   end
 
   def translate_if(sexp)
@@ -146,21 +176,6 @@ class Translator
         filtered_block(if_false, assign_to_var.call(if_false.value_symbol)))
     ).with_value_symbol s(:var, var)
   end
-
-  # Returns symbol table according to current context.
-  def functions_table
-    @symbol_table[@cclass][:functions]
-  end
-
-  def lvars_table
-    functions_table[@cfunction][:lvars]
-  end
-
-  
-  def add_lvar(lvar)
-    lvars_table[lvar] = Hash.new
-  end
-
 
   # Returns a block sexp with all stmts sexps' children extracted.
   def filtered_block(*args)
