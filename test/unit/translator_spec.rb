@@ -56,4 +56,9 @@ describe Translator do
                  s(:block, s(:asgn, s(:var, :var2), s(:lit, 3)))
                 ), s(:asgn, s(:var, :var1), s(:var, :var2)))))
   end
+
+  it 'should translate while' do
+    translate_code('while 1; 2 end').should ==
+      main(s(:while, s(:lit, 1), s(:block)))
+  end
 end
