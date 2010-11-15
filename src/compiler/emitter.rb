@@ -1,22 +1,5 @@
 require 'stringio'
-
-# Extensions for standard Array class
-class Array
-
-  # Returns a slice from the middle of the array
-  # - a -- index of first char of the slice
-  # - b -- negative index of last char of the slice
-  def middle(a=1, b=-1)
-    return self[a..self.length+b-1]
-  end
-
-  # Returns fragment from supplied index to the end of the array
-  def rest(index=1)
-    return self[index..self.length-1] if index >= 0
-    return self[0, self.length+index]
-  end
-
-end
+require 'extensions'
 
 # Generates code from given C abstract syntax tree. It does
 # not perform any validation.

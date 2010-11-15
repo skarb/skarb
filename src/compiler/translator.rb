@@ -1,5 +1,6 @@
 require 'sexp_processor'
 require 'helpers'
+require 'extensions'
 require 'translator/symbol_table'
 
 # Responsible for transforming a Ruby AST to its C equivalent.
@@ -35,35 +36,6 @@ class Translator
 
   # A sexp representing 'return 0;'
   ReturnZero = s(:return, s(:lit, 0))
-
-  # Nearly all Ruby statements have a value. It has to be stored in a variable
-  # after being translated to C. We need to know what is the name of that
-  # variable. Hence we add an attribute to Sexp.
-  class ::Sexp
-    # A C sexp (a literal or a variable) which stores the value of the sexp
-    # after evaluation. It should have been named +value+ but this method name
-    # is unfortunately already taken by RubyParser.
-    attr_accessor :value_symbol, :value_types
-
-    # Syntactic sugar. Sets the value_symbol and returns self.
-    def with_value_symbol(value_symbol)
-      @value_symbol = value_symbol
-      self
-    end
-    
-    # Syntactic sugar. Sets the value_types and returns self.
-    def with_value_types(value_types)
-      @value_types = value_types
-      self
-    end
-  
-    # Syntactic sugar. Sets the value_symbol, value_types and returns self.
-    def with_value(symbol, types)
-      @value_types = types
-      @value_symbol = symbol
-      self
-    end
-  end
 
   # Wraps a given body with a 'main' function. The body is expected to be a
   # collection of Sexp instances.
