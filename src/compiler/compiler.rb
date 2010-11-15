@@ -90,7 +90,7 @@ class Compiler
 
   # Creates the object file by starting the C compiler in a child process.
   def spawn_cc(filename)
-    fork_and_wait cc + " -c -o #{object_file filename} #{filename}"
+    fork_and_wait cc + " #{cflags} -c -o #{object_file filename} #{filename}"
     raise_if_child_failed 'cc failed!'
   end
 
@@ -125,5 +125,10 @@ class Compiler
   # Returns a command starting a C compiler
   def cc
     ENV['CC'] || 'cc'
+  end
+
+  # Returns CFLAGS set using the environment variable.
+  def cflags
+    ENV['CFLAGS'] || ''
   end
 end
