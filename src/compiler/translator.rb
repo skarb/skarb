@@ -150,6 +150,8 @@ class Translator
   end
 
   def translate_if(sexp)
+    # Rewrite the sexp if it's an unless expression.
+    sexp = s(:if, s(:not, sexp[1]), sexp[3], nil) if sexp[2].nil?
     return translate_if_else sexp if sexp[3]
     var = next_var_name
     assign_to_var = lambda { |val| s(:asgn, s(:var, var), val) }
@@ -220,6 +222,13 @@ class Translator
     filtered_stmts(cond,
                    s(:while, s(:l_unary_oper, :!, cond.value_symbol),
                      filtered_block(body)))
+  end
+
+  # Translates a 'not' or a '!'.
+  def translate_not(sexp)
+    child = translate_generic_sexp sexp[1]
+    filtered_stmts(child).with_value_symbol s(:l_unary_oper,
+                                              :!, child.value_symbol)
   end
 
   # Returns an array of sexps with all empty statements sexps, that is s(:stmts)
