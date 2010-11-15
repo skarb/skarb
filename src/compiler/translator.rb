@@ -35,13 +35,7 @@ class Translator
   # Analyses a given Ruby AST tree and returns a C AST. Both the argument and
   # the returned value are Sexps from the sexp_processor gem.
   def translate(sexp)
-    c_sexp = translate_generic_sexp sexp
-    ret = s(:return, c_sexp.value_symbol)
-    if c_sexp.first == :stmts
-      main_function(*(c_sexp.drop 1), ret)
-    else
-      main_function(c_sexp, ret)
-    end
+    main_function translate_generic_sexp(sexp), ReturnZero
   end
 
   # For debugging purposes only
@@ -50,6 +44,9 @@ class Translator
   end
 
   private
+
+  # A sexp representing 'return 0;'
+  ReturnZero = s(:return, s(:lit, 0))
 
   # Nearly all Ruby statements have a value. It has to be stored in a variable
   # after being translated to C. We need to know what is the name of that
@@ -87,7 +84,7 @@ class Translator
     args = s(:abstract_args,
              s(:decl, :int, :argc),
              s(:decl, :'char**', :args))
-    s(:defn, :int, :main, args, s(:block, *body))
+    s(:defn, :int, :main, args, filtered_block(*body))
   end
 
   # Calls translate_generic_sexp with value_matters = true
@@ -130,7 +127,7 @@ class Translator
       cond,
       s(:if, cond.value_symbol,
         filtered_block(if_true, assign_to_var.call(if_true.value_symbol)))
-    ).with_value_symbol var
+    ).with_value_symbol s(:var, var)
   end
 
   # TODO: DRY, translate_if is almost identical.
@@ -147,7 +144,7 @@ class Translator
         cond.value_symbol,
         filtered_block(if_true, assign_to_var.call(if_true.value_symbol)),
         filtered_block(if_false, assign_to_var.call(if_false.value_symbol)))
-    ).with_value_symbol var
+    ).with_value_symbol s(:var, var)
   end
 
   # Returns symbol table according to current context.
@@ -165,14 +162,46 @@ class Translator
   end
 
 
-  # Returns a block sexp with all empty statements sexps removed.
+  # Returns a block sexp with all stmts sexps' children extracted.
   def filtered_block(*args)
-    s(:block, *(filter_empty_sexps args))
+    # This array of sexp will be the content of the returned block.
+    filtered_args = []
+    args.each do |sexp|
+      if sexp.first == :stmts
+        # If it's a stmts take all its children and add them to the output
+        filtered_args += sexp.drop 1
+      else
+        # Otherwise add the whole sexp to the output
+        filtered_args << sexp
+      end
+    end
+    s(:block, *filtered_args)
   end
 
   # Returns a stmts sexp with all empty statements sexps removed.
   def filtered_stmts(*args)
     s(:stmts, *(filter_empty_sexps args))
+  end
+
+  # Translates a while loop. Such loop in Ruby doesn't return a value so we do
+  # not set the value_symbol attribute.
+  def translate_while(sexp)
+    cond = translate_generic_sexp sexp[1]
+    body = translate_generic_sexp sexp[2]
+    filtered_stmts(cond,
+                   s(:while,
+                     cond.value_symbol,
+                     filtered_block(body)))
+  end
+
+  # Translates an until loop. Such loop in Ruby doesn't return a value so we do
+  # not set the value_symbol attribute.
+  def translate_until(sexp)
+    cond = translate_generic_sexp sexp[1]
+    body = translate_generic_sexp sexp[2]
+    filtered_stmts(cond,
+                   s(:while, s(:l_unary_oper, :!, cond.value_symbol),
+                     filtered_block(body)))
   end
 
   # Returns an array of sexps with all empty statements sexps, that is s(:stmts)

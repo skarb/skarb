@@ -1,2 +1,7 @@
 #!/bin/sh
-echo acts_as_cc
+if test 0 -eq `echo $* | grep -c 'this_is_for_testing_purposes'`; then
+  # No args have been passed
+  echo acts_as_cc
+else
+  echo args_have_been_passed
+fi

@@ -23,11 +23,11 @@ describe Translator do
     args = s(:abstract_args,
              s(:decl, :int, :argc),
              s(:decl, :'char**', :args))
-    s(:defn, :int, :main, args, s(:block, *body))
+    s(:defn, :int, :main, args, s(:block, *body, s(:return, s(:lit, 0))))
   end
 
   it 'should translate lit' do
-    translate_code('69').should == main(s(:return, s(:lit, 69)))
+    translate_code('69').should == main
   end
 
   it 'should translate if' do
@@ -35,8 +35,7 @@ describe Translator do
       main(s(:decl, :int, :var1),
            s(:if,
              s(:lit, 1),
-             s(:block, s(:asgn, s(:var, :var1), s(:lit, 2)))
-            ), s(:return, :var1))
+             s(:block, s(:asgn, s(:var, :var1), s(:lit, 2)))))
   end
 
   it 'should translate if else' do
@@ -45,8 +44,31 @@ describe Translator do
            s(:if,
              s(:lit, 1),
              s(:block, s(:asgn, s(:var, :var1), s(:lit, 2))),
-             s(:block, s(:asgn, s(:var, :var1), s(:lit, 3))),
-            ), s(:return, :var1))
+             s(:block, s(:asgn, s(:var, :var1), s(:lit, 3)))))
+  end
+
+  it 'should translate if elsif' do
+    translate_code('if 1; 2 elsif 5; 3 end').should ==
+      main(s(:decl, :int, :var1),
+           s(:if,
+             s(:lit, 1),
+             s(:block, s(:asgn, s(:var, :var1), s(:lit, 2))),
+             s(:block,
+               s(:decl, :int, :var2),
+               s(:if,
+                 s(:lit, 5),
+                 s(:block, s(:asgn, s(:var, :var2), s(:lit, 3)))
+                ), s(:asgn, s(:var, :var1), s(:var, :var2)))))
+  end
+
+  it 'should translate while' do
+    translate_code('while 1; 2 end').should ==
+      main(s(:while, s(:lit, 1), s(:block)))
+  end
+
+  it 'should translate until' do
+    translate_code('until 1; 2 end').should ==
+      main(s(:while, s(:l_unary_oper, :!, s(:lit, 1)), s(:block)))
   end
 
   it 'should detect type of fixnum literal' do
