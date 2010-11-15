@@ -61,4 +61,9 @@ describe Translator do
     translate_code('while 1; 2 end').should ==
       main(s(:while, s(:lit, 1), s(:block)))
   end
+
+  it 'should translate until' do
+    translate_code('until 1; 2 end').should ==
+      main(s(:while, s(:l_unary_oper, :!, s(:lit, 1)), s(:block)))
+  end
 end

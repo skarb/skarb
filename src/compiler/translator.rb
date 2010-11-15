@@ -137,6 +137,16 @@ class Translator
                      filtered_block(body)))
   end
 
+  # Translates an until loop. Such loop in Ruby doesn't return a value so we do
+  # not set the value_symbol attribute.
+  def translate_until(sexp)
+    cond = translate_generic_sexp sexp[1]
+    body = translate_generic_sexp sexp[2]
+    filtered_stmts(cond,
+                   s(:while, s(:l_unary_oper, :!, cond.value_symbol),
+                     filtered_block(body)))
+  end
+
   # Returns an array of sexps with all empty statements sexps, that is s(:stmts)
   # deleted.
   def filter_empty_sexps(sexps)
