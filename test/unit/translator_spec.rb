@@ -72,16 +72,16 @@ describe Translator do
   end
 
   it 'should detect type of fixnum literal' do
-    translate_code_only('2').value_types.first.should == :Fixnum
+    translate_code_only('2').value_types.first.should == Fixnum
   end
 
   it 'should detect type of float literal' do
-    translate_code_only('2.5').value_types.first.should == :Float
+    translate_code_only('2.5').value_types.first.should == Float
   end
 
   it 'should detect type of variable' do
     translate_code_only('b=2')
-    translate_code_only('b').value_types.first.should == :Fixnum
+    translate_code_only('b').value_types.first.should == Fixnum
   end
 
 end

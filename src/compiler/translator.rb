@@ -24,7 +24,7 @@ class Translator
 
   def initialize
     @symbol_table = SymbolTable.new
-    @cclass = :Object
+    @cclass = Object
     @cfunction = :_main
     @symbol_table[@cclass] = Hash.new
     @symbol_table[@cclass][:functions] = SymbolTable.new
@@ -100,7 +100,7 @@ class Translator
   # Translates a literal numeric to an empty block with a value equal to a :lit
   # sexp equal to the given literal.
   def translate_lit(sexp)
-    s(:stmts).with_value(sexp, [sexp[1].class.to_s.to_sym])
+    s(:stmts).with_value(sexp, [sexp[1].class])
   end
 
   # TODO: Translation
