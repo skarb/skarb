@@ -32,7 +32,7 @@ describe Translator do
            s(:if,
              s(:lit, 1),
              s(:block, s(:asgn, s(:var, :var1), s(:lit, 2)))
-            ), s(:return, :var1))
+            ), s(:return, s(:var, :var1)))
   end
 
   it 'should translate if else' do
@@ -42,6 +42,6 @@ describe Translator do
              s(:lit, 1),
              s(:block, s(:asgn, s(:var, :var1), s(:lit, 2))),
              s(:block, s(:asgn, s(:var, :var1), s(:lit, 3))),
-            ), s(:return, :var1))
+            ), s(:return, s(:var, :var1)))
   end
 end
