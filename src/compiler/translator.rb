@@ -88,7 +88,7 @@ class Translator
       cond,
       s(:if, cond.value_symbol,
         filtered_block(if_true, assign_to_var.call(if_true.value_symbol)))
-    ).with_value_symbol var
+    ).with_value_symbol s(:var, var)
   end
 
   # TODO: DRY, translate_if is almost identical.
@@ -105,12 +105,23 @@ class Translator
         cond.value_symbol,
         filtered_block(if_true, assign_to_var.call(if_true.value_symbol)),
         filtered_block(if_false, assign_to_var.call(if_false.value_symbol)))
-    ).with_value_symbol var
+    ).with_value_symbol s(:var, var)
   end
 
-  # Returns a block sexp with all empty statements sexps removed.
+  # Returns a block sexp with all stmts sexps' children extracted.
   def filtered_block(*args)
-    s(:block, *(filter_empty_sexps args))
+    # This array of sexp will be the content of the returned block.
+    filtered_args = []
+    args.each do |sexp|
+      if sexp.first == :stmts
+        # If it's a stmts take all its children and add them to the output
+        filtered_args += sexp.drop 1
+      else
+        # Otherwise add the whole sexp to the output
+        filtered_args << sexp
+      end
+    end
+    s(:block, *filtered_args)
   end
 
   # Returns a stmts sexp with all empty statements sexps removed.
