@@ -26,15 +26,17 @@ class Translator
   # the returned value are Sexps from the sexp_processor gem.
   def translate(sexp)
     c_sexp = translate_generic_sexp sexp
-    ret = s(:return, c_sexp.value_symbol)
     if c_sexp.first == :stmts
-      main_function(*(c_sexp.drop 1), ret)
+      main_function(*(c_sexp.drop 1), ReturnZero)
     else
-      main_function(c_sexp, ret)
+      main_function(c_sexp, ReturnZero)
     end
   end
 
   private
+
+  # A sexp representing 'return 0;'
+  ReturnZero = s(:return, s(:lit, 0))
 
   # Nearly all Ruby statements have a value. It has to be stored in a variable
   # after being translated to C. We need to know what is the name of that

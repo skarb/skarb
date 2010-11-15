@@ -19,11 +19,11 @@ describe Translator do
     args = s(:abstract_args,
              s(:decl, :int, :argc),
              s(:decl, :'char**', :args))
-    s(:defn, :int, :main, args, s(:block, *body))
+    s(:defn, :int, :main, args, s(:block, *body, s(:return, s(:lit, 0))))
   end
 
   it 'should translate lit' do
-    translate_code('69').should == main(s(:return, s(:lit, 69)))
+    translate_code('69').should == main
   end
 
   it 'should translate if' do
@@ -31,8 +31,7 @@ describe Translator do
       main(s(:decl, :int, :var1),
            s(:if,
              s(:lit, 1),
-             s(:block, s(:asgn, s(:var, :var1), s(:lit, 2)))
-            ), s(:return, s(:var, :var1)))
+             s(:block, s(:asgn, s(:var, :var1), s(:lit, 2)))))
   end
 
   it 'should translate if else' do
@@ -41,8 +40,7 @@ describe Translator do
            s(:if,
              s(:lit, 1),
              s(:block, s(:asgn, s(:var, :var1), s(:lit, 2))),
-             s(:block, s(:asgn, s(:var, :var1), s(:lit, 3))),
-            ), s(:return, s(:var, :var1)))
+             s(:block, s(:asgn, s(:var, :var1), s(:lit, 3)))))
   end
 
   it 'should translate if elsif' do
@@ -56,7 +54,6 @@ describe Translator do
                s(:if,
                  s(:lit, 5),
                  s(:block, s(:asgn, s(:var, :var2), s(:lit, 3)))
-                ), s(:asgn, s(:var, :var1), s(:var, :var2))),
-            ), s(:return, s(:var, :var1)))
+                ), s(:asgn, s(:var, :var1), s(:var, :var2)))))
   end
 end
