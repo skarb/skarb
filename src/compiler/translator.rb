@@ -147,6 +147,20 @@ class Translator
                      filtered_block(body)))
   end
 
+  # Translates a call to the Kernel#puts method. All other calls cause an error.
+  def translate_call(sexp)
+    raise 'Kernel#puts is the only supported method' if sexp[1,2] != s(nil, :puts)
+    value = sexp[3][1]
+    raise 'Only integers can be printed' if value[0] != :lit
+    var = next_var_name
+    s(:stmts,
+      s(:decl, :int, var),
+      s(:asgn,
+        s(:var, var),
+        s(:call, :printf, s(:args, s(:str, '%i\n'), s(:lit, value[1]))))
+     ).with_value_symbol s(:var, var)
+  end
+
   # Returns an array of sexps with all empty statements sexps, that is s(:stmts)
   # deleted.
   def filter_empty_sexps(sexps)
