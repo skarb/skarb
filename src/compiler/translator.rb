@@ -25,12 +25,7 @@ class Translator
   # Analyses a given Ruby AST tree and returns a C AST. Both the argument and
   # the returned value are Sexps from the sexp_processor gem.
   def translate(sexp)
-    c_sexp = translate_generic_sexp sexp
-    if c_sexp.first == :stmts
-      main_function(*(c_sexp.drop 1), ReturnZero)
-    else
-      main_function(c_sexp, ReturnZero)
-    end
+    main_function translate_generic_sexp(sexp), ReturnZero
   end
 
   private
@@ -60,7 +55,7 @@ class Translator
     args = s(:abstract_args,
              s(:decl, :int, :argc),
              s(:decl, :'char**', :args))
-    s(:defn, :int, :main, args, s(:block, *body))
+    s(:defn, :int, :main, args, filtered_block(*body))
   end
 
   # Calls translate_generic_sexp with value_matters = true
