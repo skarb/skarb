@@ -229,6 +229,8 @@ class Translator
     child = translate_generic_sexp sexp[1]
     filtered_stmts(child).with_value_symbol s(:l_unary_oper,
                                               :!, child.value_symbol)
+  end
+
   # Translates a call to the Kernel#puts method. All other calls cause an error.
   def translate_call(sexp)
     raise 'Kernel#puts is the only supported method' if sexp[1,2] != s(nil, :puts)
