@@ -1,4 +1,5 @@
 require 'sexp_processor'
+require 'helpers'
 
 # Responsible for transforming a Ruby AST to its C equivalent.
 # It performs tree traversal by recursive execution of functions
@@ -78,6 +79,8 @@ class Translator
 
   private
 
+  include Helpers
+
   # A sexp representing 'return 0;'
   ReturnZero = s(:return, s(:lit, 0))
 
@@ -126,7 +129,11 @@ class Translator
 
   # Calls one of translate_* methods depending on the given sexp's type.
   def translate_generic_sexp(sexp)
-    send "translate_#{sexp[0]}", sexp
+    begin
+      send "translate_#{sexp[0]}", sexp
+    rescue NoMethodError
+      die 'Input contains unsupported Ruby instructions. Aborting.'
+    end
   end
 
   # Translates a literal numeric to an empty block with a value equal to a :lit
