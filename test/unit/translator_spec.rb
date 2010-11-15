@@ -44,4 +44,19 @@ describe Translator do
              s(:block, s(:asgn, s(:var, :var1), s(:lit, 3))),
             ), s(:return, s(:var, :var1)))
   end
+
+  it 'should translate if elsif' do
+    translate_code('if 1; 2 elsif 5; 3 end').should ==
+      main(s(:decl, :int, :var1),
+           s(:if,
+             s(:lit, 1),
+             s(:block, s(:asgn, s(:var, :var1), s(:lit, 2))),
+             s(:block,
+               s(:decl, :int, :var2),
+               s(:if,
+                 s(:lit, 5),
+                 s(:block, s(:asgn, s(:var, :var2), s(:lit, 3)))
+                ), s(:asgn, s(:var, :var1), s(:var, :var2))),
+            ), s(:return, s(:var, :var1)))
+  end
 end
