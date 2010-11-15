@@ -20,39 +20,42 @@ class Translator
   # Classes --> Functions --> Local variables
   class SymbolTable < Hash
     def initialize
-      cclass = Object
+      cclass = Object 
       cfunction = :_main
-      self[@cclass] = {}
-      self[@cclass][:functions] = {}
-      self[@cclass][:functions][@cfunction] = {}
-      self[@cclass][:functions][@cfunction][:lvars] = {}
     end
 
+    # Setter for cclass -- curent class context
     def cclass=(value)
       @cclass = value
-      self[@cclass] = {}
-      self[@cclass][:functions] = {}
+      self[@cclass] ||= {}
+      self[@cclass][:functions] ||= {}
     end
 
+    # Setter for cfunction -- current function context
     def cfunction=(value)
       @cfunction = value
-      self[@cclass][:functions][@cfunction] = {}
-      self[@cclass][:functions][@cfunction][:lvars] = {}
+      self[@cclass][:functions][@cfunction] ||= {}
+      self[@cclass][:functions][@cfunction][:lvars] ||= {}  
     end
 
     def add_lvar(lvar)
-      lvars_table[lvar] = {}
+      lvars_table[lvar] ||= {}
+    end
+
+    def cclass_attrs
+      self[@cclass]
+    end
+
+    def functions_table
+      self[@cclass][:functions]
+    end
+
+    def cfunction_attrs
+      self[@cclass][:functions][@cfunction]
     end
 
     def lvars_table
-      functions_table[@cfunction][:lvars]
-    end
-
-    private
-
-    # Returns symbol table according to current context.
-    def functions_table
-      self[@cclass][:functions]
+      self[@cclass][:functions][@cfunction][:lvars]
     end
   end
 
