@@ -73,15 +73,22 @@ class Translator
     filtered_stmts(*sexps).with_value_symbol sexps.last.value_symbol
   end
 
-  # TODO: Translation
+  # Translate assignment to a local variable. The variable is declared unless
+  # it already was. As a value of expression the variable is returned.
   def translate_lasgn(sexp)
     arg = translate_generic_sexp(sexp[2])
-    @symbol_table.add_lvar sexp[1] unless @symbol_table.lvars_table.has_key? sexp[1]
+    decl = s(:stmts)
+    unless @symbol_table.lvars_table.has_key? sexp[1]
+      @symbol_table.add_lvar sexp[1]
+      decl = s(:decl, :int, sexp[1]) # TODO: Change int
+    end
     @symbol_table.lvars_table[sexp[1]][:types] = arg.value_types
-    s().with_value(arg.value_symbol, arg.value_types)
+    filtered_stmts(decl, arg, s(:asgn, s(:var, sexp[1]), arg.value_symbol))
+      .with_value(s(:var, sexp[1]), arg.value_types)
   end
 
-  # TODO: Translation
+  # Translate a referenced variable to empty block with value of this
+  # variable.
   def translate_lvar(sexp)
     s(:stmts).with_value(s(:var, sexp[1]),
                          @symbol_table.lvars_table[sexp[1]][:types])
@@ -96,7 +103,7 @@ class Translator
     cond = translate_generic_sexp sexp[1]
     if_true = translate_generic_sexp sexp[2]
     filtered_stmts(
-      s(:decl, :int, var),
+      s(:decl, :int, var), # :TODO: Change int
       cond,
       s(:if, cond.value_symbol,
         filtered_block(if_true, assign_to_var.call(if_true.value_symbol)))

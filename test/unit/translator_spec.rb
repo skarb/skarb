@@ -118,4 +118,15 @@ describe Translator do
     translate_code_only('b').value_types.first.should == Fixnum
   end
 
+  it 'should translate local assignment to new variable' do
+    translate_code('b=2').should ==
+      main(s(:decl, :int, :b), s(:asgn, s(:var, :b), s(:lit, 2)))
+  end
+
+  it 'should translate local assignment to known variable' do
+    translate_code_only('b=1')
+    translate_code('b=2').should ==
+      main(s(:asgn, s(:var, :b), s(:lit, 2)))
+  end
+
 end
