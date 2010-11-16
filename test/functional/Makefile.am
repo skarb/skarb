@@ -6,7 +6,8 @@ TESTSCRIPTS = if.rb \
               unless-else.rb \
               unless.rb \
               while-break.rb \
-              until.rb
+              until.rb \
+              simple-function-without-arguments.rb
 TESTS_ENVIRONMENT = RUBYC_PATH=$(top_srcdir)/src/compiler/rubyc.rb \
                     TESTS="$(TESTSCRIPTS)" $(RUBY) -I $(top_srcdir)/src/compiler
 TESTS = runner.rb
