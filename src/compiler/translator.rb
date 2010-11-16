@@ -18,7 +18,7 @@ class Translator
     @symbol_table.cclass = Object
     @symbol_table.cfunction = :_main
     @functions_definitions = {}
-    @functions_implementations = []
+    @functions_implementations = {}
   end
 
   # Analyses a given Ruby AST tree and returns a C AST. Both the argument and
@@ -27,11 +27,11 @@ class Translator
     main = main_function translate_generic_sexp(sexp), ReturnZero
     # If there are any functions other than main they have to be included in
     # the output along with their prototypes.
-    protos = @functions_implementations.map do |fun|
+    protos = @functions_implementations.values.map do |fun|
       s(:prototype, *fun[1,3])
     end
     s(:file, s(:include, '<stdio.h>'),
-      *protos, *@functions_implementations, main)
+      *protos, *@functions_implementations.values, main)
   end
 
   private
@@ -210,12 +210,14 @@ class Translator
     elsif defn = @functions_definitions[sexp[2]]
       # If the function has been already defined translate it's body and save
       # the output in @functions_implementations.
-      @symbol_table.cfunction = defn[1]
-      body = translate_generic_sexp(defn[3][1])
-      body_block = filtered_block(body, s(:return, body.value_symbol))
-      @functions_implementations << s(:defn, :int, defn[1], s(:args),
-                                      body_block)
-      @symbol_table.cfunction = :_main
+      unless @functions_implementations.has_key? defn[1]
+        @symbol_table.cfunction = defn[1]
+        body = translate_generic_sexp(defn[3][1])
+        body_block = filtered_block(body, s(:return, body.value_symbol))
+        @functions_implementations[defn[1]] = s(:defn, :int, defn[1], s(:args),
+                                                body_block)
+        @symbol_table.cfunction = :_main
+      end
       call = s(:call, defn[1], s(:args))
     else
       raise "Unknown function: #{sexp[1]}"
