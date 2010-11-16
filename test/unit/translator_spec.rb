@@ -18,6 +18,14 @@ describe Translator do
     @translator.send :translate_generic_sexp, @rp.parse(code)
   end
 
+  # Returns a sexp representing a whole C program with a given body of the
+  # 'main' function.
+  def program(*body)
+    s(:file,
+      s(:include, '<stdio.h>'),
+      main(*body))
+  end
+
   # Returns a sexp representing a 'main' function with a given body.
   def main(*body)
     args = s(:abstract_args,
@@ -27,12 +35,12 @@ describe Translator do
   end
 
   it 'should translate lit' do
-    translate_code('69').should == main
+    translate_code('69').should == program
   end
 
   it 'should translate if' do
     translate_code('if 1; 2 end').should ==
-      main(s(:decl, :int, :var1),
+      program(s(:decl, :int, :var1),
            s(:if,
              s(:lit, 1),
              s(:block, s(:asgn, s(:var, :var1), s(:lit, 2)))))
@@ -40,7 +48,7 @@ describe Translator do
 
   it 'should translate block' do
     translate_code('4 if 3; 6 if 1;').should ==
-      main(s(:decl, :int, :var1),
+      program(s(:decl, :int, :var1),
            s(:if, s(:lit, 3), s(:block, s(:asgn, s(:var, :var1), s(:lit, 4)))),
            s(:decl, :int, :var2),
            s(:if, s(:lit, 1), s(:block, s(:asgn, s(:var, :var2), s(:lit, 6)))))
@@ -48,7 +56,7 @@ describe Translator do
 
   it 'should translate unless' do
     translate_code('unless 1; 2 end').should ==
-      main(s(:decl, :int, :var1),
+      program(s(:decl, :int, :var1),
            s(:if,
              s(:l_unary_oper, :!, s(:lit, 1)),
              s(:block, s(:asgn, s(:var, :var1), s(:lit, 2)))))
@@ -56,7 +64,7 @@ describe Translator do
 
   it 'should translate if else' do
     translate_code('if 1; 2 else 3 end').should ==
-      main(s(:decl, :int, :var1),
+      program(s(:decl, :int, :var1),
            s(:if,
              s(:lit, 1),
              s(:block, s(:asgn, s(:var, :var1), s(:lit, 2))),
@@ -65,7 +73,7 @@ describe Translator do
 
   it 'should translate if elsif' do
     translate_code('if 1; 2 elsif 5; 3 end').should ==
-      main(s(:decl, :int, :var1),
+      program(s(:decl, :int, :var1),
            s(:if,
              s(:lit, 1),
              s(:block, s(:asgn, s(:var, :var1), s(:lit, 2))),
@@ -80,7 +88,7 @@ describe Translator do
   # NOTE: a temporary solution. We need to have Object#== to do it right.
   it 'should translate case with integers only' do
     translate_code('case 4; when 1; 2; when 3; 5; else 6; end').should ==
-      main(s(:decl, :int, :var1),
+      program(s(:decl, :int, :var1),
            s(:if,
              #s(:binary_oper, :==, s(:lit, 4), s(:lit, 1)),
              s(:lit, 1),
@@ -97,12 +105,12 @@ describe Translator do
 
   it 'should translate while' do
     translate_code('while 1; 2 end').should ==
-      main(s(:while, s(:lit, 1), s(:block)))
+      program(s(:while, s(:lit, 1), s(:block)))
   end
 
   it 'should translate until' do
     translate_code('until 1; 2 end').should ==
-      main(s(:while, s(:l_unary_oper, :!, s(:lit, 1)), s(:block)))
+      program(s(:while, s(:l_unary_oper, :!, s(:lit, 1)), s(:block)))
   end
 
   it 'should detect type of fixnum literal' do
@@ -120,18 +128,19 @@ describe Translator do
 
   it 'should translate local assignment to new variable' do
     translate_code('b=2').should ==
-      main(s(:decl, :int, :b), s(:asgn, s(:var, :b), s(:lit, 2)))
+      program(s(:decl, :int, :b), s(:asgn, s(:var, :b), s(:lit, 2)))
   end
 
   it 'should translate local assignment to known variable' do
     translate_code_only('b=1')
     translate_code('b=2').should ==
-      main(s(:asgn, s(:var, :b), s(:lit, 2)))
+      program(s(:asgn, s(:var, :b), s(:lit, 2)))
   end
 
   it 'should translate a function without arguments' do
     translate_code('def fun; 5; end; fun').should ==
       s(:file,
+        s(:include, '<stdio.h>'),
         s(:prototype, :int, :fun, s(:args)),
         s(:defn, :int, :fun, s(:args), s(:block, s(:return, s(:lit, 5)))),
         main(

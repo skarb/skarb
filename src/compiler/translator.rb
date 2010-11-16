@@ -25,16 +25,13 @@ class Translator
   # the returned value are Sexps from the sexp_processor gem.
   def translate(sexp)
     main = main_function translate_generic_sexp(sexp), ReturnZero
-    if @functions_implementations.any?
-      # If there are any functions other than main they have to be included in
-      # the output along with their prototypes.
-      protos = @functions_implementations.map do |fun|
-        s(:prototype, *fun[1,3])
-      end
-      s(:file, *protos, *@functions_implementations, main)
-    else
-      main
+    # If there are any functions other than main they have to be included in
+    # the output along with their prototypes.
+    protos = @functions_implementations.map do |fun|
+      s(:prototype, *fun[1,3])
     end
+    s(:file, s(:include, '<stdio.h>'),
+      *protos, *@functions_implementations, main)
   end
 
   private
