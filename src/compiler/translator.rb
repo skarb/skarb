@@ -151,6 +151,11 @@ class Translator
                      filtered_block(body)))
   end
 
+  # A trivial break translation.
+  def translate_break(sexp)
+    s(:break)
+  end
+
   # Translates a 'not' or a '!'.
   def translate_not(sexp)
     child = translate_generic_sexp sexp[1]
