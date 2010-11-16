@@ -25,22 +25,32 @@ class SymbolTable < Hash
     self[@cclass][:functions][@cfunction][:lvars] ||= {}
   end
 
+  # Adds a local variable in the current function context.
   def add_lvar(lvar)
     lvars_table[lvar] ||= {}
   end
 
-  def cclass_attrs
-    self[@cclass]
+  # Checks whether we've got a given local variable in the current function
+  # context.
+  def has_lvar?(lvar)
+    lvars_table.has_key? lvar
   end
 
-  def functions_table
-    self[@cclass][:functions]
+  # Sets the given types array for the given local variable in the current
+  # function context.
+  def set_type(lvar, types)
+    lvars_table[lvar][:types] = types
   end
 
-  def cfunction_attrs
-    self[@cclass][:functions][@cfunction]
+  # Returns the types array for the given local variable in the current function
+  # context.
+  def lvars_types(lvar)
+    lvars_table[lvar][:types]
   end
 
+  private
+
+  # The hash of local variables in the current function context.
   def lvars_table
     self[@cclass][:functions][@cfunction][:lvars]
   end
