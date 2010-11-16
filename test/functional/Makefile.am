@@ -1,6 +1,8 @@
 SUBDIRS = . ui
 TESTSCRIPTS = if.rb \
-              puts.rb
+              puts.rb \
+              unless-else.rb \
+              unless.rb
 TESTS_ENVIRONMENT = RUBYC_PATH=$(top_srcdir)/src/compiler/rubyc.rb \
                     TESTS="$(TESTSCRIPTS)" $(RUBY) -I $(top_srcdir)/src/compiler
 TESTS = runner.rb
