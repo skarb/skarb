@@ -38,6 +38,14 @@ describe Translator do
              s(:block, s(:asgn, s(:var, :var1), s(:lit, 2)))))
   end
 
+  it 'should translate block' do
+    translate_code('4 if 3; 6 if 1;').should ==
+      main(s(:decl, :int, :var1),
+           s(:if, s(:lit, 3), s(:block, s(:asgn, s(:var, :var1), s(:lit, 4)))),
+           s(:decl, :int, :var2),
+           s(:if, s(:lit, 1), s(:block, s(:asgn, s(:var, :var2), s(:lit, 6)))))
+  end
+
   it 'should translate unless' do
     translate_code('unless 1; 2 end').should ==
       main(s(:decl, :int, :var1),

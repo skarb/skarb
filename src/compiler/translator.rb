@@ -66,6 +66,13 @@ class Translator
     s(:stmts).with_value(sexp, [sexp[1].class])
   end
 
+  # Translates a block of expressions by translating all of them and returning a
+  # stmts sexp with a value of the last translated element.
+  def translate_block(sexp)
+    sexps = sexp.drop(1).map { |s| translate_generic_sexp s }
+    filtered_stmts(*sexps).with_value_symbol sexps.last.value_symbol
+  end
+
   # TODO: Translation
   def translate_lasgn(sexp)
     arg = translate_generic_sexp(sexp[2])
@@ -131,7 +138,17 @@ class Translator
 
   # Returns a stmts sexp with all empty statements sexps removed.
   def filtered_stmts(*args)
-    s(:stmts, *(filter_empty_sexps args))
+    filtered_args = []
+    args.each do |sexp|
+      if sexp.first == :stmts
+        # If it's a stmts take all its children and add them to the output
+        filtered_args += sexp.drop 1
+      else
+        # Otherwise add the whole sexp to the output
+        filtered_args << sexp
+      end
+    end
+    s(:stmts, *filtered_args)
   end
 
   # Translates a while loop. Such loop in Ruby doesn't return a value so we do
