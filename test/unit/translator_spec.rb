@@ -147,4 +147,17 @@ describe Translator do
           s(:decl, :int, :var1),
           s(:asgn, s(:var, :var1), s(:call, :fun, s(:args)))))
   end
+
+  it 'should translate a function without arguments called twice' do
+    translate_code('def fun; 5; end; fun; fun').should ==
+      s(:file,
+        s(:include, '<stdio.h>'),
+        s(:prototype, :int, :fun, s(:args)),
+        s(:defn, :int, :fun, s(:args), s(:block, s(:return, s(:lit, 5)))),
+        main(
+          s(:decl, :int, :var1),
+          s(:asgn, s(:var, :var1), s(:call, :fun, s(:args))),
+          s(:decl, :int, :var2),
+          s(:asgn, s(:var, :var2), s(:call, :fun, s(:args)))))
+  end
 end
