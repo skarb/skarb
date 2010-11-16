@@ -129,4 +129,13 @@ describe Translator do
       main(s(:asgn, s(:var, :b), s(:lit, 2)))
   end
 
+  it 'should translate a function without arguments' do
+    translate_code('def fun; 5; end; fun').should ==
+      s(:file,
+        s(:prototype, :int, :fun, s(:args)),
+        s(:defn, :int, :fun, s(:args), s(:block, s(:return, s(:lit, 5)))),
+        main(
+          s(:decl, :int, :var1),
+          s(:asgn, s(:var, :var1), s(:call, :fun, s(:args)))))
+  end
 end

@@ -17,12 +17,24 @@ class Translator
     @symbol_table = SymbolTable.new
     @symbol_table.cclass = Object
     @symbol_table.cfunction = :_main
+    @functions_definitions = {}
+    @functions_implementations = []
   end
 
   # Analyses a given Ruby AST tree and returns a C AST. Both the argument and
   # the returned value are Sexps from the sexp_processor gem.
   def translate(sexp)
-    main_function translate_generic_sexp(sexp), ReturnZero
+    main = main_function translate_generic_sexp(sexp), ReturnZero
+    if @functions_implementations.any?
+      # If there are any functions other than main they have to be included in
+      # the output along with their prototypes.
+      protos = @functions_implementations.map do |fun|
+        s(:prototype, *fun[1,3])
+      end
+      s(:file, *protos, *@functions_implementations, main)
+    else
+      main
+    end
   end
 
   private
@@ -187,18 +199,42 @@ class Translator
     translate_if top_if
   end
 
-  # Translates a call to the Kernel#puts method. All other calls cause an error.
+  # Translates a call to the Kernel#puts method or a simple function defined
+  # previously. All other calls cause an error. TODO: split it into multiple
+  # methods.
   def translate_call(sexp)
-    raise 'Kernel#puts is the only supported method' if sexp[1,2] != s(nil, :puts)
-    value = sexp[3][1]
-    raise 'Only integers can be printed' if value[0] != :lit
+    # Only simple functions without arguments are supported.
+    raise UnsupportedNodeError unless sexp[1].nil? or sexp[3].count > 1
     var = next_var_name
-    s(:stmts,
-      s(:decl, :int, var),
-      s(:asgn,
-        s(:var, var),
-        s(:call, :printf, s(:args, s(:str, '%i\n'), s(:lit, value[1]))))
-     ).with_value_symbol s(:var, var)
+    if sexp[2] == :puts
+      value = sexp[3][1]
+      raise 'Only integers can be printed' if value[0] != :lit
+      call = s(:call, :printf, s(:args, s(:str, '%i\n'), s(:lit, value[1])))
+    elsif defn = @functions_definitions[sexp[2]]
+      # If the function has been already defined translate it's body and save
+      # the output in @functions_implementations.
+      @symbol_table.cfunction = defn[1]
+      body = translate_generic_sexp(defn[3][1])
+      body_block = filtered_block(body, s(:return, body.value_symbol))
+      @functions_implementations << s(:defn, :int, defn[1], s(:args),
+                                      body_block)
+      @symbol_table.cfunction = :_main
+      call = s(:call, defn[1], s(:args))
+    else
+      raise "Unknown function: #{sexp[1]}"
+    end
+      s(:stmts,
+        s(:decl, :int, var),
+        s(:asgn, s(:var, var), call)
+       ).with_value_symbol s(:var, var)
+  end
+
+  # Functions' definitions don't get translated immediately. We'll wait for the
+  # actual call. Meanwhile the defining sexp is saved and we return an empty
+  # statements sexp.
+  def translate_defn(sexp)
+    @functions_definitions[sexp[1]] = sexp
+    s(:stmts)
   end
 
   # Returns an array of sexps with all stmts sexps expanded.
