@@ -38,17 +38,27 @@ class SymbolTable < Hash
 
   # Sets the given types array for the given local variable in the current
   # function context.
-  def set_type(lvar, types)
+  def set_lvar_types(lvar, types)
     lvars_table[lvar][:types] = types
   end
 
   # Returns the types array for the given local variable in the current function
   # context.
-  def lvars_types(lvar)
+  def get_lvar_types(lvar)
     lvars_table[lvar][:types]
   end
 
   private
+
+  # The hash of classes
+  def classes_table
+     self[@cclass]
+  end
+
+  # The hash of methods in the current class context.
+  def functions_table
+    self[@cclass][:functions]
+  end
 
   # The hash of local variables in the current function context.
   def lvars_table

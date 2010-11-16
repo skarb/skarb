@@ -77,7 +77,7 @@ class Translator
       @symbol_table.add_lvar sexp[1]
       decl = s(:decl, :int, sexp[1]) # TODO: Change int
     end
-    @symbol_table.set_types sexp[1], arg.value_types
+    @symbol_table.set_lvar_types sexp[1], arg.value_types
     filtered_stmts(decl, arg, s(:asgn, s(:var, sexp[1]), arg.value_symbol))
       .with_value(s(:var, sexp[1]), arg.value_types)
   end
@@ -85,7 +85,7 @@ class Translator
   # Translate a referenced variable to empty block with value of this
   # variable.
   def translate_lvar(sexp)
-    s(:stmts).with_value(s(:var, sexp[1]), @symbol_table.lvars_types(sexp[1]))
+    s(:stmts).with_value(s(:var, sexp[1]), @symbol_table.get_lvar_types(sexp[1]))
   end
 
   def translate_if(sexp)
