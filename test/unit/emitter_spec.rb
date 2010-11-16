@@ -27,11 +27,11 @@ describe Emitter do
   end
 
   it 'should emit include declaration' do
-    emit(s(:include, '<stdio.h>')).should == '#include <stdio.h>'
+    emit(s(:include, '<stdio.h>')).should == "#include <stdio.h>\n"
   end
 
   it 'should emit define declaration' do
-    emit(s(:define , 'x (y/z)')).should == '#define x (y/z)'
+    emit(s(:define , 'x (y/z)')).should == "#define x (y/z)\n"
   end
 
   it 'should emit goto' do
@@ -87,9 +87,20 @@ describe Emitter do
     emit(s(:register, s(:decl, :int, :a))).should == 'register int a'
   end
 
+  it 'should emit a file with include and function definition' do
+    emit(s(:file,
+           s(:include, "<stdio.h>"),
+           s(:defn, :int, :foo, s(:args), s(:block)))).should ==
+           "#include <stdio.h>\nint foo(){}"
+  end
+
+  it 'should emit a call to a function with no arguments' do
+    emit(s(:call, :foo, s(:args))).should == "foo()"
+  end
+
   it 'should emit a block with two statements' do
     emit(s(:block,
-           s(:call, :fun, s(:args, nil)),
+           s(:call, :fun, s(:args)),
            s(:call, :asdf, s(:args, s(:var, :x)))),
         ).should == "{fun();asdf(x);}"
   end
@@ -126,7 +137,7 @@ describe Emitter do
   end
 
   it 'should emit a do while loop' do
-    emit(s(:do, s(:block, s(:call, :x, s(:arglist, nil))), s(:var, :y))
+    emit(s(:do, s(:block, s(:call, :x, s(:args))), s(:var, :y))
         ).should == "do{x();}while(y);"
   end
 
