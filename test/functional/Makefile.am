@@ -1,5 +1,7 @@
 SUBDIRS = . ui
 TESTSCRIPTS = if.rb \
+              if-else.rb \
+              if-elsif.rb \
               puts.rb \
               unless-else.rb \
               unless.rb \
