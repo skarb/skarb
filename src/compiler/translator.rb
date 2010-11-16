@@ -25,11 +25,6 @@ class Translator
     main_function translate_generic_sexp(sexp), ReturnZero
   end
 
-  # For debugging purposes only
-  def _translate_generic_debug(sexp)
-    translate_generic_sexp sexp
-  end
-
   private
 
   include Helpers

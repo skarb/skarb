@@ -15,7 +15,7 @@ describe Translator do
   end
 
   def translate_code_only(code)
-    @translator._translate_generic_debug @rp.parse code
+    @translator.send :translate_generic_sexp, @rp.parse(code)
   end
 
   # Returns a sexp representing a 'main' function with a given body.
