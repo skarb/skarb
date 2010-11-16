@@ -120,35 +120,14 @@ class Translator
     ).with_value_symbol s(:var, var)
   end
 
-  # Returns a block sexp with all stmts sexps' children extracted.
+  # Returns a block sexp with all stmts sexps expanded.
   def filtered_block(*args)
-    # This array of sexp will be the content of the returned block.
-    filtered_args = []
-    args.each do |sexp|
-      if sexp.first == :stmts
-        # If it's a stmts take all its children and add them to the output
-        filtered_args += sexp.drop 1
-      else
-        # Otherwise add the whole sexp to the output
-        filtered_args << sexp
-      end
-    end
-    s(:block, *filtered_args)
+    s(:block, *expand_stmts(args))
   end
 
-  # Returns a stmts sexp with all empty statements sexps removed.
+  # Returns a stmts sexp with all stmts sexps expanded.
   def filtered_stmts(*args)
-    filtered_args = []
-    args.each do |sexp|
-      if sexp.first == :stmts
-        # If it's a stmts take all its children and add them to the output
-        filtered_args += sexp.drop 1
-      else
-        # Otherwise add the whole sexp to the output
-        filtered_args << sexp
-      end
-    end
-    s(:stmts, *filtered_args)
+    s(:stmts, *expand_stmts(args))
   end
 
   # Translates a while loop. Such loop in Ruby doesn't return a value so we do
@@ -215,10 +194,20 @@ class Translator
      ).with_value_symbol s(:var, var)
   end
 
-  # Returns an array of sexps with all empty statements sexps, that is s(:stmts)
-  # deleted.
-  def filter_empty_sexps(sexps)
-    sexps.delete_if { |sexp| sexp == s(:stmts) }
+  # Returns an array of sexps with all stmts sexps expanded.
+  def expand_stmts(sexps)
+    # This array of sexps will be the content of the returned block.
+    expanded_sexps = []
+    sexps.each do |sexp|
+      if sexp.first == :stmts
+        # If it's a stmts take all its children and add them to the output
+        expanded_sexps += sexp.drop 1
+      else
+        # Otherwise add the whole sexp to the output
+        expanded_sexps << sexp
+      end
+    end
+    expanded_sexps
   end
 
   # Each call to this method returns a new, unique var name.
