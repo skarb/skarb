@@ -1,5 +1,6 @@
-#!/usr/bin/env ruby
+#!/usr/bin/env RUBY_PATH
 require 'optparse'
+$: << 'RUBYC_LIBDIR'
 require 'compiler'
 require 'emitter'
 require 'translator'
