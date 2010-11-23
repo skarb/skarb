@@ -5,9 +5,7 @@ require 'extensions'
 # not perform any validation.
 class Emitter
   def emit(sexp)
-    @out = StringIO.new
     emit_generic_elem(sexp)
-    return @out.string
   end
 
   private
@@ -25,7 +23,6 @@ class Emitter
   include Literals
   include Macros
   include Operators
-  include Helpers
   include Modifiers
   include Composite
   include Errors
@@ -37,14 +34,15 @@ class Emitter
     when :str, :lit, :var
       emit_generic_elem(elem)
     else
-      in_parentheses { emit_generic_elem(elem) }
+      '(' + emit_generic_elem(elem) + ')'
     end
   end
 
-  # Emits symbol or executes method "emit_..." according sexp[0] symbol
+  # Emits a symbol or executes a "emit_..." method according to the sexp[0]
+  # symbol.
   def emit_generic_elem(sexp)
     if sexp.is_a? Symbol
-      @out << sexp
+      sexp
     elsif sexp.is_a? Sexp
       begin
         self.send 'emit_' + sexp[0].to_s, sexp

@@ -2,24 +2,19 @@
 # - :block -- "{" + statements + "}"
 module Emitter::Blocks
   def emit_file(sexp)
-    sexp.rest.each do |elem|
-      case elem[0]
-      when :define, :include, :defn
-        emit_generic_elem(elem)
-      else
-        emit_generic_elem(elem)
-        semicolon
-      end
-    end
+    sexp.rest.map do |elem|
+      emit_generic_elem(elem) + (';' if needs_semicolon? elem).to_s
+    end.join
   end
 
   def emit_block(sexp)
-    @out << '{'
-    sexp.rest.each do |elem|
-      emit_generic_elem(elem)
-      semicolon
-    end
-    @out << '}'
+    '{' + sexp.rest.map { |elem| emit_generic_elem(elem) + ';' }.join + '}'
+  end
+
+  private
+
+  def needs_semicolon?(sexp)
+    not [:define, :include, :defn].include? sexp[0]
   end
 end
 
