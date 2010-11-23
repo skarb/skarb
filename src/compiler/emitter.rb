@@ -5,15 +5,12 @@ require 'extensions'
 # not perform any validation.
 class Emitter
   def emit(sexp)
-    return MinimalCode if sexp.nil?
     @out = StringIO.new
     emit_generic_elem(sexp)
     return @out.string
   end
 
   private
-
-  MinimalCode = "int main(){return 0;}"
 
   %w{assignments blocks flow_control functions literals macros operators helpers
     modifiers composite errors
