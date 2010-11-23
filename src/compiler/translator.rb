@@ -102,21 +102,19 @@ class Translator
     sexp = s(:if, s(:not, sexp[1]), sexp[3], nil) if sexp[2].nil?
     return translate_if_else sexp if sexp[3]
     var = next_var_name
-    assign_to_var = lambda { |val| s(:asgn, s(:var, var), val) }
     cond = translate_generic_sexp sexp[1]
     if_true = translate_generic_sexp sexp[2]
     filtered_stmts(
       s(:decl, :int, var), # :TODO: Change int
       cond,
       s(:if, cond.value_symbol,
-        filtered_block(if_true, assign_to_var.call(if_true.value_symbol)))
+        filtered_block(if_true, s(:asgn, s(:var, var), if_true.value_symbol)))
     ).with_value_symbol s(:var, var)
   end
 
   # TODO: DRY, translate_if is almost identical.
   def translate_if_else(sexp)
     var = next_var_name
-    assign_to_var = lambda { |val| s(:asgn, s(:var, var), val) }
     cond = translate_generic_sexp sexp[1]
     if_true = translate_generic_sexp sexp[2]
     if_false = translate_generic_sexp sexp[3]
@@ -125,8 +123,8 @@ class Translator
       cond,
       s(:if,
         cond.value_symbol,
-        filtered_block(if_true, assign_to_var.call(if_true.value_symbol)),
-        filtered_block(if_false, assign_to_var.call(if_false.value_symbol)))
+        filtered_block(if_true, s(:asgn, s(:var, var), if_true.value_symbol)),
+        filtered_block(if_false, s(:asgn, s(:var, var), if_false.value_symbol)))
     ).with_value_symbol s(:var, var)
   end
 
