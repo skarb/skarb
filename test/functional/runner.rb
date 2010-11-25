@@ -23,6 +23,6 @@ describe 'Compiler' do
 
   # After each test remove the binary file.
   after do
-    FileUtils.rm_f 'a.out'
+    FileUtils.rm_f %w/a.out output.c/
   end
 end
