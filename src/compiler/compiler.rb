@@ -1,6 +1,7 @@
 require 'tempfile'
 require 'fileutils'
 require 'helpers'
+require 'config'
 
 # Files created by Tempfile are placed in the /tmp directory. As a result all
 # files produced during the compilation process (excl. the output binary) are
@@ -129,6 +130,6 @@ class Compiler
 
   # Returns CFLAGS set using the environment variable.
   def cflags
-    ENV['CFLAGS'] || ''
+    "-I#{Configuration::IncludeDir} #{ENV['CFLAGS']}"
   end
 end

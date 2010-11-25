@@ -1,19 +1,15 @@
 #include <stdint.h>
 
-typedef struct
-{
+typedef struct {
    uint32_t type;
 } robject;
 
-typedef struct
-{
-   uint32_t type;
+typedef struct {
+   robject meta;
    int val;
 } Fixnum;
 
-typedef struct
-{
-   uint32_t type;
+typedef struct {
+   robject meta;
    double val;
 } Float;
-

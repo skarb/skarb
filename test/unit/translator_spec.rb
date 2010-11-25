@@ -21,7 +21,7 @@ describe Translator do
   # Returns an array of expected included headers
   def includes
       [s(:include, '<stdio.h>'),
-      s(:include, '"lib/objects.h"')]
+      s(:include, '"objects.h"')]
   end
 
   # Returns a sexp representing a whole C program with a given body of the

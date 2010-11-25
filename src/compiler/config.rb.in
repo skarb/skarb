@@ -1,0 +1,3 @@
+module Configuration
+  IncludeDir = 'RUBYC_INCLUDE_DIR'
+end

@@ -22,12 +22,14 @@ if test x = "x$RUBY" -o true != "`$RUBY -e 'puts RUBY_VERSION>="1.9.2"'`"; then
 	AC_MSG_ERROR([cannot find Ruby >= 1.9.2])
 fi
 INZ_CHECK_GEMS([rspec sexp_processor ruby_parser simplecov])
+AC_SUBST([rubycincludedir], ["$includedir/rubyc"])
 AC_CONFIG_FILES([
 				Makefile
 				src/Makefile
 				src/compiler/emitter/Makefile
 				src/compiler/translator/Makefile
 				src/compiler/Makefile
+				src/stdlib/Makefile
 				doc/Makefile
 				test/Makefile
 				test/functional/Makefile

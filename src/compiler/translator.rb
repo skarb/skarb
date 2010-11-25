@@ -30,7 +30,7 @@ class Translator
     protos = @functions_implementations.values.map do |fun|
       s(:prototype, *fun[1,3])
     end
-    includes = [s(:include, '<stdio.h>'), s(:include, '"lib/objects.h"')]
+    includes = [s(:include, '<stdio.h>'), s(:include, '"objects.h"')]
     s(:file, *includes,
       *protos, *@functions_implementations.values, main)
   end
