@@ -1,7 +1,7 @@
 SUBDIRS = src doc test
 .PHONY: coverage rdoc
 
-coverage:
+coverage: all
 	make coverage -C test
 
 rdoc:
