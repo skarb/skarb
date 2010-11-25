@@ -7,13 +7,12 @@ typedef struct
 
 typedef struct
 {
-   uint32_t type;
+   robject meta;
    int val;
 } Fixnum;
 
 typedef struct
 {
-   uint32_t type;
+   robject meta;
    double val;
 } Float;
-
