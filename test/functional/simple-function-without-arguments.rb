@@ -6,6 +6,7 @@
 #7
 #9
 #6
+#6
 def fun
   puts 3
 end
@@ -30,3 +31,4 @@ fun
 fun2
 fun
 fun3
+fun4

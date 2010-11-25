@@ -18,11 +18,17 @@ describe Translator do
     @translator.send :translate_generic_sexp, @rp.parse(code)
   end
 
+  # Returns an array of expected included headers
+  def includes
+      [s(:include, '<stdio.h>'),
+      s(:include, '"lib/objects.h"')]
+  end
+
   # Returns a sexp representing a whole C program with a given body of the
   # 'main' function.
   def program(*body)
     s(:file,
-      s(:include, '<stdio.h>'),
+      *includes,
       main(*body))
   end
 
@@ -140,7 +146,7 @@ describe Translator do
   it 'should translate a function without arguments' do
     translate_code('def fun; 5; end; fun').should ==
       s(:file,
-        s(:include, '<stdio.h>'),
+        *includes,
         s(:prototype, :int, :fun, s(:args)),
         s(:defn, :int, :fun, s(:args), s(:block, s(:return, s(:lit, 5)))),
         main(
@@ -151,7 +157,7 @@ describe Translator do
   it 'should translate a function without arguments called twice' do
     translate_code('def fun; 5; end; fun; fun').should ==
       s(:file,
-        s(:include, '<stdio.h>'),
+        *includes,
         s(:prototype, :int, :fun, s(:args)),
         s(:defn, :int, :fun, s(:args), s(:block, s(:return, s(:lit, 5)))),
         main(
