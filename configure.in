@@ -28,6 +28,7 @@ AC_CONFIG_FILES([
 				src/compiler/emitter/Makefile
 				src/compiler/translator/Makefile
 				src/compiler/Makefile
+				src/stdlib/Makefile
 				doc/Makefile
 				test/Makefile
 				test/functional/Makefile
