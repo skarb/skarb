@@ -6,9 +6,10 @@ autom4te.cache
 config.log
 config.status
 configure
-doc/Makefile
-doc/Makefile.in
 doc/rdoc
 install-sh
 missing
+src/compiler/config.rb
+src/compiler/rubyc.rb
+tags
 test/coverage
