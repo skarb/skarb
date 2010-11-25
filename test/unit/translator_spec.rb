@@ -20,7 +20,7 @@ describe Translator do
 
   # Returns an array of expected included headers
   def includes
-      [s(:include, '<stdio.h>'),
+    [s(:include, '<stdio.h>'),
       s(:include, '"objects.h"')]
   end
 
