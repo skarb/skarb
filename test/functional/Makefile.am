@@ -9,6 +9,7 @@ TESTSCRIPTS = if.rb \
               until.rb \
               simple-function-without-arguments.rb
 TESTS_ENVIRONMENT = RUBYC_PATH=$(top_srcdir)/src/compiler/rubyc.rb \
+                    CFLAGS="-I$(top_srcdir)/src/stdlib" \
                     TESTS="$(TESTSCRIPTS)" $(RUBY) -I $(top_srcdir)/src/compiler
 TESTS = runner.rb
 dist_noinst_DATA = $(TESTSCRIPTS) $(TESTS)

@@ -23,6 +23,7 @@ describe Translator do
   def program(*body)
     s(:file,
       s(:include, '<stdio.h>'),
+      s(:include, '<objects.h>'),
       main(*body))
   end
 
@@ -141,6 +142,7 @@ describe Translator do
     translate_code('def fun; 5; end; fun').should ==
       s(:file,
         s(:include, '<stdio.h>'),
+        s(:include, '<objects.h>'),
         s(:prototype, :int, :fun, s(:args)),
         s(:defn, :int, :fun, s(:args), s(:block, s(:return, s(:lit, 5)))),
         main(
@@ -152,6 +154,7 @@ describe Translator do
     translate_code('def fun; 5; end; fun; fun').should ==
       s(:file,
         s(:include, '<stdio.h>'),
+        s(:include, '<objects.h>'),
         s(:prototype, :int, :fun, s(:args)),
         s(:defn, :int, :fun, s(:args), s(:block, s(:return, s(:lit, 5)))),
         main(
