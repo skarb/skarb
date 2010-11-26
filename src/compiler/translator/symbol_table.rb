@@ -11,10 +11,15 @@ class SymbolTable < Hash
     cfunction = :_main
   end
 
+  # Adds a new class and generates id for it
+  def add_class(class_name)
+    self[class_name] ||= { id: next_id }
+  end
+
   # Setter for cclass -- curent class context
   def cclass=(value)
     @cclass = value
-    self[@cclass] ||= {}
+    add_class @cclass
     self[@cclass][:functions] ||= {}
   end
 
@@ -50,9 +55,9 @@ class SymbolTable < Hash
 
   private
 
-  # The hash of classes
-  def classes_table
-     self[@cclass]
+  # General hash of current class context.
+  def class_table
+    self[@cclass]
   end
 
   # The hash of methods in the current class context.
@@ -64,4 +69,11 @@ class SymbolTable < Hash
   def lvars_table
     self[@cclass][:functions][@cfunction][:lvars]
   end
+
+  # Each call to this method returns a new, unique id.
+  def next_id
+    @next_id ||= 0
+    @next_id += 1 
+  end
+
 end

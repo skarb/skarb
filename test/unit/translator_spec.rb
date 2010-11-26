@@ -18,6 +18,14 @@ describe Translator do
     @translator.send :translate_generic_sexp, @rp.parse(code)
   end
 
+  def simple_type_check(var, type, code)
+    @translator.send :add_simple_type_check, var, type, code
+  end
+
+  def complex_type_check(var, type2code_hash)
+    @translator.send :add_complex_type_check, var, type2code_hash
+  end
+
   # Returns an array of expected included headers
   def includes
     [s(:include, '<stdio.h>'),
@@ -165,5 +173,29 @@ describe Translator do
           s(:asgn, s(:var, :var1), s(:call, :fun, s(:args))),
           s(:decl, :int, :var2),
           s(:asgn, s(:var, :var2), s(:call, :fun, s(:args)))))
+  end
+
+  it 'should add simple type check in the output code' do
+    simple_type_check(:b, :Fixnum, s(:lit, 1)).should ==
+      s(:stmts,
+        s(:decl, :int, :var1),
+        s(:if,
+           s(:binary_oper, s(:binary_oper, s(:var, :b), :'.', s(:var, :type)),
+             :==, s(:lit, 2)),
+           s(:block, s(:asgn, s(:var, :var1), s(:lit, 1)))))
+  end
+
+  it 'should add complex type check in the output code' do
+    complex_type_check(:b, {Fixnum: s(:lit, 1), Object: s(:lit, 2)}).should ==
+      s(:stmts,
+        s(:decl, :int, :var1),
+        s(:switch, s(:binary_oper, s(:var, :b), :'.', s(:var, :type)),
+          s(:block,
+           s(:case, s(:lit, 2)),
+           s(:asgn, s(:var, :var1), s(:lit, 1)),
+           s(:break),
+           s(:case, s(:lit, 1)),
+           s(:asgn, s(:var, :var1), s(:lit, 2)),
+           s(:break))))
   end
 end
