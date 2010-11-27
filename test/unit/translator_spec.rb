@@ -48,24 +48,38 @@ describe Translator do
     s(:defn, :int, :main, args, s(:block, *body, s(:return, s(:lit, 0))))
   end
 
+  # Returns a sexp representing a call to the Fixnum_new function with a given
+  # int value.
+  def fixnum_new(value)
+    s(:call, :Fixnum_new, s(:args, s(:lit, value)))
+  end
+
+  # Returns a sexp representing a call to the boolean_value function with a
+  # given value.
+  def boolean_value(value)
+    s(:call, :boolean_value, s(:args, value))
+  end
+
   it 'should translate lit' do
     translate_code('69').should == program
   end
 
   it 'should translate if' do
     translate_code('if 1; 2 end').should ==
-      program(s(:decl, :int, :var1),
+      program(s(:decl, 'Fixnum*', :var1),
            s(:if,
-             s(:lit, 1),
-             s(:block, s(:asgn, s(:var, :var1), s(:lit, 2)))))
+             boolean_value(fixnum_new(1)),
+             s(:block, s(:asgn, s(:var, :var1), fixnum_new(2)))))
   end
 
   it 'should translate block' do
     translate_code('4 if 3; 6 if 1;').should ==
-      program(s(:decl, :int, :var1),
-           s(:if, s(:lit, 3), s(:block, s(:asgn, s(:var, :var1), s(:lit, 4)))),
-           s(:decl, :int, :var2),
-           s(:if, s(:lit, 1), s(:block, s(:asgn, s(:var, :var2), s(:lit, 6)))))
+      program(s(:decl, 'Fixnum*', :var1),
+           s(:if, boolean_value(fixnum_new(3)),
+             s(:block, s(:asgn, s(:var, :var1), fixnum_new(4)))),
+           s(:decl, 'Fixnum*', :var2),
+           s(:if, boolean_value(fixnum_new(6)),
+             s(:block, s(:asgn, s(:var, :var1), fixnum_new(1)))))
   end
 
   it 'should translate unless' do
