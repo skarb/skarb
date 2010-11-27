@@ -1,6 +1,16 @@
 AC_PREREQ([2.65])
 AC_INIT([inzynierka], [snapshot])
 AM_INIT_AUTOMAKE([1.10 foreign color-tests])
+
+# Tests related to C
+AC_PROG_CC
+AC_PROG_LIBTOOL
+AC_TYPE_SIZE_T
+AC_TYPE_UINT32_T
+AC_FUNC_MALLOC
+AC_FUNC_REALLOC
+
+# Other tests
 AC_PROG_AWK
 AC_CHECK_PROGS(RUBBER, [rubber])
 if test -z "$RUBBER"; then
