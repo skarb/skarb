@@ -97,7 +97,7 @@ class Compiler
 
   # Links the object file by starting the C compiler in a child process.
   def spawn_linker(filename)
-    fork_and_wait cc + " -o #{@output} #{filename}"
+    fork_and_wait cc + " #{ldflags} -o #{@output} #{filename}"
     raise_if_child_failed 'linker failed!'
   end
 
@@ -131,5 +131,11 @@ class Compiler
   # Returns CFLAGS set using the environment variable.
   def cflags
     "-I#{Configuration::IncludeDir} #{ENV['CFLAGS']}"
+  end
+
+  # Returns flags used during linking, including the LDFLAGS environment
+  # variable.
+  def ldflags
+    "-lrubyc #{ENV['LDFLAGS']}"
   end
 end

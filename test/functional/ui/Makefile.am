@@ -5,6 +5,7 @@ TESTSCRIPTS = compile_from_stdin.sh create_a_binary.sh error_parse.sh \
               unsupported.sh
 TESTS_ENVIRONMENT = RUBYLIB=$(top_srcdir)/src/compiler RUBY=$(RUBY) \
                     CFLAGS="-I$(top_srcdir)/src/stdlib" \
+                    LDFLAGS="-static -L$(top_builddir)/src/stdlib/.libs" \
                     RUBYC="$(RUBY) $(top_srcdir)/src/compiler/rubyc.rb" \
                     TESTS="$(TESTSCRIPTS)" $(RUBY)
 TESTS = uitester.rb
