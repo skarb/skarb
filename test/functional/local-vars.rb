@@ -3,6 +3,8 @@
 #3
 #4
 #4
+#4
+#6
 a = 1
 puts a
 a = 2
@@ -14,3 +16,6 @@ b = 5 unless a
 puts b
 a = b
 puts a
+b = 6
+puts a
+puts b
