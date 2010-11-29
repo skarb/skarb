@@ -56,7 +56,8 @@ describe Translator do
   # Returns a sexp representing a call to the boolean_value function with a
   # given value.
   def boolean_value(value)
-    s(:call, :boolean_value, s(:args, value))
+    s(:call, :boolean_value, s(:args,
+                               s(:call, :TO_OBJECT, s(:args, value))))
   end
 
   # Returns a sexp representing a declaration of a pointer to Fixnum.
