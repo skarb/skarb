@@ -5,17 +5,17 @@
 
 typedef struct {
    uint32_t type;
-} robject;
+} Object;
 
-#define TO_OBJECT(obj) ((robject *)(obj))
+#define TO_OBJECT(obj) ((Object *)(obj))
 
 typedef struct {
-   robject meta;
+   Object meta;
    int val;
 } Fixnum;
 
 typedef struct {
-   robject meta;
+   Object meta;
    double val;
 } Float;
 
