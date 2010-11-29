@@ -246,11 +246,7 @@ class Translator
     raise UnsupportedNodeError unless sexp[1].nil? or sexp[3].count > 1
     var = next_var_name
     if sexp[2] == :puts
-      value = sexp[3][1]
-      raise 'Only integers can be printed' if value[0] != :lit
-      call = s(:call, :Fixnum_new,
-               s(:args, s(:call, :printf,
-                          s(:args, s(:str, '%i\n'), s(:lit, value[1])))))
+      call = faked_puts sexp
     elsif defn = @functions_definitions[sexp[2]]
       # If the function has been already defined translate it's body and save
       # the output in @functions_implementations.
@@ -270,6 +266,27 @@ class Translator
         s(:decl, 'Fixnum*', var),
         s(:asgn, s(:var, var), call)
        ).with_value_symbol s(:var, var)
+  end
+
+  # Returns a sexp which acts as if the Kernel#puts method was called.
+  def faked_puts(sexp)
+      value = sexp[3][1]
+      case value[0]
+      when :lit
+        return s(:call, :Fixnum_new,
+                 s(:args, s(:call, :printf,
+                            s(:args, s(:str, '%i\n'), s(:lit, value[1])))))
+      when :lvar
+        type = @symbol_table.get_lvar_types(value[1]).first
+        if type == Fixnum
+          return s(:call, :Fixnum_new,
+                   s(:args, s(:call, :printf,
+                              s(:args, s(:str, '%i\n'),
+                                s(:binary_oper, :'->',
+                                  s(:var, value[1]), s(:var, :val))))))
+        end
+      end
+      raise 'Only Fixnums can be printed'
   end
 
   # Functions' definitions don't get translated immediately. We'll wait for the
