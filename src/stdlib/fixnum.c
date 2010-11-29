@@ -1,3 +1,4 @@
+#include "fixnum.h"
 #include "xalloc.h"
 #include "objects.h"
 

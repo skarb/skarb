@@ -97,7 +97,7 @@ class Compiler
 
   # Links the object file by starting the C compiler in a child process.
   def spawn_linker(filename)
-    fork_and_wait cc + " #{ldflags} -o #{@output} #{filename}"
+    fork_and_wait "#{cc} -o #{@output} #{filename} #{ldflags}"
     raise_if_child_failed 'linker failed!'
   end
 
