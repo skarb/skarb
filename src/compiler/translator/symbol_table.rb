@@ -21,6 +21,7 @@ class SymbolTable < Hash
     @cclass = value
     add_class @cclass
     self[@cclass][:functions] ||= {}
+    self[@cclass][:ivars] ||= {}
   end
 
   # Setter for cfunction -- current function context
@@ -53,6 +54,29 @@ class SymbolTable < Hash
     lvars_table[lvar][:types]
   end
 
+  # Adds an instance variable in the current class context.
+  def add_ivar(ivar)
+    ivars_table[ivar] ||= {}
+  end
+
+  # Checks whether we've got a given instance variable in the current class
+  # context.
+  def has_ivar?(ivar)
+    ivars_table.has_key? ivar
+  end
+
+  # Sets the given types array for the given instance variable in the current
+  # class context.
+  def set_ivar_types(ivar, types)
+    ivars_table[ivar][:types] = types
+  end
+
+  # Returns the types array for the given instance variable in the current class
+  # context.
+  def get_ivar_types(ivar)
+    ivars_table[ivar][:types]
+  end
+
   private
 
   # General hash of current class context.
@@ -63,6 +87,11 @@ class SymbolTable < Hash
   # The hash of methods in the current class context.
   def functions_table
     self[@cclass][:functions]
+  end
+
+  # The hash of instance variables in the current class context.
+  def ivars_table
+    self[@cclass][:ivars]
   end
 
   # The hash of local variables in the current function context.

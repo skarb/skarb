@@ -86,12 +86,12 @@ class Translator
   # Translate assignment to a local variable. The variable is declared unless
   # it already was. As a value of expression the variable is returned.
   def translate_lasgn(sexp)
-    arg = translate_generic_sexp(sexp[2])
     decl = s(:stmts)
     unless @symbol_table.has_lvar? sexp[1]
       @symbol_table.add_lvar sexp[1]
       decl = s(:decl, 'Fixnum*', sexp[1])
     end
+    arg = translate_generic_sexp(sexp[2])
     @symbol_table.set_lvar_types sexp[1], arg.value_types
     filtered_stmts(decl, arg, s(:asgn, s(:var, sexp[1]), arg.value_symbol))
       .with_value(s(:var, sexp[1]), arg.value_types)
@@ -100,14 +100,42 @@ class Translator
   # Translate a referenced local variable to empty block with value of this
   # variable.
   def translate_lvar(sexp)
+    unless @symbol_table.has_lvar? sexp[1]
+      die 'Use of uninitialized local variable'
+    end
     s(:stmts).with_value(s(:var, sexp[1]), @symbol_table.get_lvar_types(sexp[1]))
+  end
+ 
+  # Translate assignment to an instance variable. The variable is declared unless
+  # it already was. As a value of expression the variable is returned.
+  def translate_iasgn(sexp)
+    str_name = sexp[1].to_s
+    sname = str_name[1, str_name.length-1].to_sym
+    unless @symbol_table.has_ivar? sexp[1]
+      @symbol_table.add_ivar sexp[1]
+    end
+    arg = translate_generic_sexp(sexp[2])
+    @symbol_table.set_ivar_types sexp[1], arg.value_types
+    filtered_stmts(arg, s(:asgn,
+                                s(:binary_oper, :'->',
+                                  s(:var, :self), s(:var, sname)),
+                                arg.value_symbol))
+      .with_value(s(:binary_oper, :'->', s(:var, :self), s(:var, sname)),
+                  arg.value_types)
   end
 
   # Translate a referenced instance variable to empty block with value of this
   # variable.
-#  def translate_ivar(sexp)
-#    s(:stmts).with_value(s(:var, sexp[1]), @symbol_table.get_lvar_types(sexp[1]))
-#  end
+  def translate_ivar(sexp)
+    unless @symbol_table.has_ivar? sexp[1]
+      die 'Use of uninitialized instance variable'
+    end
+    str_name = sexp[1].to_s
+    sname = str_name[1, str_name.length-1].to_sym
+    s(:stmts).with_value(
+      s(:binary_oper, :'->', s(:var, :self), s(:var, sname)),
+      @symbol_table.get_ivar_types(sexp[1]))
+  end
 
   def translate_if(sexp)
     # Rewrite the sexp if it's an unless expression.

@@ -198,6 +198,12 @@ describe Translator do
           s(:asgn, s(:var, :var2), s(:call, :fun, s(:args)))))
   end
 
+  it 'should translate an assignment to an instance variable' do
+    translate_code('@a=@a').should ==
+      program(s(:asgn, s(:binary_oper, :'->', s(:var, :self), s(:var, :a)),
+       s(:binary_oper, :'->', s(:var, :self), s(:var, :a))))
+  end
+
   it 'should add simple type check in the output code' do
     simple_type_check(:b, :Fixnum, s(:lit, 1)).should ==
       s(:stmts,
@@ -205,8 +211,7 @@ describe Translator do
         s(:if,
            s(:binary_oper, :==, s(:binary_oper, :'->', s(:var, :b), s(:var, :type)),
              s(:lit, 2)),
-           s(:block, s(:asgn, s(:var, :var1), s(:call, :Fixnum_new,
-                                                s(:args, s(:lit, 1)))))))
+           s(:block, s(:asgn, s(:var, :var1), fixnum_new(1)))))
   end
 
   it 'should add complex type check in the output code' do
@@ -216,12 +221,10 @@ describe Translator do
         s(:switch, s(:binary_oper, :'->', s(:var, :b), s(:var, :type)),
           s(:block,
            s(:case, s(:lit, 2)),
-           s(:asgn, s(:var, :var1), s(:call, :Fixnum_new,
-                                      s(:args, s(:lit, 1)))),
+           s(:asgn, s(:var, :var1), fixnum_new(1)),
            s(:break),
            s(:case, s(:lit, 1)),
-           s(:asgn, s(:var, :var1), s(:call, :Fixnum_new,
-                                      s(:args, s(:lit, 2)))),
+           s(:asgn, s(:var, :var1), fixnum_new(2)),
            s(:break))))
   end
 end
