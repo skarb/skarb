@@ -1,3 +1,6 @@
+#ifndef OBJECTS_H_
+#define OBJECTS_H_
+
 #include <stdint.h>
 
 typedef struct {
@@ -13,3 +16,5 @@ typedef struct {
    robject meta;
    double val;
 } Float;
+
+#endif /* OBJECTS_H_ */

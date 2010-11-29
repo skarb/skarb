@@ -31,7 +31,7 @@ class Translator
     protos = @functions_implementations.values.map do |fun|
       s(:prototype, *fun[1,3])
     end
-    includes = [s(:include, '<stdio.h>'), s(:include, '"objects.h"')]
+    includes = Headers.map { |h| s(:include, h) }
     s(:file, *includes,
       *protos, *@functions_implementations.values, main)
   end
@@ -42,6 +42,9 @@ class Translator
 
   # A sexp representing 'return 0;'
   ReturnZero = s(:return, s(:lit, 0))
+
+  # A list of headers to be included.
+  Headers = %w/<stdio.h> "objects.h" "helpers.h" "fixnum.h"/
 
   # Wraps a given body with a 'main' function. The body is expected to be a
   # collection of Sexp instances.
