@@ -28,8 +28,7 @@ describe Translator do
 
   # Returns an array of expected included headers
   def includes
-    [s(:include, '<stdio.h>'),
-      s(:include, '"objects.h"')]
+    %w/<stdio.h> "objects.h" "helpers.h" "fixnum.h"/.map { |h| s(:include, h) }
   end
 
   # Returns a sexp representing a whole C program with a given body of the
