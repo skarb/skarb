@@ -60,85 +60,92 @@ describe Translator do
     s(:call, :boolean_value, s(:args, value))
   end
 
+  # Returns a sexp representing a declaration of a pointer to Fixnum.
+  def decl_fixnum(name)
+    s(:decl, 'Fixnum*', name)
+  end
+
   it 'should translate lit' do
     translate_code('69').should == program
   end
 
   it 'should translate if' do
     translate_code('if 1; 2 end').should ==
-      program(s(:decl, 'Fixnum*', :var1),
-           s(:if,
-             boolean_value(fixnum_new(1)),
-             s(:block, s(:asgn, s(:var, :var1), fixnum_new(2)))))
+      program(decl_fixnum(:var1),
+              s(:if,
+                boolean_value(fixnum_new(1)),
+                s(:block, s(:asgn, s(:var, :var1), fixnum_new(2)))))
   end
 
   it 'should translate block' do
     translate_code('4 if 3; 6 if 1;').should ==
-      program(s(:decl, 'Fixnum*', :var1),
-           s(:if, boolean_value(fixnum_new(3)),
-             s(:block, s(:asgn, s(:var, :var1), fixnum_new(4)))),
-           s(:decl, 'Fixnum*', :var2),
-           s(:if, boolean_value(fixnum_new(6)),
-             s(:block, s(:asgn, s(:var, :var1), fixnum_new(1)))))
+      program(decl_fixnum(:var1),
+              s(:if, boolean_value(fixnum_new(3)),
+                s(:block, s(:asgn, s(:var, :var1), fixnum_new(4)))),
+              decl_fixnum(:var2),
+              s(:if, boolean_value(fixnum_new(6)),
+                s(:block, s(:asgn, s(:var, :var1), fixnum_new(1)))))
   end
 
   it 'should translate unless' do
     translate_code('unless 1; 2 end').should ==
-      program(s(:decl, :int, :var1),
-           s(:if,
-             s(:l_unary_oper, :!, s(:lit, 1)),
-             s(:block, s(:asgn, s(:var, :var1), s(:lit, 2)))))
+      program(decl_fixnum(:var1),
+             s(:if,
+               s(:l_unary_oper, :!, boolean_value(fixnum_new(1))),
+               s(:block, s(:asgn, s(:var, :var1), s(:lit, 2)))))
   end
 
   it 'should translate if else' do
     translate_code('if 1; 2 else 3 end').should ==
-      program(s(:decl, :int, :var1),
+      program(decl_fixnum(:var1),
            s(:if,
-             s(:lit, 1),
-             s(:block, s(:asgn, s(:var, :var1), s(:lit, 2))),
-             s(:block, s(:asgn, s(:var, :var1), s(:lit, 3)))))
+             boolean_value(fixnum_new(1)),
+             s(:block, s(:asgn, s(:var, :var1), fixnum_new(2))),
+             s(:block, s(:asgn, s(:var, :var1), fixnum_new(3)))))
   end
 
   it 'should translate if elsif' do
     translate_code('if 1; 2 elsif 5; 3 end').should ==
-      program(s(:decl, :int, :var1),
-           s(:if,
-             s(:lit, 1),
-             s(:block, s(:asgn, s(:var, :var1), s(:lit, 2))),
-             s(:block,
-               s(:decl, :int, :var2),
-               s(:if,
-                 s(:lit, 5),
-                 s(:block, s(:asgn, s(:var, :var2), s(:lit, 3)))
-                ), s(:asgn, s(:var, :var1), s(:var, :var2)))))
+      program(decl_fixnum(:var1),
+              s(:if,
+                boolean_value(fixnum_new(1)),
+                s(:block, s(:asgn, s(:var, :var1), fixnum_new(2))),
+                s(:block,
+                  decl_fixnum(:var2),
+                  s(:if,
+                    boolean_value(fixnum_new(5)),
+                    s(:block, s(:asgn, s(:var, :var2), fixnum_new(3)))
+                   ), s(:asgn, s(:var, :var1), s(:var, :var2)))))
   end
 
   # NOTE: a temporary solution. We need to have Object#== to do it right.
   it 'should translate case with integers only' do
     translate_code('case 4; when 1; 2; when 3; 5; else 6; end').should ==
-      program(s(:decl, :int, :var1),
+      program(decl_fixnum(:var1),
            s(:if,
              #s(:binary_oper, :==, s(:lit, 4), s(:lit, 1)),
-             s(:lit, 1),
-             s(:block, s(:asgn, s(:var, :var1), s(:lit, 2))),
+             boolean_value(fixnum_new(1)),
+             s(:block, s(:asgn, s(:var, :var1), fixnum_new(2))),
              s(:block,
-               s(:decl, :int, :var2),
+               decl_fixnum(:var2),
                s(:if,
                  #s(:binary_oper, :==, s(:lit, 4), s(:lit, 3)),
-                 s(:lit, 3),
-                 s(:block, s(:asgn, s(:var, :var2), s(:lit, 5))),
-                 s(:block, s(:asgn, s(:var, :var2), s(:lit, 6))),
+                 boolean_value(fixnum_new(3)),
+                 s(:block, s(:asgn, s(:var, :var2), fixnum_new(5))),
+                 s(:block, s(:asgn, s(:var, :var2), fixnum_new(6))),
                 ), s(:asgn, s(:var, :var1), s(:var, :var2)))))
   end
 
   it 'should translate while' do
     translate_code('while 1; 2 end').should ==
-      program(s(:while, s(:lit, 1), s(:block)))
+      program(s(:while, boolean_value(fixnum_new(1)), s(:block)))
   end
 
   it 'should translate until' do
     translate_code('until 1; 2 end').should ==
-      program(s(:while, s(:l_unary_oper, :!, s(:lit, 1)), s(:block)))
+      program(s(:while,
+                s(:l_unary_oper, :!, boolean_value(fixnum_new(1))),
+                s(:block)))
   end
 
   it 'should detect type of fixnum literal' do
@@ -156,23 +163,24 @@ describe Translator do
 
   it 'should translate local assignment to new variable' do
     translate_code('b=2').should ==
-      program(s(:decl, :int, :b), s(:asgn, s(:var, :b), s(:lit, 2)))
+      program(decl_fixnum(:b), s(:asgn, s(:var, :b), fixnum_new(2)))
   end
 
   it 'should translate local assignment to known variable' do
     translate_code_only('b=1')
     translate_code('b=2').should ==
-      program(s(:asgn, s(:var, :b), s(:lit, 2)))
+      program(s(:asgn, s(:var, :b), fixnum_new(2)))
   end
 
   it 'should translate a function without arguments' do
     translate_code('def fun; 5; end; fun').should ==
       s(:file,
         *includes,
-        s(:prototype, :int, :fun, s(:args)),
-        s(:defn, :int, :fun, s(:args), s(:block, s(:return, s(:lit, 5)))),
+        s(:prototype, 'Fixnum*', :fun, s(:args)),
+        s(:defn, 'Fixnum*', :fun, s(:args), s(:block,
+                                              s(:return, fixnum_new(5)))),
         main(
-          s(:decl, :int, :var1),
+          decl_fixnum(:var1),
           s(:asgn, s(:var, :var1), s(:call, :fun, s(:args)))))
   end
 
@@ -180,15 +188,17 @@ describe Translator do
     translate_code('def fun; 5; end; fun; fun').should ==
       s(:file,
         *includes,
-        s(:prototype, :int, :fun, s(:args)),
-        s(:defn, :int, :fun, s(:args), s(:block, s(:return, s(:lit, 5)))),
+        s(:prototype, 'Fixnum*', :fun, s(:args)),
+        s(:defn, 'Fixnum*', :fun, s(:args), s(:block,
+                                              s(:return, fixnum_new(5)))),
         main(
-          s(:decl, :int, :var1),
+          decl_fixnum(:var1),
           s(:asgn, s(:var, :var1), s(:call, :fun, s(:args))),
-          s(:decl, :int, :var2),
+          decl_fixnum(:var2),
           s(:asgn, s(:var, :var2), s(:call, :fun, s(:args)))))
   end
 
+  # TODO: substitute ints with Fixnums.
   it 'should add simple type check in the output code' do
     simple_type_check(:b, :Fixnum, s(:lit, 1)).should ==
       s(:stmts,
@@ -199,6 +209,7 @@ describe Translator do
            s(:block, s(:asgn, s(:var, :var1), s(:lit, 1)))))
   end
 
+  # TODO: substitute ints with Fixnums.
   it 'should add complex type check in the output code' do
     complex_type_check(:b, {Fixnum: s(:lit, 1), Object: s(:lit, 2)}).should ==
       s(:stmts,
