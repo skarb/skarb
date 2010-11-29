@@ -180,8 +180,8 @@ describe Translator do
       s(:stmts,
         s(:decl, :int, :var1),
         s(:if,
-           s(:binary_oper, s(:binary_oper, s(:var, :b), :'.', s(:var, :type)),
-             :==, s(:lit, 2)),
+           s(:binary_oper, :==, s(:binary_oper, :'->', s(:var, :b), s(:var, :type)),
+             s(:lit, 2)),
            s(:block, s(:asgn, s(:var, :var1), s(:lit, 1)))))
   end
 
@@ -189,7 +189,7 @@ describe Translator do
     complex_type_check(:b, {Fixnum: s(:lit, 1), Object: s(:lit, 2)}).should ==
       s(:stmts,
         s(:decl, :int, :var1),
-        s(:switch, s(:binary_oper, s(:var, :b), :'.', s(:var, :type)),
+        s(:switch, s(:binary_oper, :'->', s(:var, :b), s(:var, :type)),
           s(:block,
            s(:case, s(:lit, 2)),
            s(:asgn, s(:var, :var1), s(:lit, 1)),

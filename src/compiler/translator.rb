@@ -93,11 +93,17 @@ class Translator
       .with_value(s(:var, sexp[1]), arg.value_types)
   end
 
-  # Translate a referenced variable to empty block with value of this
+  # Translate a referenced local variable to empty block with value of this
   # variable.
   def translate_lvar(sexp)
     s(:stmts).with_value(s(:var, sexp[1]), @symbol_table.get_lvar_types(sexp[1]))
   end
+
+  # Translate a referenced instance variable to empty block with value of this
+  # variable.
+#  def translate_ivar(sexp)
+#    s(:stmts).with_value(s(:var, sexp[1]), @symbol_table.get_lvar_types(sexp[1]))
+#  end
 
   def translate_if(sexp)
     # Rewrite the sexp if it's an unless expression.
@@ -260,9 +266,9 @@ class Translator
   # Packs some code in an if clause which do simple type check at runtime.
   def add_simple_type_check(variable_symbol, type_symbol, body)
     var = next_var_name
-    cond = s(:binary_oper, s(:binary_oper, s(:var, variable_symbol),
-                             :'.', s(:var, :type)),
-                           :==, s(:lit, @symbol_table[type_symbol][:id]))
+    cond = s(:binary_oper, :==, s(:binary_oper, :'->', s(:var, variable_symbol),
+                             s(:var, :type)),
+                             s(:lit, @symbol_table[type_symbol][:id]))
     if_true = translate_generic_sexp body
     filtered_stmts(
       s(:decl, :int, var), # :TODO: Change int
@@ -274,8 +280,8 @@ class Translator
   # Performs complex type check at runtime through switch clause.
   def add_complex_type_check(variable_symbol, type2code_hash)
     var = next_var_name
-    type_expr = s(:binary_oper, s(:var, variable_symbol),
-                             :'.', s(:var, :type))
+    type_expr = s(:binary_oper, :'->', s(:var, variable_symbol),
+                             s(:var, :type))
     case_blocks = []
     type2code_hash.each_pair do |key, val|
       code = translate_generic_sexp val
