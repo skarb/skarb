@@ -6,6 +6,6 @@
 /**
  * Returns the value of a given object in a boolean context.
  */
-int boolean_value(robject *object);
+int boolean_value(Object *object);
 
 #endif /* HELPERS_H_ */
