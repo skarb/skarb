@@ -69,7 +69,8 @@ class Translator
   # Translates a literal numeric to an empty block with a value equal to a :lit
   # sexp equal to the given literal.
   def translate_lit(sexp)
-    s(:stmts).with_value(sexp, [sexp[1].class])
+    s(:stmts).with_value(s(:call, :Fixnum_new, s(:args, sexp)),
+                         [sexp[1].class])
   end
 
   # Translates a block of expressions by translating all of them and returning a
@@ -86,7 +87,7 @@ class Translator
     decl = s(:stmts)
     unless @symbol_table.has_lvar? sexp[1]
       @symbol_table.add_lvar sexp[1]
-      decl = s(:decl, :int, sexp[1]) # TODO: Change int
+      decl = s(:decl, 'Fixnum*', sexp[1])
     end
     @symbol_table.set_lvar_types sexp[1], arg.value_types
     filtered_stmts(decl, arg, s(:asgn, s(:var, sexp[1]), arg.value_symbol))
@@ -101,15 +102,19 @@ class Translator
 
   def translate_if(sexp)
     # Rewrite the sexp if it's an unless expression.
-    sexp = s(:if, s(:not, sexp[1]), sexp[3], nil) if sexp[2].nil?
+    boolean_value_applied = false
+    if sexp[2].nil?
+      sexp = s(:if, s(:not, sexp[1]), sexp[3], nil)
+      boolean_value_applied = true
+    end
     return translate_if_else sexp if sexp[3]
     var = next_var_name
     cond = translate_generic_sexp sexp[1]
     if_true = translate_generic_sexp sexp[2]
     filtered_stmts(
-      s(:decl, :int, var), # :TODO: Change int
+      s(:decl, 'Fixnum*', var),
       cond,
-      s(:if, cond.value_symbol,
+      s(:if, (boolean_value_applied ? cond.value_symbol: boolean_value(cond.value_symbol)),
         filtered_block(if_true, s(:asgn, s(:var, var), if_true.value_symbol)))
     ).with_value_symbol s(:var, var)
   end
@@ -121,10 +126,10 @@ class Translator
     if_true = translate_generic_sexp sexp[2]
     if_false = translate_generic_sexp sexp[3]
     filtered_stmts(
-      s(:decl, :int, var),
+      s(:decl, 'Fixnum*', var),
       cond,
       s(:if,
-        cond.value_symbol,
+        boolean_value(cond.value_symbol),
         filtered_block(if_true, s(:asgn, s(:var, var), if_true.value_symbol)),
         filtered_block(if_false, s(:asgn, s(:var, var), if_false.value_symbol)))
     ).with_value_symbol s(:var, var)
@@ -147,7 +152,7 @@ class Translator
     body = translate_generic_sexp sexp[2]
     filtered_stmts(cond,
                    s(:while,
-                     cond.value_symbol,
+                     boolean_value(cond.value_symbol),
                      filtered_block(body)))
   end
 
@@ -157,7 +162,8 @@ class Translator
     cond = translate_generic_sexp sexp[1]
     body = translate_generic_sexp sexp[2]
     filtered_stmts(cond,
-                   s(:while, s(:l_unary_oper, :!, cond.value_symbol),
+                   s(:while,
+                     s(:l_unary_oper, :!, boolean_value(cond.value_symbol)),
                      filtered_block(body)))
   end
 
@@ -169,8 +175,8 @@ class Translator
   # Translates a 'not' or a '!'.
   def translate_not(sexp)
     child = translate_generic_sexp sexp[1]
-    filtered_stmts(child).with_value_symbol s(:l_unary_oper,
-                                              :!, child.value_symbol)
+    filtered_stmts(child).with_value_symbol s(:l_unary_oper, :!,
+                                              boolean_value(child.value_symbol))
   end
 
   # We cannot use C's switch if we want to implement the original Ruby's case
@@ -213,8 +219,8 @@ class Translator
         @symbol_table.cfunction = defn[1]
         body = translate_generic_sexp(defn[3][1])
         body_block = filtered_block(body, s(:return, body.value_symbol))
-        @functions_implementations[defn[1]] = s(:defn, :int, defn[1], s(:args),
-                                                body_block)
+        @functions_implementations[defn[1]] = s(:defn, 'Fixnum*', defn[1],
+                                                s(:args), body_block)
         @symbol_table.cfunction = :_main
       end
       call = s(:call, defn[1], s(:args))
@@ -222,7 +228,7 @@ class Translator
       raise "Unknown function: #{sexp[1]}"
     end
       s(:stmts,
-        s(:decl, :int, var),
+        s(:decl, 'Fixnum*', var),
         s(:asgn, s(:var, var), call)
        ).with_value_symbol s(:var, var)
   end
@@ -290,4 +296,9 @@ class Translator
         filtered_block(*case_blocks))).with_value_symbol s(:var, var)
   end
 
+  # Returns a sexp representing a call to the boolean_value function with a
+  # given value.
+  def boolean_value(value)
+    s(:call, :boolean_value, s(:args, value))
+  end
 end
