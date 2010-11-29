@@ -198,7 +198,6 @@ describe Translator do
           s(:asgn, s(:var, :var2), s(:call, :fun, s(:args)))))
   end
 
-  # TODO: substitute ints with Fixnums.
   it 'should add simple type check in the output code' do
     simple_type_check(:b, :Fixnum, s(:lit, 1)).should ==
       s(:stmts,
@@ -206,10 +205,10 @@ describe Translator do
         s(:if,
            s(:binary_oper, :==, s(:binary_oper, :'->', s(:var, :b), s(:var, :type)),
              s(:lit, 2)),
-           s(:block, s(:asgn, s(:var, :var1), s(:lit, 1)))))
+           s(:block, s(:asgn, s(:var, :var1), s(:call, :Fixnum_new,
+                                                s(:args, s(:lit, 1)))))))
   end
 
-  # TODO: substitute ints with Fixnums.
   it 'should add complex type check in the output code' do
     complex_type_check(:b, {Fixnum: s(:lit, 1), Object: s(:lit, 2)}).should ==
       s(:stmts,
@@ -217,10 +216,12 @@ describe Translator do
         s(:switch, s(:binary_oper, :'->', s(:var, :b), s(:var, :type)),
           s(:block,
            s(:case, s(:lit, 2)),
-           s(:asgn, s(:var, :var1), s(:lit, 1)),
+           s(:asgn, s(:var, :var1), s(:call, :Fixnum_new,
+                                      s(:args, s(:lit, 1)))),
            s(:break),
            s(:case, s(:lit, 1)),
-           s(:asgn, s(:var, :var1), s(:lit, 2)),
+           s(:asgn, s(:var, :var1), s(:call, :Fixnum_new,
+                                      s(:args, s(:lit, 2)))),
            s(:break))))
   end
 end
