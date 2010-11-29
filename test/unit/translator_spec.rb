@@ -83,8 +83,8 @@ describe Translator do
               s(:if, boolean_value(fixnum_new(3)),
                 s(:block, s(:asgn, s(:var, :var1), fixnum_new(4)))),
               decl_fixnum(:var2),
-              s(:if, boolean_value(fixnum_new(6)),
-                s(:block, s(:asgn, s(:var, :var1), fixnum_new(1)))))
+              s(:if, boolean_value(fixnum_new(1)),
+                s(:block, s(:asgn, s(:var, :var2), fixnum_new(6)))))
   end
 
   it 'should translate unless' do
@@ -92,7 +92,7 @@ describe Translator do
       program(decl_fixnum(:var1),
              s(:if,
                s(:l_unary_oper, :!, boolean_value(fixnum_new(1))),
-               s(:block, s(:asgn, s(:var, :var1), s(:lit, 2)))))
+               s(:block, s(:asgn, s(:var, :var1), fixnum_new(2)))))
   end
 
   it 'should translate if else' do
