@@ -214,7 +214,9 @@ class Translator
     if sexp[2] == :puts
       value = sexp[3][1]
       raise 'Only integers can be printed' if value[0] != :lit
-      call = s(:call, :printf, s(:args, s(:str, '%i\n'), s(:lit, value[1])))
+      call = s(:call, :Fixnum_new,
+               s(:args, s(:call, :printf,
+                          s(:args, s(:str, '%i\n'), s(:lit, value[1])))))
     elsif defn = @functions_definitions[sexp[2]]
       # If the function has been already defined translate it's body and save
       # the output in @functions_implementations.
@@ -302,6 +304,7 @@ class Translator
   # Returns a sexp representing a call to the boolean_value function with a
   # given value.
   def boolean_value(value)
-    s(:call, :boolean_value, s(:args, value))
+    s(:call, :boolean_value, s(:args,
+                               s(:call, :TO_OBJECT, s(:args, value))))
   end
 end

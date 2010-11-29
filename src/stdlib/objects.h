@@ -7,6 +7,8 @@ typedef struct {
    uint32_t type;
 } robject;
 
+#define TO_OBJECT(obj) ((robject *)(obj))
+
 typedef struct {
    robject meta;
    int val;
