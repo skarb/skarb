@@ -65,11 +65,6 @@ class Translator
     s(:defn, :int, :main, args, filtered_block(*body))
   end
 
-  # Calls translate_generic_sexp with value_matters = true
-  #def translate_generic_sexp_with_value(sexp)
-  #  translate_generic_sexp sexp, true
-  #end
-
   # Calls one of translate_* methods depending on the given sexp's type.
   def translate_generic_sexp(sexp)
     begin
