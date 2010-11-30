@@ -2,6 +2,11 @@ require 'sexp_processor'
 require 'helpers'
 require 'extensions'
 require 'translator/symbol_table'
+require 'translator/functions'
+require 'translator/flow_control'
+require 'translator/local_variables'
+require 'translator/instance_variables'
+require 'translator/type_checks'
 
 # Responsible for transforming a Ruby AST to its C equivalent.
 # It performs tree traversal by recursive execution of functions
@@ -39,6 +44,11 @@ class Translator
   private
 
   include Helpers
+  include Functions
+  include FlowControl
+  include LocalVariables
+  include InstanceVariables
+  include TypeChecks
 
   # A sexp representing 'return 0;'
   ReturnZero = s(:return, s(:lit, 0))
@@ -83,95 +93,6 @@ class Translator
     filtered_stmts(*sexps).with_value_symbol sexps.last.value_symbol
   end
 
-  # Translate assignment to a local variable. The variable is declared unless
-  # it already was. As a value of expression the variable is returned.
-  def translate_lasgn(sexp)
-    decl = s(:stmts)
-    unless @symbol_table.has_lvar? sexp[1]
-      @symbol_table.add_lvar sexp[1]
-      decl = s(:decl, 'Fixnum*', sexp[1])
-    end
-    arg = translate_generic_sexp(sexp[2])
-    @symbol_table.set_lvar_types sexp[1], arg.value_types
-    filtered_stmts(decl, arg, s(:asgn, s(:var, sexp[1]), arg.value_symbol))
-      .with_value(s(:var, sexp[1]), arg.value_types)
-  end
-
-  # Translate a referenced local variable to empty block with value of this
-  # variable.
-  def translate_lvar(sexp)
-    unless @symbol_table.has_lvar? sexp[1]
-      die 'Use of an uninitialized local variable'
-    end
-    s(:stmts).with_value(s(:var, sexp[1]), @symbol_table.get_lvar_types(sexp[1]))
-  end
- 
-  # Translate assignment to an instance variable. The variable is declared unless
-  # it already was. As a value of expression the variable is returned.
-  def translate_iasgn(sexp)
-    str_name = sexp[1].to_s
-    sname = str_name[1, str_name.length-1].to_sym
-    unless @symbol_table.has_ivar? sexp[1]
-      @symbol_table.add_ivar sexp[1]
-    end
-    arg = translate_generic_sexp(sexp[2])
-    @symbol_table.set_ivar_types sexp[1], arg.value_types
-    filtered_stmts(arg, s(:asgn,
-                                s(:binary_oper, :'->',
-                                  s(:var, :self), s(:var, sname)),
-                                arg.value_symbol))
-      .with_value(s(:binary_oper, :'->', s(:var, :self), s(:var, sname)),
-                  arg.value_types)
-  end
-
-  # Translate a referenced instance variable to empty block with value of this
-  # variable.
-  def translate_ivar(sexp)
-    unless @symbol_table.has_ivar? sexp[1]
-      die 'Use of uninitialized instance variable'
-    end
-    str_name = sexp[1].to_s
-    sname = str_name[1, str_name.length-1].to_sym
-    s(:stmts).with_value(
-      s(:binary_oper, :'->', s(:var, :self), s(:var, sname)),
-      @symbol_table.get_ivar_types(sexp[1]))
-  end
-
-  def translate_if(sexp)
-    # Rewrite the sexp if it's an unless expression.
-    boolean_value_applied = false
-    if sexp[2].nil?
-      sexp = s(:if, s(:not, sexp[1]), sexp[3], nil)
-      boolean_value_applied = true
-    end
-    return translate_if_else sexp if sexp[3]
-    var = next_var_name
-    cond = translate_generic_sexp sexp[1]
-    if_true = translate_generic_sexp sexp[2]
-    filtered_stmts(
-      s(:decl, 'Fixnum*', var),
-      cond,
-      s(:if, (boolean_value_applied ? cond.value_symbol: boolean_value(cond.value_symbol)),
-        filtered_block(if_true, s(:asgn, s(:var, var), if_true.value_symbol)))
-    ).with_value_symbol s(:var, var)
-  end
-
-  # TODO: DRY, translate_if is almost identical.
-  def translate_if_else(sexp)
-    var = next_var_name
-    cond = translate_generic_sexp sexp[1]
-    if_true = translate_generic_sexp sexp[2]
-    if_false = translate_generic_sexp sexp[3]
-    filtered_stmts(
-      s(:decl, 'Fixnum*', var),
-      cond,
-      s(:if,
-        boolean_value(cond.value_symbol),
-        filtered_block(if_true, s(:asgn, s(:var, var), if_true.value_symbol)),
-        filtered_block(if_false, s(:asgn, s(:var, var), if_false.value_symbol)))
-    ).with_value_symbol s(:var, var)
-  end
-
   # Returns a block sexp with all stmts sexps expanded.
   def filtered_block(*args)
     s(:block, *expand_stmts(args))
@@ -182,137 +103,11 @@ class Translator
     s(:stmts, *expand_stmts(args))
   end
 
-  # Translates a while loop. Such loop in Ruby doesn't return a value so we do
-  # not set the value_symbol attribute.
-  def translate_while(sexp)
-    cond = translate_generic_sexp sexp[1]
-    body = translate_generic_sexp sexp[2]
-    filtered_stmts(cond,
-                   s(:while,
-                     boolean_value(cond.value_symbol),
-                     filtered_block(body)))
-  end
-
-  # Translates an until loop. Such loop in Ruby doesn't return a value so we do
-  # not set the value_symbol attribute.
-  def translate_until(sexp)
-    cond = translate_generic_sexp sexp[1]
-    body = translate_generic_sexp sexp[2]
-    filtered_stmts(cond,
-                   s(:while,
-                     s(:l_unary_oper, :!, boolean_value(cond.value_symbol)),
-                     filtered_block(body)))
-  end
-
-  # A trivial break translation.
-  def translate_break(sexp)
-    s(:break)
-  end
-
   # Translates a 'not' or a '!'.
   def translate_not(sexp)
     child = translate_generic_sexp sexp[1]
     filtered_stmts(child).with_value_symbol s(:l_unary_oper, :!,
                                               boolean_value(child.value_symbol))
-  end
-
-  # We cannot use C's switch if we want to implement the original Ruby's case
-  # behaviour. Ruby's case can make nontrivial comparisons (such as strings
-  # comparisons). As a result case has to be translated to a if-elsif-else block
-  # with equality comparisons.
-  # FIXME: we can't call methods yet so it's pretty useless at the moment.
-  # Once we'll have objects and Object#== instead of completely incorrect
-  #   s(:if, when_sexp, ...
-  # we'll have here something like
-  #   s(:if, s(:call, value, :==, s(:args, when_sexp)), ...
-  def translate_case(sexp)
-    value = translate_generic_sexp sexp[1]
-    when_sexps = sexp.drop(1).find_all { |s| s.first == :when }
-    top_if = sexp.last unless sexp.last.first == :when
-    while when_sexps.any?
-      when_sexp = when_sexps.last[1][1]
-      then_sexp = when_sexps.pop[2]
-      # FIXME: it's not the way 'case' works.
-      top_if = s(:if, when_sexp, then_sexp, top_if)
-    end
-    translate_if top_if
-  end
-
-  # Translates a call to the Kernel#puts method or a simple function defined
-  # previously. All other calls cause an error. TODO: split it into multiple
-  # methods.
-  def translate_call(sexp)
-    # Only simple functions without arguments are supported.
-    raise UnsupportedNodeError unless sexp[1].nil? or sexp[3].count > 1
-    var = next_var_name
-    args_evaluation = s(:stmts)
-    call_arguments = s(:args)
-    if sexp[2] == :puts
-      call = faked_puts sexp
-    elsif defn = @functions_definitions[sexp[2]]
-      # If the function has been already defined translate it's body and save
-      # the output in @functions_implementations.
-      unless @functions_implementations.has_key? defn[1]
-        @symbol_table.cfunction = defn[1]
-        defn_args = s(:args)
-        call_args_eval_stmts = []
-        call_arg_number = 1
-        defn[2].drop(1).each do |arg|
-          @symbol_table.add_lvar arg
-          # FIXME: set the actual type
-          @symbol_table.set_lvar_types arg, [Fixnum]
-          defn_args << s(:decl, 'Fixnum*', arg)
-          args_evaluation << translate_generic_sexp(sexp[3][call_arg_number])
-          call_arguments << args_evaluation.last.value_symbol
-          call_arg_number += 1
-        end
-        args_evaluation = filtered_stmts(*args_evaluation.rest)
-        body = translate_generic_sexp(defn[3][1])
-        body_block = filtered_block(body, s(:return, body.value_symbol))
-        # FIXME: set the actual return type
-        @functions_implementations[defn[1]] = s(:defn, 'Fixnum*', defn[1],
-                                                defn_args, body_block)
-        @symbol_table.cfunction = :_main
-      end
-      call = s(:call, defn[1], call_arguments)
-    else
-      raise "Unknown function: #{sexp[1]}"
-    end
-    filtered_stmts(
-      args_evaluation,
-      s(:decl, 'Fixnum*', var),
-      s(:asgn, s(:var, var), call)
-    ).with_value_symbol s(:var, var)
-  end
-
-  # Returns a sexp which acts as if the Kernel#puts method was called.
-  def faked_puts(sexp)
-      value = sexp[3][1]
-      case value[0]
-      when :lit
-        return s(:call, :Fixnum_new,
-                 s(:args, s(:call, :printf,
-                            s(:args, s(:str, '%i\n'), s(:lit, value[1])))))
-      when :lvar
-        raise 'Unknown local variable' if not @symbol_table.has_lvar? value[1]
-        type = @symbol_table.get_lvar_types(value[1]).first
-        if type == Fixnum
-          return s(:call, :Fixnum_new,
-                   s(:args, s(:call, :printf,
-                              s(:args, s(:str, '%i\n'),
-                                s(:binary_oper, :'->',
-                                  s(:var, value[1]), s(:var, :val))))))
-        end
-      end
-      raise 'Only Fixnums can be printed'
-  end
-
-  # Functions' definitions don't get translated immediately. We'll wait for the
-  # actual call. Meanwhile the defining sexp is saved and we return an empty
-  # statements sexp.
-  def translate_defn(sexp)
-    @functions_definitions[sexp[1]] = sexp
-    s(:stmts)
   end
 
   # Returns an array of sexps with all stmts sexps expanded.
@@ -335,39 +130,6 @@ class Translator
   def next_var_name
     @next_id ||= 0
     "var#{@next_id += 1}".to_sym
-  end
-
-  # Packs some code in an if clause which do simple type check at runtime.
-  def add_simple_type_check(variable_symbol, type_symbol, body)
-    var = next_var_name
-    cond = s(:binary_oper, :==, s(:binary_oper, :'->', s(:var, variable_symbol),
-                             s(:var, :type)),
-                             s(:lit, @symbol_table[type_symbol][:id]))
-    if_true = translate_generic_sexp body
-    filtered_stmts(
-      s(:decl, :int, var), # :TODO: Change int
-      s(:if, cond,
-        filtered_block(if_true, s(:asgn, s(:var, var), if_true.value_symbol)))
-    ).with_value_symbol s(:var, var)
-  end
-
-  # Performs complex type check at runtime through switch clause.
-  def add_complex_type_check(variable_symbol, type2code_hash)
-    var = next_var_name
-    type_expr = s(:binary_oper, :'->', s(:var, variable_symbol),
-                             s(:var, :type))
-    case_blocks = []
-    type2code_hash.each_pair do |key, val|
-      code = translate_generic_sexp val
-      case_blocks << s(:case,
-                       s(:lit, @symbol_table[key][:id])) << filtered_stmts(code,
-                       s(:asgn, s(:var, var), code.value_symbol)) << s(:break)
-    end
-
-    filtered_stmts(
-      s(:decl, :int, var), # :TODO: Change int
-      s(:switch, type_expr,
-        filtered_block(*case_blocks))).with_value_symbol s(:var, var)
   end
 
   # Returns a sexp representing a call to the boolean_value function with a
