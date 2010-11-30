@@ -245,6 +245,8 @@ class Translator
     # Only simple functions without arguments are supported.
     raise UnsupportedNodeError unless sexp[1].nil? or sexp[3].count > 1
     var = next_var_name
+    args_evaluation = s(:stmts)
+    call_arguments = s(:args)
     if sexp[2] == :puts
       call = faked_puts sexp
     elsif defn = @functions_definitions[sexp[2]]
@@ -252,20 +254,35 @@ class Translator
       # the output in @functions_implementations.
       unless @functions_implementations.has_key? defn[1]
         @symbol_table.cfunction = defn[1]
+        defn_args = s(:args)
+        call_args_eval_stmts = []
+        call_arg_number = 1
+        defn[2].drop(1).each do |arg|
+          @symbol_table.add_lvar arg
+          # FIXME: set the actual type
+          @symbol_table.set_lvar_types arg, [Fixnum]
+          defn_args << s(:decl, 'Fixnum*', arg)
+          args_evaluation << translate_generic_sexp(sexp[3][call_arg_number])
+          call_arguments << args_evaluation.last.value_symbol
+          call_arg_number += 1
+        end
+        args_evaluation = filtered_stmts(*args_evaluation.rest)
         body = translate_generic_sexp(defn[3][1])
         body_block = filtered_block(body, s(:return, body.value_symbol))
+        # FIXME: set the actual return type
         @functions_implementations[defn[1]] = s(:defn, 'Fixnum*', defn[1],
-                                                s(:args), body_block)
+                                                defn_args, body_block)
         @symbol_table.cfunction = :_main
       end
-      call = s(:call, defn[1], s(:args))
+      call = s(:call, defn[1], call_arguments)
     else
       raise "Unknown function: #{sexp[1]}"
     end
-      s(:stmts,
-        s(:decl, 'Fixnum*', var),
-        s(:asgn, s(:var, var), call)
-       ).with_value_symbol s(:var, var)
+    filtered_stmts(
+      args_evaluation,
+      s(:decl, 'Fixnum*', var),
+      s(:asgn, s(:var, var), call)
+    ).with_value_symbol s(:var, var)
   end
 
   # Returns a sexp which acts as if the Kernel#puts method was called.
@@ -277,6 +294,7 @@ class Translator
                  s(:args, s(:call, :printf,
                             s(:args, s(:str, '%i\n'), s(:lit, value[1])))))
       when :lvar
+        raise 'Unknown local variable' if not @symbol_table.has_lvar? value[1]
         type = @symbol_table.get_lvar_types(value[1]).first
         if type == Fixnum
           return s(:call, :Fixnum_new,

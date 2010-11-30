@@ -7,6 +7,7 @@
 #9
 #6
 #6
+#87
 def fun
   puts 3
 end
@@ -27,8 +28,13 @@ def fun3
   fun4
 end
 
+def fun5(x)
+  puts x
+end
+
 fun
 fun2
 fun
 fun3
 fun4
+fun5 87

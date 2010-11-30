@@ -8,7 +8,7 @@ TESTSCRIPTS = if.rb \
               while-break.rb \
               until.rb \
               zero-as-a-condition.rb \
-              simple-function-without-arguments.rb \
+              simple-functions.rb \
               local-vars.rb
 TESTS_ENVIRONMENT = RUBYC_PATH=$(top_srcdir)/src/compiler/rubyc.rb \
                     CFLAGS="-I$(top_srcdir)/src/stdlib" \

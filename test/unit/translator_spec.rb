@@ -227,4 +227,18 @@ describe Translator do
            s(:asgn, s(:var, :var1), fixnum_new(2)),
            s(:break))))
   end
+
+  it 'should translate a function with arguments' do
+    args = s(:args, s(:decl, 'Fixnum*', :x))
+    translate_code('def fun(x); x; end; fun 3').should ==
+      s(:file,
+        *includes,
+        s(:prototype, 'Fixnum*', :fun, args),
+        s(:defn, 'Fixnum*', :fun, args, s(:block,
+                                          s(:return, s(:var, :x)))),
+        main(
+          decl_fixnum(:var1),
+          s(:asgn, s(:var, :var1), s(:call, :fun,
+                                     s(:args, fixnum_new(3))))))
+  end
 end
