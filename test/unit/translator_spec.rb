@@ -228,6 +228,30 @@ describe Translator do
            s(:break))))
   end
 
+  it 'should not translate an unsupported construction' do
+    $stdout = StringIO.new
+    expect do
+      translate_code('begin; puts 1; rescue; puts 2; end')
+    end .to raise_error
+    $stdout = STDOUT
+  end
+
+  it 'should not translate an undefined local variable' do
+    expect do
+      translate_code('puts oh_my_goodness_what_is_that')
+    end .to raise_error
+  end
+
+  it 'should not translate a puts with puts as an argument' do
+    expect { translate_code('puts puts 3') } .to raise_error
+  end
+
+  it 'should not translate an undefined function' do
+    expect do
+      translate_code('there_is_no_such_function(4)')
+    end .to raise_error
+  end
+
   it 'should translate a function with arguments' do
     args = s(:args, s(:decl, 'Fixnum*', :x))
     translate_code('def fun(x); x; end; fun 3').should ==
