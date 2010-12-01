@@ -54,7 +54,7 @@ class Translator
   ReturnZero = s(:return, s(:lit, 0))
 
   # A list of headers to be included.
-  Headers = %w/<stdio.h> "objects.h" "helpers.h" "fixnum.h"/
+  Headers = %w/<stdio.h> "object.h" "helpers.h" "fixnum.h"/
 
   # Wraps a given body with a 'main' function. The body is expected to be a
   # collection of Sexp instances.

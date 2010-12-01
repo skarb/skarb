@@ -1,7 +1,7 @@
 #ifndef FLOAT_H_
 #define FLOAT_H_
 
-#include "objects.h"
+#include "object.h"
 
 typedef struct {
    Object meta;

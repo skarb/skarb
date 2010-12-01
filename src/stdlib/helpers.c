@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include "helpers.h"
-#include "objects.h"
+#include "object.h"
 
 int boolean_value(Object *object) {
   return object != NULL;

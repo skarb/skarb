@@ -1,7 +1,7 @@
 #ifndef FIXNUM_H_
 #define FIXNUM_H_
 
-#include "objects.h"
+#include "object.h"
 
 typedef struct {
    Object meta;

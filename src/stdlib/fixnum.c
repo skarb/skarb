@@ -1,6 +1,6 @@
 #include "fixnum.h"
 #include "xalloc.h"
-#include "objects.h"
+#include "object.h"
 
 Fixnum * Fixnum_new(int value) {
     Fixnum *self = xmalloc(sizeof(Fixnum));
