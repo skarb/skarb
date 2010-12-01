@@ -3,6 +3,11 @@
 
 #include "objects.h"
 
+typedef struct {
+   Object meta;
+   int val;
+} Fixnum;
+
 /**
  * Fixnum#new
  */
