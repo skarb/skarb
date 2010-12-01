@@ -1,7 +1,8 @@
 SUBDIRS = emitter translator
-dist_bin_SCRIPTS = rubyc.rb
-dist_pkgdata_DATA = compiler.rb emitter.rb helpers.rb parser.rb rubyc.rb \
-                 translator.rb extensions.rb config.rb
+nodist_bin_SCRIPTS = rubyc.rb
+nodist_pkgdata_DATA = config.rb
+dist_pkgdata_DATA = compiler.rb emitter.rb helpers.rb parser.rb translator.rb \
+                    extensions.rb
 dist_noinst_DATA = rubyc.rb.in config.rb.in
 
 config.rb: config.rb.in

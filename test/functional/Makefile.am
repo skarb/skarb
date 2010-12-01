@@ -10,9 +10,10 @@ TESTSCRIPTS = if.rb \
               zero-as-a-condition.rb \
               simple-functions.rb \
               local-vars.rb
-TESTS_ENVIRONMENT = RUBYC_PATH=$(top_srcdir)/src/compiler/rubyc.rb \
+TESTS_ENVIRONMENT = RUBYC_PATH=$(top_builddir)/src/compiler/rubyc.rb \
                     CFLAGS="-I$(top_builddir)/src/stdlib" \
                     LDFLAGS="-static -L$(top_builddir)/src/stdlib/.libs" \
-                    TESTS="$(TESTSCRIPTS)" $(RUBY) -I $(top_srcdir)/src/compiler
+                    TESTS="$(TESTSCRIPTS)" $(RUBY) -I $(top_srcdir)/src/compiler \
+                    -I $(top_builddir)/src/compiler
 TESTS = runner.rb
 dist_noinst_DATA = $(TESTSCRIPTS) $(TESTS)
