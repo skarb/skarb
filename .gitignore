@@ -22,5 +22,6 @@ ltmain.sh
 missing
 src/compiler/config.rb
 src/compiler/rubyc.rb
+src/stdlib/rubyc.h
 tags
 test/coverage
