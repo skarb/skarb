@@ -6,11 +6,12 @@ class Translator
     # it already was. As a value of expression the variable is returned.
     def translate_lasgn(sexp)
       decl = s(:stmts)
+      arg = translate_generic_sexp(sexp[2])
       unless @symbol_table.has_lvar? sexp[1]
         @symbol_table.add_lvar sexp[1]
-        decl = s(:decl, 'Fixnum*', sexp[1])
+        # FIXME: It won't work. args.value_types.first isn't the best solution.
+        decl = s(:decl, arg.value_types.first.to_s + '*', sexp[1])
       end
-      arg = translate_generic_sexp(sexp[2])
       @symbol_table.set_lvar_types sexp[1], arg.value_types
       filtered_stmts(decl, arg, s(:asgn, s(:var, sexp[1]), arg.value_symbol))
       .with_value(s(:var, sexp[1]), arg.value_types)

@@ -20,7 +20,7 @@ require 'translator/type_checks'
 class Translator
   def initialize
     @symbol_table = SymbolTable.new
-    [:Object, :Fixnum].each {|x| @symbol_table.add_class x } 
+    [:Object, :Fixnum, :Float].each {|x| @symbol_table.add_class x }
     @symbol_table.cclass = :Object
     @symbol_table.cfunction = :_main
     @functions_definitions = {}
@@ -77,8 +77,14 @@ class Translator
   # Translates a literal numeric to an empty block with a value equal to a :lit
   # sexp equal to the given literal.
   def translate_lit(sexp)
-    s(:stmts).with_value(s(:call, :Fixnum_new, s(:args, sexp)),
-                         [sexp[1].class])
+    if sexp[1].floor == sexp[1]
+      # It's an integer
+      ctor = :Fixnum_new
+    else
+      # It's a float
+      ctor = :Float_new
+    end
+    s(:stmts).with_value(s(:call, ctor, s(:args, sexp)), [sexp[1].class])
   end
 
   # Translates a block of expressions by translating all of them and returning a

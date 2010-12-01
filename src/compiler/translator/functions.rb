@@ -66,6 +66,12 @@ class Translator
                               s(:args, s(:str, '%i\n'),
                                 s(:binary_oper, :'->',
                                   s(:var, value[1]), s(:var, :val))))))
+        elsif type == Float
+          return s(:call, :Fixnum_new,
+                   s(:args, s(:call, :printf,
+                              s(:args, s(:str, '%g\n'),
+                                s(:binary_oper, :'->',
+                                  s(:var, value[1]), s(:var, :val))))))
         end
       end
       raise 'Only Fixnums can be printed'

@@ -5,6 +5,7 @@
 #4
 #4
 #6
+#7.3
 a = 1
 puts a
 a = 2
@@ -19,3 +20,5 @@ puts a
 b = 6
 puts a
 puts b
+c = 7.3
+puts c
