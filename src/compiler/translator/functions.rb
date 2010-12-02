@@ -101,13 +101,16 @@ class Translator
     # @functions_implementations.
     def implement_function(defn, args_types)
       name = mangle(defn[1], args_types)
+      # We don't want to destroy the original table
+      args_types = args_types.clone
       @symbol_table.cfunction = name
       defn_args = s(:args)
       defn[2].drop(1).each do |arg|
+        type = args_types.shift
         @symbol_table.add_lvar arg
         # FIXME: set the actual type
-        @symbol_table.set_lvar_types arg, [Fixnum]
-        defn_args << s(:decl, 'Fixnum*', arg)
+        @symbol_table.set_lvar_types arg, [type]
+        defn_args << s(:decl, "#{type}*", arg)
       end
       body = translate_generic_sexp(defn[3][1])
       body_block = filtered_block(body, s(:return, body.value_symbol))
