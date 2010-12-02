@@ -176,26 +176,26 @@ describe Translator do
     translate_code('def fun; 5; end; fun').should ==
       s(:file,
         *includes,
-        s(:prototype, 'Fixnum*', :fun, s(:args)),
-        s(:defn, 'Fixnum*', :fun, s(:args), s(:block,
+        s(:prototype, 'Fixnum*', :_fun, s(:args)),
+        s(:defn, 'Fixnum*', :_fun, s(:args), s(:block,
                                               s(:return, fixnum_new(5)))),
         main(
           decl_fixnum(:var1),
-          s(:asgn, s(:var, :var1), s(:call, :fun, s(:args)))))
+          s(:asgn, s(:var, :var1), s(:call, :_fun, s(:args)))))
   end
 
   it 'should translate a function without arguments called twice' do
     translate_code('def fun; 5; end; fun; fun').should ==
       s(:file,
         *includes,
-        s(:prototype, 'Fixnum*', :fun, s(:args)),
-        s(:defn, 'Fixnum*', :fun, s(:args), s(:block,
+        s(:prototype, 'Fixnum*', :_fun, s(:args)),
+        s(:defn, 'Fixnum*', :_fun, s(:args), s(:block,
                                               s(:return, fixnum_new(5)))),
         main(
           decl_fixnum(:var1),
-          s(:asgn, s(:var, :var1), s(:call, :fun, s(:args))),
+          s(:asgn, s(:var, :var1), s(:call, :_fun, s(:args))),
           decl_fixnum(:var2),
-          s(:asgn, s(:var, :var2), s(:call, :fun, s(:args)))))
+          s(:asgn, s(:var, :var2), s(:call, :_fun, s(:args)))))
   end
 
   it 'should translate an assignment to an instance variable' do
@@ -257,12 +257,12 @@ describe Translator do
     translate_code('def fun(x); x; end; fun 3').should ==
       s(:file,
         *includes,
-        s(:prototype, 'Fixnum*', :fun, args),
-        s(:defn, 'Fixnum*', :fun, args, s(:block,
+        s(:prototype, 'Fixnum*', :_Fixnum_fun, args),
+        s(:defn, 'Fixnum*', :_Fixnum_fun, args, s(:block,
                                           s(:return, s(:var, :x)))),
         main(
           decl_fixnum(:var1),
-          s(:asgn, s(:var, :var1), s(:call, :fun,
+          s(:asgn, s(:var, :var1), s(:call, :_Fixnum_fun,
                                      s(:args, fixnum_new(3))))))
   end
 end

@@ -1,6 +1,11 @@
 class Translator
   # A module consisting of functions which handle translation of nodes related
   # to defining and calling functions and methods.
+  #
+  # Function names are mangled in order to allow overloading. Functions which
+  # don't accept arguments are prefixed with a '_'. If a function A accepts
+  # arguments whose types are respectively X, Y and Z its mangled name will be
+  # '_X_Y_Z_A'.  See Functions#mangle for an implementation.
   module Functions
     # Translates a call to the Kernel#puts method or a simple function defined
     # previously. All other calls cause an error.
@@ -66,8 +71,11 @@ class Translator
       args_evaluation = sexp[3].rest.map { |arg_sexp| translate_generic_sexp arg_sexp }
       # Get the defn sexp in which the function has been defined.
       defn = @functions_definitions[sexp[2]]
-      implement_function defn unless function_has_implementation? defn
-      call = s(:call, defn[1],
+      # Get types of arguments. FIXME: first won't work!
+      types = args_evaluation.map { |arg| arg.value_types.first }
+      # Have we got an implementation of this function for given args' types?
+      implement_function defn, types unless function_has_implementation? defn, types
+      call = s(:call, mangle(defn[1], types),
                s(:args, *args_evaluation.map { |arg| arg.value_symbol } ))
       filtered_stmts(
         filtered_stmts(*args_evaluation),
@@ -76,16 +84,24 @@ class Translator
       ).with_value_symbol s(:var, var)
     end
 
-    # Returns true if a given function (not a method!) defined with a given defn
-    # sexp has been already added to @functions_implementations.
-    def function_has_implementation?(defn)
-      @functions_implementations.has_key? defn[1]
+    # Returns a mangled function name for a given name and a array of arguments'
+    # types.
+    def mangle(name, args_types)
+      [*([nil] + args_types), name].join('_').to_sym
+    end
+
+    # Returns true if an implementation of the given function (not a method!)
+    # defined with a given defn sexp and implemented for given arguments' types
+    # has been already added to @functions_implementations.
+    def function_has_implementation?(defn, args_types)
+      @functions_implementations.has_key? mangle(defn[1], args_types)
     end
 
     # Translates a given function and adds its implementation to
     # @functions_implementations.
-    def implement_function(defn)
-      @symbol_table.cfunction = defn[1]
+    def implement_function(defn, args_types)
+      name = mangle(defn[1], args_types)
+      @symbol_table.cfunction = name
       defn_args = s(:args)
       defn[2].drop(1).each do |arg|
         @symbol_table.add_lvar arg
@@ -96,7 +112,7 @@ class Translator
       body = translate_generic_sexp(defn[3][1])
       body_block = filtered_block(body, s(:return, body.value_symbol))
       # FIXME: set the actual return type
-      @functions_implementations[defn[1]] = s(:defn, 'Fixnum*', defn[1],
+      @functions_implementations[name] = s(:defn, 'Fixnum*', name,
                                               defn_args, body_block)
       @symbol_table.cfunction = :_main
     end
