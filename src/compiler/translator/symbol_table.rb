@@ -16,6 +16,16 @@ class SymbolTable < Hash
     self[class_name] ||= { id: next_id }
   end
 
+  # Getter for cclass -- curent class context
+  def cclass
+    @cclass
+  end
+
+  # Getter for cfunction -- curent function context
+  def cfunction
+    @cfunction
+  end
+
   # Setter for cclass -- curent class context
   def cclass=(value)
     @cclass = value
@@ -77,6 +87,21 @@ class SymbolTable < Hash
     ivars_table[ivar][:types]
   end
 
+  # Setter for higher class
+  def higher_class=(class_name)
+    class_table[:higher_class]=class_name
+  end
+
+  # Getter for higher class
+  def higher_class
+    class_table[:higher_class]
+  end
+
+  # The hash of instance variables in the current class context.
+  def ivars_table
+    self[@cclass][:ivars]
+  end
+
   private
 
   # General hash of current class context.
@@ -88,12 +113,7 @@ class SymbolTable < Hash
   def functions_table
     self[@cclass][:functions]
   end
-
-  # The hash of instance variables in the current class context.
-  def ivars_table
-    self[@cclass][:ivars]
-  end
-
+ 
   # The hash of local variables in the current function context.
   def lvars_table
     self[@cclass][:functions][@cfunction][:lvars]

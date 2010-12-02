@@ -7,6 +7,7 @@ require 'translator/flow_control'
 require 'translator/local_variables'
 require 'translator/instance_variables'
 require 'translator/type_checks'
+require 'translator/classes'
 
 # Responsible for transforming a Ruby AST to its C equivalent.
 # It performs tree traversal by recursive execution of functions
@@ -25,6 +26,8 @@ class Translator
     @symbol_table.cfunction = :_main
     @functions_definitions = {}
     @functions_implementations = {}
+    @structures_definitions = {}
+    @user_classes = []
   end
 
   # Analyses a given Ruby AST tree and returns a C AST. Both the argument and
@@ -33,11 +36,12 @@ class Translator
     main = main_function translate_generic_sexp(sexp), ReturnZero
     # If there are any functions other than main they have to be included in
     # the output along with their prototypes.
+    @user_classes.each { |x| generate_class_structure x }
     protos = @functions_implementations.values.map do |fun|
       s(:prototype, *fun[1,3])
     end
     includes = Headers.map { |h| s(:include, h) }
-    s(:file, *includes,
+    s(:file, *includes, *@structures_definitions.values,
       *protos, *@functions_implementations.values, main)
   end
 
@@ -49,6 +53,7 @@ class Translator
   include LocalVariables
   include InstanceVariables
   include TypeChecks
+  include Classes
 
   # A sexp representing 'return 0;'
   ReturnZero = s(:return, s(:lit, 0))
@@ -68,9 +73,10 @@ class Translator
   # Calls one of translate_* methods depending on the given sexp's type.
   def translate_generic_sexp(sexp)
     begin
+      #p sexp
       send "translate_#{sexp[0]}", sexp
-    rescue NoMethodError
-      die 'Input contains unsupported Ruby instructions. Aborting.'
+    #rescue NoMethodError
+    #  die 'Input contains unsupported Ruby instructions. Aborting.'
     end
   end
 

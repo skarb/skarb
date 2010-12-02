@@ -7,44 +7,67 @@ class Translator
     # methods.
     def translate_call(sexp)
       # Only simple functions without arguments are supported.
-      raise UnsupportedNodeError unless sexp[1].nil? or sexp[3].count > 1
+      #raise UnsupportedNodeError unless sexp[1].nil? or sexp[3].count > 1
       var = next_var_name
       args_evaluation = s(:stmts)
       call_arguments = s(:args)
+      sexp[3].drop(1).each do |x|
+        args_evaluation << translate_generic_sexp(x)
+        call_arguments << args_evaluation.last.value_symbol
+      end
+
+      fclass = get_class_name(sexp[1])
+      old_class = @symbol_table.cclass
+      @symbol_table.cclass = fclass
+      fname = get_function_name(sexp[2], fclass)
       if sexp[2] == :puts
         call = faked_puts sexp
-      elsif defn = @functions_definitions[sexp[2]]
+      elsif defn = @functions_definitions[fname]
         # If the function has been already defined translate it's body and save
         # the output in @functions_implementations.
-        unless @functions_implementations.has_key? defn[1]
-          @symbol_table.cfunction = defn[1]
+        unless @functions_implementations.has_key? fname
+          old_function = @symbol_table.cfunction
+          @symbol_table.cfunction = fname
           defn_args = s(:args)
           call_args_eval_stmts = []
-          call_arg_number = 1
+          if sexp[3].count < defn[2].count or sexp[3].count > defn[2].count + 1
+            raise "Wrong number of parameters"
+          end
           defn[2].drop(1).each do |arg|
             @symbol_table.add_lvar arg
             # FIXME: set the actual type
-            @symbol_table.set_lvar_types arg, [Fixnum]
-            defn_args << s(:decl, 'Fixnum*', arg)
-            args_evaluation << translate_generic_sexp(sexp[3][call_arg_number])
-            call_arguments << args_evaluation.last.value_symbol
-            call_arg_number += 1
+            @symbol_table.set_lvar_types arg, [Object]
+            defn_args << s(:decl, :'Object*', arg)
           end
+          if sexp[1] != :no_class and sexp[1][0] != :const
+            call_arguments << s(:lit, :NULL) if sexp[3].count == defn[2].count
+            @symbol_table.add_lvar :self 
+            if sexp[1]!=nil and sexp[1] != :no_class and sexp[1][0] == :const
+              defn_args << s(:decl, (fclass.to_s+"_const*").to_sym, :self)
+              @symbol_table.set_lvar_types :self, [(fclass.to_s+"_const*").to_sym]
+            else
+              defn_args << s(:decl, fclass.star, :self)
+              @symbol_table.set_lvar_types :self, [fclass]
+            end
+          end
+          
           args_evaluation = filtered_stmts(*args_evaluation.rest)
           body = translate_generic_sexp(defn[3][1])
           body_block = filtered_block(body, s(:return, body.value_symbol))
           # FIXME: set the actual return type
-          @functions_implementations[defn[1]] = s(:defn, 'Fixnum*', defn[1],
+          @functions_implementations[fname] = s(:defn, :'Object*', fname,
                                                   defn_args, body_block)
-          @symbol_table.cfunction = :_main
+          @symbol_table.cfunction = old_function
         end
-        call = s(:call, defn[1], call_arguments)
+        call = s(:call, fname, call_arguments)
       else
-        raise "Unknown function: #{sexp[1]}"
+        call = s(:call, fname, call_arguments)
+        #raise "Unknown function: #{sexp[2]}"
       end
+      @symbol_table.cclass = old_class
       filtered_stmts(
         args_evaluation,
-        s(:decl, 'Fixnum*', var),
+        s(:decl, :'Object*', var),
         s(:asgn, s(:var, var), call)
       ).with_value_symbol s(:var, var)
     end
@@ -81,8 +104,24 @@ class Translator
     # actual call. Meanwhile the defining sexp is saved and we return an empty
     # statements sexp.
     def translate_defn(sexp)
-      @functions_definitions[sexp[1]] = sexp
+      @functions_definitions[get_function_name(sexp[1])] = sexp
       s(:stmts)
+    end
+
+    def get_class_name(class_expr)
+      if class_expr.nil? || class_expr==:no_class
+        @symbol_table.cclass
+      else
+        # TODO: If the type is not known return something
+        types = translate_generic_sexp(class_expr).value_types
+        types.first
+      end
+    end
+
+    def get_function_name(function_name, class_name = nil)
+      function_name if class_name == :no_class
+      class_name = @symbol_table.cclass if class_name.nil?
+      (class_name.to_s + '_' + function_name.to_s).to_sym
     end
   end
 end

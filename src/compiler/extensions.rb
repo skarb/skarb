@@ -47,3 +47,17 @@ class ::Array
     return self[0, self.length+index]
   end
 end
+
+# Extensions for standard Symbol class used by the Translator
+class ::Symbol
+   # Returns fragment from supplied index to the end of the array
+  def rest(index=1)
+    return (self.to_s[index..self.length-1]).to_sym if index >= 0
+    return (self.to_s[0, self.length+index]).to_sym
+  end
+
+  # Returns starred symbol
+  def star
+    (self.to_s+'*').to_sym
+  end
+end
