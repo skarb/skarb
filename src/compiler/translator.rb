@@ -73,10 +73,9 @@ class Translator
   # Calls one of translate_* methods depending on the given sexp's type.
   def translate_generic_sexp(sexp)
     begin
-      #p sexp
       send "translate_#{sexp[0]}", sexp
-    #rescue NoMethodError
-    #  die 'Input contains unsupported Ruby instructions. Aborting.'
+    rescue NoMethodError
+      die 'Input contains unsupported Ruby instructions. Aborting.'
     end
   end
 

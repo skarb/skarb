@@ -186,6 +186,10 @@ describe Emitter do
     emit(s(:label, :abc)).should == 'abc:'
   end
 
+  it 'should emit cast' do
+    emit(s(:cast, :abc, s(:var, :b))).should == '(abc)b'
+  end
+
   it 'should not accept a sexp with an unexpected type' do
     expect do
       emit s(:no_such_sexp)

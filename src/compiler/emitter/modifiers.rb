@@ -21,4 +21,5 @@ module Emitter::Modifiers
   alias :emit_auto :output_type_and_children
   alias :emit_extern :output_type_and_children
   alias :emit_register :output_type_and_children
+
 end

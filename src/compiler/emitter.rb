@@ -26,6 +26,10 @@ class Emitter
   include Modifiers
   include Composite
   include Errors
+  
+  def emit_cast(sexp)
+    '(' + sexp[1].to_s + ')' + emit_arg_expr(sexp[2])
+  end
 
   # Universal function for emitting any argument expression
   # with correct parenthesis

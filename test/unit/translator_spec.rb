@@ -181,8 +181,8 @@ describe Translator do
     translate_code('def fun; 5; end; fun').should ==
       s(:file,
         *includes,
-        s(:prototype, 'Object*', :Object_fun, s(:args)),
-        s(:defn, 'Object*', :Object_fun, s(:args), s(:block,
+        s(:prototype, :'Object*', :Object_fun, s(:args)),
+        s(:defn, :'Object*', :Object_fun, s(:args), s(:block,
                                               s(:return, fixnum_new(5)))),
         main(
           decl_object(:var1),
@@ -193,8 +193,8 @@ describe Translator do
     translate_code('def fun; 5; end; fun; fun').should ==
       s(:file,
         *includes,
-        s(:prototype, 'Object*', :Object_fun, s(:args)),
-        s(:defn, 'Object*', :Object_fun, s(:args), s(:block,
+        s(:prototype, :'Object*', :Object_fun, s(:args)),
+        s(:defn, :'Object*', :Object_fun, s(:args), s(:block,
                                               s(:return, fixnum_new(5)))),
         main(
           decl_object(:var1),
@@ -262,12 +262,12 @@ describe Translator do
     translate_code('def fun(x); x; end; fun 3').should ==
       s(:file,
         *includes,
-        s(:prototype, 'Object*', :Object_Fixnum_fun, args),
-        s(:defn, 'Object*', :Object_Fixnum_fun, args, s(:block,
+        s(:prototype, :'Object*', :Object_fun_Fixnum, args),
+        s(:defn, :'Object*', :Object_fun_Fixnum, args, s(:block,
                                           s(:return, s(:var, :x)))),
         main(
           decl_object(:var1),
-          s(:asgn, s(:var, :var1), s(:call, :Object_Fixnum_fun,
+          s(:asgn, s(:var, :var1), s(:call, :Object_fun_Fixnum,
                                      s(:args, fixnum_new(3))))))
   end
 
@@ -278,26 +278,27 @@ describe Translator do
         s(:typedef,
           s(:struct, nil,
             s(:block, s(:decl, :'Object*', :a))), :A),
-        s(:prototype, :'Object*', :A_initialize,
-          s(:args, s(:decl, :'Object*', :a), s(:decl, :'A*', :self))),
-        s(:prototype, :'Object*', :A_new, s(:args, s(:decl, :'Object*', :a))),
-        s(:defn, :'Object*', :A_initialize, 
-          s(:args, s(:decl, :'Object*', :a), s(:decl, :'A*', :self)),
+        s(:prototype, :'Object*', :A_initialize_Fixnum,
+          s(:args, s(:decl, :'Object*', :a))),
+        s(:prototype, :'Object*', :A_new_Fixnum, s(:args, s(:decl, :'Object*', :a))),
+        s(:defn, :'Object*', :A_initialize_Fixnum, 
+          s(:args, s(:decl, :'Object*', :a)),
           s(:block,
             s(:asgn,
               s(:binary_oper, :'->', s(:var, :self), s(:var, :a)), s(:var, :a)),
             s(:return, s(:binary_oper, :'->', s(:var, :self), s(:var, :a))))),
-        s(:defn, :'A*', :A_new, s(:args, s(:decl, :'Object*', :a)),
+        s(:defn, :'Object*', :A_new_Fixnum, s(:args, s(:decl, :'Object*', :a)),
           s(:block,
-            s(:asgn, s(:decl, 'A*', :self),
+            s(:asgn, s(:decl, :'Object*', :self),
                      s(:call, :xmalloc,
-                       s(:args, s(:call, :sizeof, s(:args, :A))))),
-            s(:call, :A_initialize, s(:args, s(:var, :a), s(:var, :self))),
+                       s(:args, s(:call, :sizeof, s(:args, s(:lit, :A)))))),
+              s(:asgn,
+                s(:binary_oper, :'->', s(:var, :self), s(:var, :a)), s(:var, :a)),
             s(:return, s(:var, :self)))),
         main(
           decl_object(:var1),
           s(:asgn, s(:var, :var1),
-            s(:call, s(:const, :A), :new, s(:args, s(:lit, 1))))))
+            s(:call, :'A_new_Fixnum', s(:args, fixnum_new(1))))))
   end
 
 end
