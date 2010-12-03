@@ -6,6 +6,8 @@
 # Symbol tables are nested in each other:
 # Classes --> Functions --> Local variables
 class SymbolTable < Hash
+  attr_reader :cclass, :cfunction
+
   def initialize
     cclass = Object
     cfunction = :_main
@@ -14,16 +16,6 @@ class SymbolTable < Hash
   # Adds a new class and generates id for it
   def add_class(class_name)
     self[class_name] ||= { id: next_id }
-  end
-
-  # Getter for cclass -- curent class context
-  def cclass
-    @cclass
-  end
-
-  # Getter for cfunction -- curent function context
-  def cfunction
-    @cfunction
   end
 
   # Setter for cclass -- curent class context
