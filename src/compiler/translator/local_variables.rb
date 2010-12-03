@@ -9,12 +9,12 @@ class Translator
       arg = translate_generic_sexp(sexp[2])
       unless @symbol_table.has_lvar? sexp[1]
         @symbol_table.add_lvar sexp[1]
-        # FIXME: It won't work. args.value_types.first isn't the best solution.
-        decl = s(:decl, arg.value_types.first.to_s + '*', sexp[1])
+        # FIXME: It won't work. args.value_type.first isn't the best solution.
+        decl = s(:decl, arg.value_type.first.to_s + '*', sexp[1])
       end
-      @symbol_table.set_lvar_types sexp[1], arg.value_types
-      filtered_stmts(decl, arg, s(:asgn, s(:var, sexp[1]), arg.value_symbol))
-      .with_value(s(:var, sexp[1]), arg.value_types)
+      @symbol_table.set_lvar_types sexp[1], arg.value_type
+      filtered_stmts(decl, arg, s(:asgn, s(:var, sexp[1]), arg.value_sexp))
+      .with_value(s(:var, sexp[1]), arg.value_type)
     end
 
     # Translate a referenced local variable to empty block with value of this

@@ -96,7 +96,7 @@ class Translator
   # stmts sexp with a value of the last translated element.
   def translate_block(sexp)
     sexps = sexp.drop(1).map { |s| translate_generic_sexp s }
-    filtered_stmts(*sexps).with_value_symbol sexps.last.value_symbol
+    filtered_stmts(*sexps).with_value_sexp sexps.last.value_sexp
   end
 
   # Returns a block sexp with all stmts sexps expanded.
@@ -112,8 +112,8 @@ class Translator
   # Translates a 'not' or a '!'.
   def translate_not(sexp)
     child = translate_generic_sexp sexp[1]
-    filtered_stmts(child).with_value_symbol s(:l_unary_oper, :!,
-                                              boolean_value(child.value_symbol))
+    filtered_stmts(child).with_value_sexp s(:l_unary_oper, :!,
+                                              boolean_value(child.value_sexp))
   end
 
   # Returns an array of sexps with all stmts sexps expanded.

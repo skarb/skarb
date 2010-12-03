@@ -7,27 +7,28 @@ require 'sexp_processor'
 # need to know what is the name and the type of that variable. Hence we add two
 # attributes to Sexp.
 class ::Sexp
-  # A C sexp (a literal or a variable) which stores the value of the sexp
-  # after evaluation. It should have been named +value+ but this method name
-  # is unfortunately already taken by RubyParser.
-  attr_accessor :value_symbol, :value_types
+  # value_sexp is a C sexp (a literal, a variable or a call) which stores the
+  # value of the actual sexp after evaluation. It should have been named +value+
+  # but this method name is unfortunately already taken by RubyParser.
+  # value_type is the C type of value_sexp.
+  attr_accessor :value_sexp, :value_type
 
-  # Syntactic sugar. Sets the value_symbol and returns self.
-  def with_value_symbol(value_symbol)
-    @value_symbol = value_symbol
+  # Syntactic sugar. Sets the value_sexp and returns self.
+  def with_value_sexp(value_sexp)
+    @value_sexp = value_sexp
     self
   end
 
-  # Syntactic sugar. Sets the value_types and returns self.
-  def with_value_types(value_types)
-    @value_types = value_types
+  # Syntactic sugar. Sets the value_type and returns self.
+  def with_value_type(value_type)
+    @value_type = value_type
     self
   end
 
-  # Syntactic sugar. Sets the value_symbol, value_types and returns self.
-  def with_value(symbol, types)
-    @value_types = types
-    @value_symbol = symbol
+  # Syntactic sugar. Sets the value_sexp, value_type and returns self.
+  def with_value(sexp, type)
+    @value_type = type
+    @value_sexp = sexp
     self
   end
 end

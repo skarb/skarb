@@ -43,7 +43,7 @@ class Translator
 
     def translate_scope(sexp)
        sexps = sexp.drop(1).map { |s| translate_generic_sexp s }
-       filtered_stmts(*sexps).with_value_symbol sexps.last.value_symbol
+       filtered_stmts(*sexps).with_value_sexp sexps.last.value_sexp
     end
 
     def translate_const(sexp)

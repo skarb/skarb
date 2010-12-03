@@ -11,8 +11,8 @@ class Translator
       filtered_stmts(
         s(:decl, :int, var), # :TODO: Change int
         s(:if, cond,
-          filtered_block(if_true, s(:asgn, s(:var, var), if_true.value_symbol)))
-      ).with_value_symbol s(:var, var)
+          filtered_block(if_true, s(:asgn, s(:var, var), if_true.value_sexp)))
+      ).with_value_sexp s(:var, var)
     end
 
     # Performs complex type check at runtime through switch clause.
@@ -25,13 +25,13 @@ class Translator
         code = translate_generic_sexp val
         case_blocks << s(:case,
                          s(:lit, @symbol_table[key][:id])) << filtered_stmts(code,
-                         s(:asgn, s(:var, var), code.value_symbol)) << s(:break)
+                         s(:asgn, s(:var, var), code.value_sexp)) << s(:break)
       end
 
       filtered_stmts(
         s(:decl, :int, var), # :TODO: Change int
         s(:switch, type_expr,
-          filtered_block(*case_blocks))).with_value_symbol s(:var, var)
+          filtered_block(*case_blocks))).with_value_sexp s(:var, var)
     end
   end
 end

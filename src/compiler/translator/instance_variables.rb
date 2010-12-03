@@ -11,13 +11,13 @@ class Translator
         @symbol_table.add_ivar sexp[1]
       end
       arg = translate_generic_sexp(sexp[2])
-      @symbol_table.set_ivar_types sexp[1], arg.value_types
+      @symbol_table.set_ivar_types sexp[1], arg.value_type
       filtered_stmts(arg, s(:asgn,
                             s(:binary_oper, :'->',
                               s(:var, :self), s(:var, sname)),
-                              arg.value_symbol))
+                              arg.value_sexp))
       .with_value(s(:binary_oper, :'->', s(:var, :self), s(:var, sname)),
-                  arg.value_types)
+                  arg.value_type)
     end
 
     # Translate a referenced instance variable to empty block with value of this

@@ -48,7 +48,7 @@ class Translator
         end
       end
       raise 'Only Fixnums can be printed' if not retval
-      retval.with_value_symbol s(:lit, 0)
+      retval.with_value_sexp s(:lit, 0)
     end
 
     # Functions' definitions don't get translated immediately. We'll wait for the
@@ -79,7 +79,7 @@ class Translator
       # Get the defn sexp in which the function has been defined.
       defn = @functions_definitions[def_name]
       # Get types of arguments. FIXME: first won't work!
-      types = args_evaluation.map { |arg| arg.value_types.first }
+      types = args_evaluation.map { |arg| arg.value_type.first }
       impl_name = mangle(def_name, types)
       # Have we got an implementation of this function for given args' types?
       unless function_is_implemented? impl_name
@@ -89,12 +89,12 @@ class Translator
         @symbol_table.cclass = old_class
       end
       call = s(:call, impl_name,
-               s(:args, *args_evaluation.map { |arg| arg.value_symbol } ))
+               s(:args, *args_evaluation.map { |arg| arg.value_sexp } ))
       filtered_stmts(
         filtered_stmts(*args_evaluation),
         s(:decl, :'Object*', var),
         s(:asgn, s(:var, var), call)
-      ).with_value_symbol s(:var, var)
+      ).with_value_sexp s(:var, var)
     end
 
     # Returns a sexp calling a constructor. If the constructor hasn't been
@@ -110,7 +110,7 @@ class Translator
         # Get the defn sexp in which the function has been defined.
         defn = @functions_definitions[init_name]
         # Get types of arguments. FIXME: first won't work!
-        types = args_evaluation.map { |arg| arg.value_types.first }
+        types = args_evaluation.map { |arg| arg.value_type.first }
         impl_init_name = mangle(init_name, types)
         impl_name = mangle(def_name, types)
         old_class = @symbol_table.cclass
@@ -128,17 +128,17 @@ class Translator
           class_constructor(class_name, impl_name)
       end
       call = s(:call, impl_name,
-               s(:args, *args_evaluation.map { |arg| arg.value_symbol } ))
+               s(:args, *args_evaluation.map { |arg| arg.value_sexp } ))
       filtered_stmts(
         filtered_stmts(*args_evaluation),
         s(:decl, :'Object*', var),
         s(:asgn, s(:var, var), call)
-      ).with_value_symbol s(:var, var)
+      ).with_value_sexp s(:var, var)
     end
 
     def get_class_name(class_expr)
       return @symbol_table.cclass if class_expr.nil?
-      translate_generic_sexp(class_expr).value_types.first
+      translate_generic_sexp(class_expr).value_type.first
     end
 
     # Returns function name preceded by class name
@@ -177,7 +177,7 @@ class Translator
         defn_args << s(:decl, :'Object*', arg)
       end
       body = translate_generic_sexp(defn[3][1])
-      body_block = filtered_block(body, s(:return, body.value_symbol))
+      body_block = filtered_block(body, s(:return, body.value_sexp))
       @symbol_table.cfunction = prev_function
       # FIXME: set the actual return type
       s(:defn, :'Object*', impl_name, defn_args, body_block)

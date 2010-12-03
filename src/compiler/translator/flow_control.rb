@@ -16,9 +16,9 @@ class Translator
       filtered_stmts(
         s(:decl, 'Fixnum*', var),
         cond,
-        s(:if, (boolean_value_applied ? cond.value_symbol: boolean_value(cond.value_symbol)),
-          filtered_block(if_true, s(:asgn, s(:var, var), if_true.value_symbol)))
-      ).with_value_symbol s(:var, var)
+        s(:if, (boolean_value_applied ? cond.value_sexp: boolean_value(cond.value_sexp)),
+          filtered_block(if_true, s(:asgn, s(:var, var), if_true.value_sexp)))
+      ).with_value_sexp s(:var, var)
     end
 
     # TODO: DRY, translate_if is almost identical.
@@ -31,32 +31,32 @@ class Translator
         s(:decl, 'Fixnum*', var),
         cond,
         s(:if,
-          boolean_value(cond.value_symbol),
-          filtered_block(if_true, s(:asgn, s(:var, var), if_true.value_symbol)),
-          filtered_block(if_false, s(:asgn, s(:var, var), if_false.value_symbol)))
-      ).with_value_symbol s(:var, var)
+          boolean_value(cond.value_sexp),
+          filtered_block(if_true, s(:asgn, s(:var, var), if_true.value_sexp)),
+          filtered_block(if_false, s(:asgn, s(:var, var), if_false.value_sexp)))
+      ).with_value_sexp s(:var, var)
     end
   end
 
   # Translates a while loop. Such loop in Ruby doesn't return a value so we do
-  # not set the value_symbol attribute.
+  # not set the value_sexp attribute.
   def translate_while(sexp)
     cond = translate_generic_sexp sexp[1]
     body = translate_generic_sexp sexp[2]
     filtered_stmts(cond,
                    s(:while,
-                     boolean_value(cond.value_symbol),
+                     boolean_value(cond.value_sexp),
                      filtered_block(body)))
   end
 
   # Translates an until loop. Such loop in Ruby doesn't return a value so we do
-  # not set the value_symbol attribute.
+  # not set the value_sexp attribute.
   def translate_until(sexp)
     cond = translate_generic_sexp sexp[1]
     body = translate_generic_sexp sexp[2]
     filtered_stmts(cond,
                    s(:while,
-                     s(:l_unary_oper, :!, boolean_value(cond.value_symbol)),
+                     s(:l_unary_oper, :!, boolean_value(cond.value_sexp)),
                      filtered_block(body)))
   end
 
