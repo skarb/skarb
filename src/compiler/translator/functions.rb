@@ -113,15 +113,12 @@ class Translator
         types = args_evaluation.map { |arg| arg.value_types.first }
         impl_init_name = mangle(init_name, types)
         impl_name = mangle(def_name, types)
-        # Have we got an implementation of this function for given args' types?
-        unless function_is_implemented? impl_init_name
-          old_class = @symbol_table.cclass
-          @symbol_table.cclass = class_name
-          implement_function impl_init_name, defn, types
-          @symbol_table.cclass = old_class
-        end
-        init_args = @functions_implementations[impl_init_name][3].rest
-        init_body = @functions_implementations[impl_init_name][4].rest.rest(-1)
+        old_class = @symbol_table.cclass
+        @symbol_table.cclass = class_name
+        init_fun =  process_function_definition impl_init_name, defn, types
+        @symbol_table.cclass = old_class
+        init_args = init_fun[3].rest
+        init_body = init_fun[4].rest.rest(-1)
         @functions_implementations[impl_name] =
           class_constructor(class_name, impl_name, init_args, init_body)
       else
