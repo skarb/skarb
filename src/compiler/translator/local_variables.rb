@@ -9,8 +9,7 @@ class Translator
       arg = translate_generic_sexp(sexp[2])
       unless @symbol_table.has_lvar? sexp[1]
         @symbol_table.add_lvar sexp[1]
-        # FIXME: It won't work. args.value_type.first isn't the best solution.
-        decl = s(:decl, arg.value_type.first.to_s + '*', sexp[1])
+        decl = s(:decl, arg.value_type.to_s + '*', sexp[1])
       end
       @symbol_table.set_lvar_type sexp[1], arg.value_type
       filtered_stmts(decl, arg, s(:asgn, s(:var, sexp[1]), arg.value_sexp))

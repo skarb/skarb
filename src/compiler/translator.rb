@@ -89,7 +89,7 @@ class Translator
       # It's a float
       ctor = :Float_new
     end
-    s(:stmts).with_value(s(:call, ctor, s(:args, sexp)), [sexp[1].class])
+    s(:stmts).with_value(s(:call, ctor, s(:args, sexp)), sexp[1].class)
   end
 
   # Translates a block of expressions by translating all of them and returning a

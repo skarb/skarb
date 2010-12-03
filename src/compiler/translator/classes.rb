@@ -47,7 +47,7 @@ class Translator
     end
 
     def translate_const(sexp)
-       s().with_value(sexp[1], [sexp[1]])
+       s().with_value(sexp[1], sexp[1])
     end
   end
 end

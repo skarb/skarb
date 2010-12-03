@@ -154,16 +154,16 @@ describe Translator do
   end
 
   it 'should detect type of fixnum literal' do
-    translate_code_only('2').value_type.first.should == Fixnum
+    translate_code_only('2').value_type.should == Fixnum
   end
 
   it 'should detect type of float literal' do
-    translate_code_only('2.5').value_type.first.should == Float
+    translate_code_only('2.5').value_type.should == Float
   end
 
   it 'should detect type of variable' do
     translate_code_only('b=2')
-    translate_code_only('b').value_type.first.should == Fixnum
+    translate_code_only('b').value_type.should == Fixnum
   end
 
   it 'should translate local assignment to new variable' do

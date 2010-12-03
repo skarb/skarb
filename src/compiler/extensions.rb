@@ -10,7 +10,8 @@ class ::Sexp
   # value_sexp is a C sexp (a literal, a variable or a call) which stores the
   # value of the actual sexp after evaluation. It should have been named +value+
   # but this method name is unfortunately already taken by RubyParser.
-  # value_type is the C type of value_sexp.
+  # value_type is the type of value_sexp. It can either be an instance of a
+  # Class or nil in case we cannot determine the exact type.
   attr_accessor :value_sexp, :value_type
 
   # Syntactic sugar. Sets the value_sexp and returns self.

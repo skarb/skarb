@@ -34,7 +34,7 @@ class Translator
                    s(:args, s(:str, '%i\n'), s(:lit, value[1])))
       when :lvar
         raise 'Unknown local variable' if not @symbol_table.has_lvar? value[1]
-        type = @symbol_table.get_lvar_type(value[1]).first
+        type = @symbol_table.get_lvar_type value[1]
         if type == Fixnum
           retval = s(:call, :printf,
                      s(:args, s(:str, '%i\n'),
@@ -78,8 +78,7 @@ class Translator
       args_evaluation = sexp[3].rest.map { |arg_sexp| translate_generic_sexp arg_sexp }
       # Get the defn sexp in which the function has been defined.
       defn = @functions_definitions[def_name]
-      # Get types of arguments. FIXME: first won't work!
-      types = args_evaluation.map { |arg| arg.value_type.first }
+      types = args_evaluation.map { |arg| arg.value_type }
       impl_name = mangle(def_name, types)
       # Have we got an implementation of this function for given args' types?
       unless function_is_implemented? impl_name
@@ -109,8 +108,8 @@ class Translator
         args_evaluation = sexp[3].rest.map { |arg_sexp| translate_generic_sexp arg_sexp }
         # Get the defn sexp in which the function has been defined.
         defn = @functions_definitions[init_name]
-        # Get types of arguments. FIXME: first won't work!
-        types = args_evaluation.map { |arg| arg.value_type.first }
+        # Get types of arguments.
+        types = args_evaluation.map { |arg| arg.value_type }
         impl_init_name = mangle(init_name, types)
         impl_name = mangle(def_name, types)
         old_class = @symbol_table.cclass
@@ -138,7 +137,7 @@ class Translator
 
     def get_class_name(class_expr)
       return @symbol_table.cclass if class_expr.nil?
-      translate_generic_sexp(class_expr).value_type.first
+      translate_generic_sexp(class_expr).value_type
     end
 
     # Returns function name preceded by class name
@@ -171,8 +170,7 @@ class Translator
       defn[2].drop(1).each do |arg|
         type = args_types.shift
         @symbol_table.add_lvar arg
-        # FIXME: set the actual type
-        @symbol_table.set_lvar_type arg, [type]
+        @symbol_table.set_lvar_type arg, type
         #defn_args << s(:decl, "#{type}*", arg)
         defn_args << s(:decl, :'Object*', arg)
       end
