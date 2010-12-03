@@ -281,7 +281,7 @@ describe Translator do
         s(:prototype, :'Object*', :A_initialize_Fixnum,
           s(:args, s(:decl, :'Object*', :a))),
         s(:prototype, :'Object*', :A_new_Fixnum, s(:args, s(:decl, :'Object*', :a))),
-        s(:defn, :'Object*', :A_initialize_Fixnum, 
+        s(:defn, :'Object*', :A_initialize_Fixnum,
           s(:args, s(:decl, :'Object*', :a)),
           s(:block,
             s(:asgn,

@@ -16,7 +16,7 @@ require 'translator/classes'
 # 1. Modifies symbol table
 # 2. Returns translated subtree which is valid C AST or nil
 # 3. Returns attributes dictionary for the given node
-# Final C AST is composed depending on symbol table and subtrees 
+# Final C AST is composed depending on symbol table and subtrees
 # returned by subsequent functions.
 class Translator
   def initialize

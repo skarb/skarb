@@ -12,9 +12,9 @@ class Translator
       structure_definition =
         s(:typedef, s(:struct, nil,
                       s(:block, *fields_declarations)), class_name)
-      @structures_definitions[class_name] = structure_definition 
+      @structures_definitions[class_name] = structure_definition
     end
-   
+
     def class_constructor(class_name, constructor_name, init_args=[], init_body=[])
       s(:defn, :'Object*', constructor_name, s(:args, *init_args),
         s(:block,
@@ -47,7 +47,7 @@ class Translator
     end
 
     def translate_const(sexp)
-       s().with_value(sexp[1], [sexp[1]]) 
+       s().with_value(sexp[1], [sexp[1]])
     end
   end
 end

@@ -18,7 +18,7 @@ class Translator
         call_faked_puts sexp
       elsif sexp[2] == :new
         call_constructor def_name, sexp
-      elsif function_is_defined? def_name 
+      elsif function_is_defined? def_name
         call_defined_function def_name, sexp
       else
         raise "Unknown function: #{sexp[1]}"
@@ -85,7 +85,7 @@ class Translator
       unless function_is_implemented? impl_name
         old_class = @symbol_table.cclass
         @symbol_table.cclass = class_name
-        implement_function impl_name, defn, types 
+        implement_function impl_name, defn, types
         @symbol_table.cclass = old_class
       end
       call = s(:call, impl_name,
@@ -117,7 +117,7 @@ class Translator
         unless function_is_implemented? impl_init_name
           old_class = @symbol_table.cclass
           @symbol_table.cclass = class_name
-          implement_function impl_init_name, defn, types 
+          implement_function impl_init_name, defn, types
           @symbol_table.cclass = old_class
         end
         init_args = @functions_implementations[impl_init_name][3].rest
@@ -157,7 +157,7 @@ class Translator
     end
 
     alias :get_implemented_function_name :mangle
-    
+
     # Returns true if an implementation of the given function (not a method!)
     # defined with a given defn sexp and implemented for given arguments' types
     # has been already added to @functions_implementations.
@@ -170,7 +170,7 @@ class Translator
       # We don't want to destroy the original table
       args_types = args_types.clone
       prev_function = @symbol_table.cfunction
-      @symbol_table.cfunction = defn[1] 
+      @symbol_table.cfunction = defn[1]
       defn_args = s(:args)
       defn[2].drop(1).each do |arg|
         type = args_types.shift

@@ -105,7 +105,7 @@ class SymbolTable < Hash
   def functions_table
     self[@cclass][:functions]
   end
- 
+
   # The hash of local variables in the current function context.
   def lvars_table
     self[@cclass][:functions][@cfunction][:lvars]
@@ -114,7 +114,7 @@ class SymbolTable < Hash
   # Each call to this method returns a new, unique id.
   def next_id
     @next_id ||= 0
-    @next_id += 1 
+    @next_id += 1
   end
 
 end

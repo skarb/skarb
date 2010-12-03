@@ -48,7 +48,7 @@ module Emitter::FlowControl
 
   def emit_label(sexp)
     "#{emit_generic_elem(sexp[1])}:"
-  end 
+  end
 
   alias :emit_continue :output_type_and_children
   alias :emit_break :output_type_and_children
