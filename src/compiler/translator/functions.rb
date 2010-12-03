@@ -169,8 +169,7 @@ class Translator
     def process_function_definition(impl_name, defn, args_types)
       # We don't want to destroy the original table
       args_types = args_types.clone
-      prev_function = @symbol_table.cfunction
-      @symbol_table.cfunction = defn[1]
+      prev_function, @symbol_table.cfunction = @symbol_table.cfunction, defn[1]
       defn_args = s(:args)
       defn[2].drop(1).each do |arg|
         type = args_types.shift
