@@ -44,16 +44,16 @@ class SymbolTable < Hash
     lvars_table.has_key? lvar
   end
 
-  # Sets the given types array for the given local variable in the current
-  # function context.
-  def set_lvar_types(lvar, types)
-    lvars_table[lvar][:types] = types
+  # Sets the given type for the given local variable in the current function
+  # context.
+  def set_lvar_type(lvar, type)
+    lvars_table[lvar][:type] = type
   end
 
-  # Returns the types array for the given local variable in the current function
+  # Returns the type for the given local variable in the current function
   # context.
-  def get_lvar_types(lvar)
-    lvars_table[lvar][:types]
+  def get_lvar_type(lvar)
+    lvars_table[lvar][:type]
   end
 
   # Adds an instance variable in the current class context.
@@ -67,16 +67,16 @@ class SymbolTable < Hash
     ivars_table.has_key? ivar
   end
 
-  # Sets the given types array for the given instance variable in the current
-  # class context.
-  def set_ivar_types(ivar, types)
-    ivars_table[ivar][:types] = types
+  # Sets the given type for the given instance variable in the current class
+  # context.
+  def set_ivar_type(ivar, type)
+    ivars_table[ivar][:type] = type
   end
 
-  # Returns the types array for the given instance variable in the current class
+  # Returns the type for the given instance variable in the current class
   # context.
-  def get_ivar_types(ivar)
-    ivars_table[ivar][:types]
+  def get_ivar_type(ivar)
+    ivars_table[ivar][:type]
   end
 
   # Setter for higher class

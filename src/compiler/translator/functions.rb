@@ -34,7 +34,7 @@ class Translator
                    s(:args, s(:str, '%i\n'), s(:lit, value[1])))
       when :lvar
         raise 'Unknown local variable' if not @symbol_table.has_lvar? value[1]
-        type = @symbol_table.get_lvar_types(value[1]).first
+        type = @symbol_table.get_lvar_type(value[1]).first
         if type == Fixnum
           retval = s(:call, :printf,
                      s(:args, s(:str, '%i\n'),
@@ -172,7 +172,7 @@ class Translator
         type = args_types.shift
         @symbol_table.add_lvar arg
         # FIXME: set the actual type
-        @symbol_table.set_lvar_types arg, [type]
+        @symbol_table.set_lvar_type arg, [type]
         #defn_args << s(:decl, "#{type}*", arg)
         defn_args << s(:decl, :'Object*', arg)
       end

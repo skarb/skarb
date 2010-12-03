@@ -12,7 +12,7 @@ class Translator
         # FIXME: It won't work. args.value_type.first isn't the best solution.
         decl = s(:decl, arg.value_type.first.to_s + '*', sexp[1])
       end
-      @symbol_table.set_lvar_types sexp[1], arg.value_type
+      @symbol_table.set_lvar_type sexp[1], arg.value_type
       filtered_stmts(decl, arg, s(:asgn, s(:var, sexp[1]), arg.value_sexp))
       .with_value(s(:var, sexp[1]), arg.value_type)
     end
@@ -23,7 +23,7 @@ class Translator
       unless @symbol_table.has_lvar? sexp[1]
         die "Use of an uninitialized local variable #{sexp[1]}"
       end
-      s(:stmts).with_value(s(:var, sexp[1]), @symbol_table.get_lvar_types(sexp[1]))
+      s(:stmts).with_value(s(:var, sexp[1]), @symbol_table.get_lvar_type(sexp[1]))
     end
   end
 end
