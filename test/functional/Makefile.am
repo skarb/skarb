@@ -9,7 +9,8 @@ TESTSCRIPTS = if.rb \
               until.rb \
               zero-as-a-condition.rb \
               simple-functions.rb \
-              local-vars.rb
+              local-vars.rb \
+              overloading-functions.rb
 TESTS_ENVIRONMENT = RUBYC_PATH=$(top_builddir)/src/compiler/rubyc.rb \
                     CFLAGS="-I$(top_builddir)/src/stdlib" \
                     LDFLAGS="-static -L$(top_builddir)/src/stdlib/.libs" \

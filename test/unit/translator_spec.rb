@@ -181,8 +181,8 @@ describe Translator do
     translate_code('def fun; 5; end; fun').should ==
       s(:file,
         *includes,
-        s(:prototype, :'Object*', :Object_fun, s(:args)),
-        s(:defn, :'Object*', :Object_fun, s(:args), s(:block,
+        s(:prototype, 'Object*', :Object_fun, s(:args)),
+        s(:defn, 'Object*', :Object_fun, s(:args), s(:block,
                                               s(:return, fixnum_new(5)))),
         main(
           decl_object(:var1),
@@ -193,8 +193,8 @@ describe Translator do
     translate_code('def fun; 5; end; fun; fun').should ==
       s(:file,
         *includes,
-        s(:prototype, :'Object*', :Object_fun, s(:args)),
-        s(:defn, :'Object*', :Object_fun, s(:args), s(:block,
+        s(:prototype, 'Object*', :Object_fun, s(:args)),
+        s(:defn, 'Object*', :Object_fun, s(:args), s(:block,
                                               s(:return, fixnum_new(5)))),
         main(
           decl_object(:var1),
@@ -262,12 +262,12 @@ describe Translator do
     translate_code('def fun(x); x; end; fun 3').should ==
       s(:file,
         *includes,
-        s(:prototype, :'Object*', :Object_fun, args),
-        s(:defn, :'Object*', :Object_fun, args, s(:block,
+        s(:prototype, 'Object*', :Object_Fixnum_fun, args),
+        s(:defn, 'Object*', :Object_Fixnum_fun, args, s(:block,
                                           s(:return, s(:var, :x)))),
         main(
           decl_object(:var1),
-          s(:asgn, s(:var, :var1), s(:call, :Object_fun,
+          s(:asgn, s(:var, :var1), s(:call, :Object_Fixnum_fun,
                                      s(:args, fixnum_new(3))))))
   end
 

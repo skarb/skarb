@@ -125,6 +125,8 @@ class Translator
       if sexp.first == :stmts
         # If it's a stmts take all its children and add them to the output
         expanded_sexps += sexp.drop 1
+      elsif sexp.empty?
+        # Do nothing
       else
         # Otherwise add the whole sexp to the output
         expanded_sexps << sexp
