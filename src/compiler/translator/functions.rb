@@ -25,30 +25,14 @@ class Translator
       end
     end
 
-    # Returns a sexp which acts as if the Kernel#puts method was called.
+    # Calls Object_Object_puts.
     def call_faked_puts(sexp)
       value = sexp[3][1]
-      case value[0]
-      when :lit
-        retval = s(:call, :printf,
-                   s(:args, s(:str, '%i\n'), s(:lit, value[1])))
-      when :lvar
-        raise 'Unknown local variable' if not @symbol_table.has_lvar? value[1]
-        type = @symbol_table.get_lvar_type value[1]
-        if type == Fixnum
-          retval = s(:call, :printf,
-                     s(:args, s(:str, '%i\n'),
-                       s(:binary_oper, :'->',
-                         s(:cast, :'Fixnum*', s(:var, value[1])), s(:var, :val))))
-        elsif type == Float
-          retval = s(:call, :printf,
-                     s(:args, s(:str, '%g\n'),
-                       s(:binary_oper, :'->',
-                         s(:cast, :'Float*', s(:var, value[1])), s(:var, :val))))
-        end
-      end
-      raise 'Only Fixnums can be printed' if not retval
-      retval.with_value_sexp s(:lit, 0)
+      arg_evaluation = translate_generic_sexp value
+      filtered_stmts(
+        arg_evaluation,
+        s(:call, :Object_Object_puts, s(:args, arg_evaluation.value_sexp))
+      ).with_value s(:lit, 0), Fixnum
     end
 
     # Functions' definitions don't get translated immediately. We'll wait for the
