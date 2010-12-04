@@ -16,14 +16,6 @@ AC_TYPE_SIZE_T
 AC_TYPE_UINT32_T
 AC_FUNC_MALLOC
 AC_FUNC_REALLOC
-AC_CHECK_HEADERS([gc.h gc/gc.h], [got_libgc_headers=yes; break])
-if test xyes != "x$got_libgc_headers"; then
-	AC_MSG_ERROR(["cannot find libgc's headers"])
-fi
-AC_CHECK_LIB([gc], [GC_malloc])
-if test xyes != "x$ac_cv_lib_gc_GC_malloc"; then
-	AC_MSG_ERROR([cannot find libgc])
-fi
 
 # Other tests
 AC_PROG_AWK
@@ -43,6 +35,21 @@ if test -z "$PERL"; then
 	AC_MSG_ERROR([cannot find Perl])
 fi
 AC_SUBST([rubycincludedir], ["$includedir/rubyc"])
+
+# Download, verify and configure libgc
+AC_MSG_NOTICE([=== configuring libgc ===])
+if test ! -f gc-7.1.tar.gz; then
+	wget http://www.hpl.hp.com/personal/Hans_Boehm/gc/gc_source/gc-7.1.tar.gz
+fi
+gc_sha1sum=e84cba5d18f4ea5ed4e5fd3f1dc6a46bc190ff6f
+if test "x`sha1sum gc-7.1.tar.gz | cut -c-40`" != "x$gc_sha1sum"; then
+	AC_MSG_ERROR([gc-7.1.tar.gz is invalid, please remove it])
+fi
+tar -xf gc-7.1.tar.gz && cd gc-7.1 && \
+	./configure --disable-threads --disable-cplusplus --disable-shared && \
+	cd .. || AC_MSG_ERROR([failed to configure libgc])
+AC_MSG_NOTICE([=== done configuring libc ===])
+
 AC_CONFIG_FILES([
 				Makefile
 				src/Makefile

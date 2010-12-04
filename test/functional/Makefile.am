@@ -13,7 +13,8 @@ TESTSCRIPTS = if.rb \
               overloading-functions.rb
 TESTS_ENVIRONMENT = RUBYC_PATH=$(top_builddir)/src/compiler/rubyc.rb \
                     CFLAGS="-I$(top_builddir)/src/stdlib" \
-                    LDFLAGS="-static -L$(top_builddir)/src/stdlib/.libs" \
+                    LD_LIBRARY_PATH="$(top_builddir)/src/stdlib/.libs" \
+                    LDFLAGS="-L$(top_builddir)/src/stdlib/.libs" \
                     TESTS="$(TESTSCRIPTS)" $(RUBY) -I $(top_srcdir)/src/compiler \
                     -I $(top_builddir)/src/compiler
 TESTS = runner.rb

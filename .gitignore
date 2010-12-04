@@ -16,6 +16,8 @@ config.sub
 configure
 depcomp
 doc/rdoc
+gc-7.1
+gc-7.1.tar.gz
 install-sh
 libtool
 ltmain.sh

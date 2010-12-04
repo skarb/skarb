@@ -1,13 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
-#ifdef HAVE_GC_H
 #include <gc.h>
-#elif HAVE_GC_GC_H
-#include <gc/gc.h>
-#endif /* HAVE_GC_H */
-
 #include "xalloc.h"
 
 void* xmalloc(size_t s) {
