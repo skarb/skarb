@@ -32,7 +32,7 @@ class Translator
       filtered_stmts(
         arg_evaluation,
         s(:call, :Object_Object_puts, s(:args, arg_evaluation.value_sexp))
-      ).with_value s(:lit, 0), Fixnum
+      ).with_value s(:call, :Fixnum_new, s(:args, s(:lit, 0))), Fixnum
     end
 
     # Functions' definitions don't get translated immediately. We'll wait for the
