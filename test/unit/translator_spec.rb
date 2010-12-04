@@ -166,6 +166,17 @@ describe Translator do
     translate_code_only('b').value_type.should == Fixnum
   end
 
+  it 'should detect type of a function call returning a constant' do
+    translate_code_only('def fun(x); 5.3; end')
+    translate_code_only('fun()').value_type.should == Float
+  end
+
+  it 'should detect type of a function call returning an argument' do
+    translate_code_only('def fun(x); x; end')
+    translate_code_only('fun(3.3)').value_type.should == Float
+    translate_code_only('fun(2)').value_type.should == Fixnum
+  end
+
   it 'should translate local assignment to new variable' do
     translate_code('b=2').should ==
       program(decl_fixnum(:b), s(:asgn, s(:var, :b), fixnum_new(2)))
