@@ -247,10 +247,6 @@ describe Translator do
     end .to raise_error
   end
 
-  it 'should not translate a puts with puts as an argument' do
-    expect { translate_code('puts puts 3') } .to raise_error
-  end
-
   it 'should not translate an undefined function' do
     expect do
       translate_code('there_is_no_such_function(4)')
