@@ -16,6 +16,14 @@ AC_TYPE_SIZE_T
 AC_TYPE_UINT32_T
 AC_FUNC_MALLOC
 AC_FUNC_REALLOC
+AC_CHECK_HEADERS([gc.h gc/gc.h], [got_libgc_headers=yes; break])
+if test xyes != "x$got_libgc_headers"; then
+	AC_MSG_ERROR(["cannot find libgc's headers"])
+fi
+AC_CHECK_LIB([gc], [GC_malloc])
+if test xyes != "x$ac_cv_lib_gc_GC_malloc"; then
+	AC_MSG_ERROR([cannot find libgc])
+fi
 
 # Other tests
 AC_PROG_AWK

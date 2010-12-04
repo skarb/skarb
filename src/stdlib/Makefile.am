@@ -3,6 +3,7 @@ nodist_rubycinclude_HEADERS=rubyc.h
 lib_LTLIBRARIES=librubyc.la
 librubyc_la_SOURCES=$(public_headers) fixnum.c xalloc.c xalloc.h helpers.c \
                     float.c object.c
+librubyc_la_LDFLAGS=-Wl,--as-needed
 rubyc.h: $(public_headers)
 	cat $^ |grep -v '#include "object.h"'> $@
 
