@@ -155,7 +155,6 @@ class Translator
         type = args_types.shift
         @symbol_table.add_lvar arg
         @symbol_table.set_lvar_type arg, type
-        #defn_args << s(:decl, "#{type}*", arg)
         defn_args << s(:decl, :'Object*', arg)
       end
       body = translate_generic_sexp(defn[3][1])
