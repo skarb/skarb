@@ -14,6 +14,8 @@
 #132
 #12
 #12
+#3
+#4.5
 def fun
   puts 3
 end
@@ -40,6 +42,8 @@ end
 
 def fun6(a, c, b); puts b; puts a; puts a; end
 
+def fun7(x); x; end
+
 fun
 fun2
 fun
@@ -48,3 +52,5 @@ fun4
 fun5 87
 fun6 13, 29, 93
 fun6 12, 43, 132
+puts fun7 3
+puts fun7 4.5
