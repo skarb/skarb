@@ -35,7 +35,7 @@ class Emitter
   # with correct parenthesis
   def emit_arg_expr(elem)
     case elem[0]
-    when :str, :lit, :var
+    when :str, :lit, :var, :decl
       emit_generic_elem(elem)
     else
       '(' + emit_generic_elem(elem) + ')'
