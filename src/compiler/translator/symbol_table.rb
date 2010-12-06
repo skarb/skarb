@@ -9,8 +9,8 @@ class SymbolTable < Hash
   attr_reader :cclass, :cfunction
 
   def initialize
-    cclass = Object
-    cfunction = :_main
+    self.cclass = :Object
+    self.cfunction = :_main
   end
 
   # Adds a new class and generates id for it
