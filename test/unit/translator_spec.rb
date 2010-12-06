@@ -192,26 +192,26 @@ describe Translator do
     translate_code('def fun; 5; end; fun').should ==
       s(:file,
         *includes,
-        s(:prototype, :'Object*', :Object_fun, s(:args)),
-        s(:defn, :'Object*', :Object_fun, s(:args), s(:block,
+        s(:prototype, :'Object*', :Object_fun, s(:args, s(:decl, :'Object*', :self))),
+        s(:defn, :'Object*', :Object_fun, s(:args, s(:decl, :'Object*', :self)), s(:block,
                                               s(:return, fixnum_new(5)))),
         main(
           decl_object(:var1),
-          s(:asgn, s(:var, :var1), s(:call, :Object_fun, s(:args)))))
+          s(:asgn, s(:var, :var1), s(:call, :Object_fun, s(:args, s(:var, :self))))))
   end
 
   it 'should translate a function without arguments called twice' do
     translate_code('def fun; 5; end; fun; fun').should ==
       s(:file,
         *includes,
-        s(:prototype, :'Object*', :Object_fun, s(:args)),
-        s(:defn, :'Object*', :Object_fun, s(:args), s(:block,
+        s(:prototype, :'Object*', :Object_fun, s(:args, s(:decl, :'Object*', :self))),
+        s(:defn, :'Object*', :Object_fun, s(:args, s(:decl, :'Object*', :self)), s(:block,
                                               s(:return, fixnum_new(5)))),
         main(
           decl_object(:var1),
-          s(:asgn, s(:var, :var1), s(:call, :Object_fun, s(:args))),
+          s(:asgn, s(:var, :var1), s(:call, :Object_fun, s(:args, s(:var, :self)))),
           decl_object(:var2),
-          s(:asgn, s(:var, :var2), s(:call, :Object_fun, s(:args)))))
+          s(:asgn, s(:var, :var2), s(:call, :Object_fun, s(:args, s(:var, :self))))))
   end
 
   it 'should translate an assignment to an instance variable' do
@@ -265,7 +265,7 @@ describe Translator do
   end
 
   it 'should translate a function with arguments' do
-    args = s(:args, s(:decl, :'Object*', :x))
+    args = s(:args, s(:decl, :'Object*', :x), s(:decl, :'Object*', :self))
     translate_code('def fun(x); x; end; fun 3').should ==
       s(:file,
         *includes,
@@ -275,7 +275,7 @@ describe Translator do
         main(
           decl_object(:var1),
           s(:asgn, s(:var, :var1), s(:call, :Object_fun_Fixnum,
-                                     s(:args, fixnum_new(3))))))
+                                     s(:args, fixnum_new(3), s(:var, :self))))))
   end
 
   it 'should translate class declaration' do
