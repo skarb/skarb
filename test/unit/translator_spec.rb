@@ -44,7 +44,10 @@ describe Translator do
     args = s(:abstract_args,
              s(:decl, :int, :argc),
              s(:decl, :'char**', :args))
-    s(:defn, :int, :main, args, s(:block, *body, s(:return, s(:lit, 0))))
+    s(:defn, :int, :main, args,
+      s(:block,
+        #s(:asgn, decl(:self), s(:call, :Object_new, s(:args))),
+                  *body, s(:return, s(:lit, 0))))
   end
 
   # Returns a sexp representing a call to the Fixnum_new function with a given
@@ -279,13 +282,15 @@ describe Translator do
         *includes,
         s(:typedef,
           s(:struct, nil,
-            s(:block, decl(:a))), :A),
+            s(:block, s(:decl, :Object, :meta), decl(:a))), :A),
         s(:prototype, :'Object*', :A_new_Fixnum, s(:args, decl(:a))),
         s(:defn, :'Object*', :A_new_Fixnum, s(:args, decl(:a)),
           s(:block,
             s(:asgn, decl(:self),
                      s(:call, :xmalloc,
                        s(:args, s(:call, :sizeof, s(:args, s(:lit, :A)))))),
+              s(:asgn,
+                s(:binary_oper, :'->', s(:var, :self), s(:var, :type)), s(:lit, 4)),
               s(:asgn,
                 s(:binary_oper, :'->', s(:cast, :'A*', s(:var, :self)), s(:var, :a)), s(:var, :a)),
             s(:return, s(:var, :self)))),

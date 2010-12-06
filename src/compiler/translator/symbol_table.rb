@@ -106,12 +106,12 @@ class SymbolTable < Hash
     self[@cclass][:ivars]
   end
 
-  private
-
   # General hash of current class context.
   def class_table
     self[@cclass]
   end
+
+  private
 
   # The hash of methods in the current class context.
   def functions_table
