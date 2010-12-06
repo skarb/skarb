@@ -9,7 +9,7 @@ class SymbolTable < Hash
   attr_reader :cclass, :cfunction
 
   def initialize
-    self.cclass = :Object
+    self.cclass = Translator::MainObject
     self.cfunction = :_main
   end
 

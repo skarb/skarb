@@ -21,17 +21,17 @@ require 'translator/classes'
 class Translator
   def initialize
     @symbol_table = SymbolTable.new
-    [:Object, :Fixnum, :Float].each {|x| @symbol_table.add_class x }
+    [:Object, :Fixnum, :Float, MainObject].each {|x| @symbol_table.add_class x }
     @functions_definitions = {}
     @functions_implementations = {}
     @structures_definitions = {}
-    @user_classes = []
+    @user_classes = [MainObject]
   end
 
   # Analyses a given Ruby AST tree and returns a C AST. Both the argument and
   # the returned value are Sexps from the sexp_processor gem.
   def translate(sexp)
-    main = main_function translate_generic_sexp(sexp), ReturnZero
+    main = main_function AllocateSelf, translate_generic_sexp(sexp), ReturnZero
     # If there are any functions other than main they have to be included in
     # the output along with their prototypes.
     @user_classes.each { |x| generate_class_structure x }
@@ -53,8 +53,17 @@ class Translator
   include TypeChecks
   include Classes
 
+  # Name of modified instance of Object class containing main program
+  MainObject = :M_Object
+
   # A sexp representing 'return 0;'
   ReturnZero = s(:return, s(:lit, 0))
+
+  # A sexp corresponding to allocation of global variables structure
+  AllocateSelf = s(:asgn,
+            s(:decl, :'Object*', :self),
+            s(:call, :xmalloc,
+              s(:args, s(:call, :sizeof, s(:args, s(:lit, MainObject))))))
 
   # A list of headers to be included.
   Headers = %w/<stdio.h> <rubyc.h>/
