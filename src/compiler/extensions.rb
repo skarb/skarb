@@ -32,6 +32,14 @@ class ::Sexp
     @value_sexp = sexp
     self
   end
+
+  # Syntactic sugar. Sets the value_sexp and value_type to ones of a given sexp
+  # and returns self.
+  def with_value_of(other_sexp)
+    @value_type = other_sexp.value_type
+    @value_sexp = other_sexp.value_sexp
+    self
+  end
 end
 
 # Extensions for standard Array class used by the Emitter.

@@ -78,7 +78,7 @@ class Translator
         filtered_stmts(*args_evaluation),
         s(:decl, :'Object*', var),
         s(:asgn, s(:var, var), call)
-      ).with_value_sexp s(:var, var)
+      ).with_value s(:var, var), return_type(impl_name)
     end
 
     # Returns a sexp calling a constructor. If the constructor hasn't been
@@ -159,14 +159,19 @@ class Translator
       body = translate_generic_sexp(defn[3][1])
       body_block = filtered_block(body, s(:return, body.value_sexp))
       @symbol_table.cfunction = prev_function
-      # FIXME: set the actual return type
-      s(:defn, :'Object*', impl_name, defn_args, body_block)
+      s(:defn, :'Object*', impl_name, defn_args, body_block
+       ).with_value_type body.value_type
     end
 
     # Adds function implementation to @functions_implementations.
     def implement_function(impl_name, defn, args_types)
       @functions_implementations[impl_name] =
         process_function_definition(impl_name, defn, args_types)
+    end
+
+    # Returns the type of values returned by a function with given arguments.
+    def return_type(impl_name)
+      @functions_implementations[impl_name].value_type
     end
   end
 end

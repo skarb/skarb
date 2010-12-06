@@ -96,7 +96,7 @@ class Translator
   # stmts sexp with a value of the last translated element.
   def translate_block(sexp)
     sexps = sexp.drop(1).map { |s| translate_generic_sexp s }
-    filtered_stmts(*sexps).with_value_sexp sexps.last.value_sexp
+    filtered_stmts(*sexps).with_value_of sexps.last
   end
 
   # Returns a block sexp with all stmts sexps expanded.
