@@ -60,16 +60,16 @@ class Translator
       class_name = get_class_name(sexp[1])
       # Evaluate arguments. We need to know what their type is in order to call
       # appropriate overloaded function.
-      args_evaluation = sexp[3].rest.map { |arg_sexp| translate_generic_sexp arg_sexp }
       if sexp[1].nil?
-        args_evaluation << s().with_value(s(:var, :self), class_name)
+        args_evaluation = [s().with_value(s(:var, :self), class_name)]
       else
-        args_evaluation << translate_generic_sexp(sexp[1])
+        args_evaluation = [translate_generic_sexp(sexp[1])]
       end
+      args_evaluation += sexp[3].rest.map { |arg_sexp| translate_generic_sexp arg_sexp }
       # Get the defn sexp in which the function has been defined.
       defn = @functions_definitions[def_name]
       types = args_evaluation.map { |arg| arg.value_type }
-      impl_name = mangle(def_name, types.rest(-1))
+      impl_name = mangle(def_name, types.rest)
       # Have we got an implementation of this function for given args' types?
       unless function_is_implemented? impl_name
         old_class = @symbol_table.cclass
@@ -106,7 +106,7 @@ class Translator
         @symbol_table.cclass = class_name
         init_fun =  process_function_definition impl_init_name, defn, types
         @symbol_table.cclass = old_class
-        init_args = init_fun[3].rest.rest(-1)
+        init_args = init_fun[3].rest(2)
         init_body = init_fun[4].rest.rest(-1)
         @functions_implementations[impl_name] =
           class_constructor(class_name, impl_name, init_args, init_body)
@@ -154,7 +154,7 @@ class Translator
       # We don't want to destroy the original table
       defn_args = s(:args)
       body = @symbol_table.in_function defn[1] do
-        defn[2].drop(1).push(:self).zip args_types do |arg, type|
+        ([:self] + defn[2].drop(1)).zip args_types do |arg, type|
           @symbol_table.add_lvar arg
           @symbol_table.set_lvar_type arg, type
           defn_args << s(:decl, :'Object*', arg)

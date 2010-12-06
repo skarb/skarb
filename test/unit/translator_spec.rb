@@ -198,8 +198,8 @@ describe Translator do
     translate_code('def fun; 5; end; fun').should ==
       s(:file,
         *includes, struct_M_Object,
-        s(:prototype, :'Object*', :"M_Object_fun", s(:args, s(:decl, :'Object*', :self))),
-        s(:defn, :'Object*', :"M_Object_fun", s(:args, s(:decl, :'Object*', :self)), s(:block,
+        s(:prototype, :'Object*', :"M_Object_fun", s(:args, decl(:self))),
+        s(:defn, :'Object*', :"M_Object_fun", s(:args, decl(:self)), s(:block,
                                               s(:return, fixnum_new(5)))),
         main(
           decl(:var1),
@@ -210,8 +210,8 @@ describe Translator do
     translate_code('def fun; 5; end; fun; fun').should ==
       s(:file,
         *includes, struct_M_Object,
-        s(:prototype, :'Object*', :"M_Object_fun", s(:args, s(:decl, :'Object*', :self))),
-        s(:defn, :'Object*', :"M_Object_fun", s(:args, s(:decl, :'Object*', :self)), s(:block,
+        s(:prototype, :'Object*', :"M_Object_fun", s(:args, decl(:self))),
+        s(:defn, :'Object*', :"M_Object_fun", s(:args, decl(:self)), s(:block,
                                               s(:return, fixnum_new(5)))),
         main(
           decl(:var1),
@@ -273,7 +273,7 @@ describe Translator do
   end
 
   it 'should translate a function with arguments' do
-    args = s(:args, decl(:x), decl(:self))
+    args = s(:args, decl(:self), decl(:x))
     translate_code('def fun(x); x; end; fun 3').should ==
       s(:file,
         *includes, struct_M_Object,
@@ -283,7 +283,7 @@ describe Translator do
         main(
           decl(:var1),
           s(:asgn, s(:var, :var1), s(:call, :"M_Object_fun_Fixnum",
-                                     s(:args, fixnum_new(3), s(:var, :self))))))
+                                     s(:args, s(:var, :self), fixnum_new(3))))))
   end
 
   it 'should translate class declaration' do
