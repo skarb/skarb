@@ -117,7 +117,7 @@ class Translator
         filtered_stmts(*args_evaluation),
         s(:decl, :'Object*', var),
         s(:asgn, s(:var, var), call)
-      ).with_value_sexp s(:var, var)
+      ).with_value s(:var, var), class_name 
     end
 
     def get_class_name(class_expr)
