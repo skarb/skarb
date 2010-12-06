@@ -49,7 +49,7 @@ tar -xf gc-7.1.tar.gz && cd gc-7.1 && \
 	./configure --disable-threads --disable-cplusplus --disable-shared \
 	CFLAGS='-fPIC' && \
 	cd .. || AC_MSG_ERROR([failed to configure libgc])
-AC_MSG_NOTICE([=== done configuring libc ===])
+AC_MSG_NOTICE([=== done configuring libgc ===])
 
 AC_CONFIG_FILES([
 				Makefile
