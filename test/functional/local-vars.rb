@@ -20,5 +20,5 @@ puts a
 b = 6
 puts a
 puts b
-c = 7.3
-puts c
+b = 7.3
+puts b
