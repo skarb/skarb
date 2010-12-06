@@ -33,6 +33,18 @@ class SymbolTable < Hash
     self[@cclass][:functions][@cfunction][:lvars] ||= {}
   end
 
+  # Executes a block in a given function context and resets the current function
+  # to the previous value. A funny fact: it won't work without those two self
+  # references used below. Seems like a Ruby's bug. Or a feature.
+  def in_function(name)
+    raise 'Block expected' unless block_given?
+    prev_function = cfunction
+    self.cfunction = name
+    retval = yield
+    self.cfunction = prev_function
+    retval
+  end
+
   # Adds a local variable in the current function context.
   def add_lvar(lvar)
     lvars_table[lvar] ||= {}

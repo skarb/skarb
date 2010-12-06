@@ -148,17 +148,17 @@ class Translator
     def process_function_definition(impl_name, defn, args_types)
       # We don't want to destroy the original table
       args_types = args_types.clone
-      prev_function, @symbol_table.cfunction = @symbol_table.cfunction, defn[1]
       defn_args = s(:args)
-      defn[2].drop(1).each do |arg|
-        type = args_types.shift
-        @symbol_table.add_lvar arg
-        @symbol_table.set_lvar_type arg, type
-        defn_args << s(:decl, :'Object*', arg)
+      body = @symbol_table.in_function defn[1] do
+        defn[2].drop(1).each do |arg|
+          type = args_types.shift
+          @symbol_table.add_lvar arg
+          @symbol_table.set_lvar_type arg, type
+          defn_args << s(:decl, :'Object*', arg)
+        end
+        translate_generic_sexp(defn[3][1])
       end
-      body = translate_generic_sexp(defn[3][1])
       body_block = filtered_block(body, s(:return, body.value_sexp))
-      @symbol_table.cfunction = prev_function
       s(:defn, :'Object*', impl_name, defn_args, body_block
        ).with_value_type body.value_type
     end
