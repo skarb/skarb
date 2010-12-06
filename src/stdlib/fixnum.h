@@ -11,6 +11,6 @@ typedef struct {
 /**
  * Fixnum#new
  */
-Fixnum * Fixnum_new(int value);
+Object * Fixnum_new(int value);
 
 #endif /* FIXNUM_H_ */

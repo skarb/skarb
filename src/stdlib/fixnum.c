@@ -3,9 +3,9 @@
 #include "object.h"
 #include "types.h"
 
-Fixnum * Fixnum_new(int value) {
+Object * Fixnum_new(int value) {
     Fixnum *self = xmalloc(sizeof(Fixnum));
     set_type(self, Fixnum);
     self->val = value;
-    return self;
+    return TO_OBJECT(self);
 }

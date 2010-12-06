@@ -14,7 +14,7 @@ class Translator
       cond = translate_generic_sexp sexp[1]
       if_true = translate_generic_sexp sexp[2]
       filtered_stmts(
-        s(:decl, 'Fixnum*', var),
+        s(:decl, :'Object*', var),
         cond,
         s(:if, (boolean_value_applied ? cond.value_sexp: boolean_value(cond.value_sexp)),
           filtered_block(if_true, s(:asgn, s(:var, var), if_true.value_sexp)))
@@ -28,7 +28,7 @@ class Translator
       if_true = translate_generic_sexp sexp[2]
       if_false = translate_generic_sexp sexp[3]
       filtered_stmts(
-        s(:decl, 'Fixnum*', var),
+        s(:decl, :'Object*', var),
         cond,
         s(:if,
           boolean_value(cond.value_sexp),
