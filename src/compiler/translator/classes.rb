@@ -38,7 +38,6 @@ class Translator
       @user_classes << class_name
       # TODO: Build main function for class
       s()
-      #s(:stmts, *body)
     end
 
     def translate_scope(sexp)

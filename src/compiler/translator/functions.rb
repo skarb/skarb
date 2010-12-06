@@ -2,10 +2,11 @@ class Translator
   # A module consisting of functions which handle translation of nodes related
   # to defining and calling functions and methods.
   #
-  # Function names are mangled in order to allow overloading. Functions which
-  # don't accept arguments are prefixed with a '_'. If a function A accepts
-  # arguments whose types are respectively X, Y and Z its mangled name will be
-  # '_X_Y_Z_A'.  See Functions#mangle for an implementation.
+  # Function names are mangled in order to allow overloading. Function name is
+  # always prefixed with class name (names are separated by '_'). Then comes
+  # the arguments types: If a function A, method of class B, accepts arguments
+  # whose types are respectively X, Y and Z its mangled name will be 'B_A_X_Y_Z'.
+  # See Functions#mangle for an implementation.
   module Functions
     # Translates a call to the Kernel#puts method or a simple function defined
     # previously. All other calls cause an error.
@@ -129,7 +130,6 @@ class Translator
       [class_name.to_s, name.to_s].join('_').to_sym
     end
 
-
     # Returns a mangled function name for a given name and a array of arguments'
     # types.
     def mangle(name, args_types)
@@ -138,9 +138,8 @@ class Translator
 
     alias :get_implemented_function_name :mangle
 
-    # Returns true if an implementation of the given function (not a method!)
-    # defined with a given defn sexp and implemented for given arguments' types
-    # has been already added to @functions_implementations.
+    # Returns true if an implementation of the given function (or method)
+    # defined with a full name has been already added to @functions_implementations.
     def function_is_implemented?(name)
       @functions_implementations.has_key? name
     end
@@ -155,7 +154,6 @@ class Translator
         type = args_types.shift
         @symbol_table.add_lvar arg
         @symbol_table.set_lvar_type arg, type
-        #defn_args << s(:decl, "#{type}*", arg)
         defn_args << s(:decl, :'Object*', arg)
       end
       body = translate_generic_sexp(defn[3][1])

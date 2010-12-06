@@ -216,8 +216,8 @@ describe Translator do
 
   it 'should translate an assignment to an instance variable' do
     translate_code('@a=@a').should ==
-      program(s(:asgn, s(:binary_oper, :'->', s(:var, :self), s(:var, :a)),
-       s(:binary_oper, :'->', s(:var, :self), s(:var, :a))))
+      program(s(:asgn, s(:binary_oper, :'->', s(:cast, :'Object*', s(:var, :self)), s(:var, :a)),
+                s(:binary_oper, :'->', s(:cast, :'Object*', s(:var, :self)), s(:var, :a))))
   end
 
   it 'should add simple type check in the output code' do
@@ -292,7 +292,7 @@ describe Translator do
                      s(:call, :xmalloc,
                        s(:args, s(:call, :sizeof, s(:args, s(:lit, :A)))))),
               s(:asgn,
-                s(:binary_oper, :'->', s(:var, :self), s(:var, :a)), s(:var, :a)),
+                s(:binary_oper, :'->', s(:cast, :'A*', s(:var, :self)), s(:var, :a)), s(:var, :a)),
             s(:return, s(:var, :self)))),
         main(
           decl_object(:var1),
