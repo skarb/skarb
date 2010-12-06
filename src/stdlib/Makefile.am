@@ -1,7 +1,7 @@
-public_headers=object.h helpers.h fixnum.h float.h types.h
+public_headers=object.h helpers.h fixnum.h float.h types.h xalloc.h
 nodist_rubycinclude_HEADERS=rubyc.h
 lib_LTLIBRARIES=librubyc.la
-librubyc_la_SOURCES=$(public_headers) fixnum.c xalloc.c xalloc.h helpers.c \
+librubyc_la_SOURCES=$(public_headers) fixnum.c xalloc.c helpers.c \
                     float.c object.c
 librubyc_la_CFLAGS=-I$(top_builddir)/gc-7.1/include
 librubyc_la_LIBADD=$(top_builddir)/gc-7.1/libgc.la

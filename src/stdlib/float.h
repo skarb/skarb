@@ -11,6 +11,6 @@ typedef struct {
 /**
  * Float#new
  */
-Float * Float_new(double value);
+Object * Float_new(double value);
 
 #endif /* FLOAT_H_ */
