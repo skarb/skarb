@@ -14,13 +14,8 @@ class Translator
       s()
     end
 
-    # TODO: comment
-    def translate_scope(sexp)
-       sexps = sexp.drop(1).map { |s| translate_generic_sexp s }
-       filtered_stmts(*sexps).with_value_sexp sexps.last.value_sexp
-    end
-
-    # TODO: comment
+    # Returns empty sexp with value of an constants
+    # TODO: Add support for non-class constants 
     # FIXME: should it really belong to Translator::Classes?
     def translate_const(sexp)
        s().with_value(sexp[1], sexp[1])
@@ -48,7 +43,7 @@ class Translator
       @structures_definitions[class_name] = structure_definition
     end
 
-    # TODO: comment
+    # Returns C constructor code for given class
     def class_constructor(class_name, constructor_name, init_args=[], init_body=[])
       s(:defn, :'Object*', constructor_name, s(:args, *init_args),
         s(:block,
