@@ -11,16 +11,14 @@ class Translator
     # Translates a call to the Kernel#puts method or a simple function defined
     # previously. All other calls cause an error.
     def translate_call(sexp)
-      class_name = get_class_name(sexp[1])
-      def_name = get_defined_function_name(sexp[2], class_name)
-      if sexp[2] == :puts
-        call_faked_puts sexp
-      elsif sexp[2] == :new
+      return call_faked_puts sexp if sexp[2] == :puts
+      def_name = get_defined_function_name(sexp[2], get_class_name(sexp[1]))
+      if sexp[2] == :new
         call_constructor def_name, sexp
       elsif function_is_defined? def_name
         call_defined_function def_name, sexp
       else
-        raise "Unknown function: #{sexp[1]}"
+        raise "Unknown function: #{sexp[2]}"
       end
     end
 
