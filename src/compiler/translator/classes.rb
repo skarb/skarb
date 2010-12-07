@@ -33,9 +33,9 @@ class Translator
     # Translates class definition.
     def translate_class(sexp)
       class_name=sexp[1]
-      parent_class=sexp[2]
       higher_class=@symbol_table.cclass
       @symbol_table.cclass=class_name
+      set_parent sexp if sexp[2]
       body = translate_generic_sexp(sexp[3])
 
       @symbol_table.cclass=higher_class
@@ -51,6 +51,14 @@ class Translator
 
     def translate_const(sexp)
        s().with_value(sexp[1], sexp[1])
+    end
+
+    private
+
+    # Sets the parent-child class relationship in the symbol table.
+    def set_parent(sexp)
+      raise 'Only constant inheritance is allowed' if sexp[2][0] != :const
+      @symbol_table.set_parent sexp[1], sexp[2][1]
     end
   end
 end

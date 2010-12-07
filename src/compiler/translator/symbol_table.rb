@@ -26,6 +26,20 @@ class SymbolTable < Hash
     self[@cclass][:ivars] ||= {}
   end
 
+  # Sets the parent class for a given symbol. Both args are symbols.
+  def set_parent(child, parent)
+    # Begin with checking whether we know both classes.
+    [child, parent].each { |cls| raise "Unknown class: #{cls}" if !self[cls] }
+    # The parent cannot be re-set.
+    raise "There's already a parent for #{child}" if self[child][:parent]
+    self[child][:parent] = parent
+  end
+
+  # Gets the parent class for a given symbol with a class name.
+  def parent(child)
+    self[child][:parent]
+  end
+
   # Setter for cfunction -- current function context
   def cfunction=(value)
     @cfunction = value

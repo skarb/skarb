@@ -11,14 +11,13 @@ class Translator
     # Translates a call to the Kernel#puts method or a simple function defined
     # previously. All other calls cause an error.
     def translate_call(sexp)
-      return call_faked_puts sexp if sexp[2] == :puts
-      def_name = get_defined_function_name(sexp[2], get_class_name(sexp[1]))
-      if sexp[2] == :new
+      if sexp[2] == :puts
+        call_faked_puts sexp
+      elsif sexp[2] == :new
+        def_name = get_defined_function_name(sexp[2], get_class_name(sexp[1]))
         call_constructor def_name, sexp
-      elsif function_is_defined? def_name
-        call_defined_function def_name, sexp
       else
-        raise "Unknown function: #{sexp[2]}"
+        look_up_and_call sexp
       end
     end
 
@@ -47,6 +46,17 @@ class Translator
     # Returns true if a given function (not a method!) has been already defined.
     def function_is_defined?(name)
       @functions_definitions.include? name
+    end
+
+    # Tries to find a method in the inheritance chain and call it.
+    def look_up_and_call(sexp)
+      type = get_class_name(sexp[1])
+      while type
+        name = get_defined_function_name(sexp[2], type)
+        return call_defined_function name, sexp if function_is_defined? name
+        type = @symbol_table.parent type
+      end
+      raise "Unknown function or method: #{sexp[2]}"
     end
 
     # Returns a sexp calling a defined function. If the function hasn't been
