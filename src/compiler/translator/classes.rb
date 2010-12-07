@@ -11,7 +11,7 @@ class Translator
         ivars_table.keys.map { |key| s(:decl, :'Object*', key.rest) }
       structure_definition =
         s(:typedef, s(:struct, nil,
-                      s(:block, s(:decl, :Object, :meta),                       
+                      s(:block, s(:decl, :Object, :meta),
                         *fields_declarations)), class_name)
       @structures_definitions[class_name] = structure_definition
     end
