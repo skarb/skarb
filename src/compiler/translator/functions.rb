@@ -11,8 +11,6 @@ class Translator
     # Translates a call to the Kernel#puts method or a simple function defined
     # previously. All other calls cause an error.
     def translate_call(sexp)
-      # Only simple functions without arguments are supported.
-      raise UnsupportedNodeError unless sexp[1].nil? or sexp[3].count > 1
       class_name = get_class_name(sexp[1])
       def_name = get_defined_function_name(sexp[2], class_name)
       if sexp[2] == :puts
