@@ -59,6 +59,17 @@ class SymbolTable < Hash
     retval
   end
 
+  # Executes a block in a given class context and resets the current class
+  # to the previous value.
+  def in_class(name)
+    raise 'Block expected' unless block_given?
+    prev_class = cclass
+    self.cclass = name
+    retval = yield
+    self.cclass = prev_class
+    retval
+  end
+
   # Adds a local variable in the current function context.
   def add_lvar(lvar)
     lvars_table[lvar] ||= {}

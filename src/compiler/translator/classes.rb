@@ -5,12 +5,10 @@ class Translator
     # Translates class definition.
     def translate_class(sexp)
       class_name=sexp[1]
-      higher_class=@symbol_table.cclass
-      @symbol_table.cclass=class_name
-      set_parent sexp if sexp[2]
-      body = translate_generic_sexp(sexp[3])
-
-      @symbol_table.cclass=higher_class
+      @symbol_table.in_class class_name do
+        set_parent sexp if sexp[2]
+        body = translate_generic_sexp(sexp[3])
+      end
       @user_classes << class_name
       # TODO: Build main function for class
       s()

@@ -78,10 +78,9 @@ class Translator
       impl_name = mangle(def_name, types.rest)
       # Have we got an implementation of this function for given args' types?
       unless function_is_implemented? impl_name
-        old_class = @symbol_table.cclass
-        @symbol_table.cclass = class_name
-        implement_function impl_name, defn, types
-        @symbol_table.cclass = old_class
+        @symbol_table.in_class class_name do
+          implement_function impl_name, defn, types
+        end
       end
       call = s(:call, impl_name,
                s(:args, *args_evaluation.map { |arg| arg.value_sexp } ))
@@ -108,10 +107,9 @@ class Translator
         types = args_evaluation.map { |arg| arg.value_type }
         impl_init_name = mangle(init_name, types)
         impl_name = mangle(def_name, types)
-        old_class = @symbol_table.cclass
-        @symbol_table.cclass = class_name
-        init_fun =  process_function_definition impl_init_name, defn, types
-        @symbol_table.cclass = old_class
+        init_fun = @symbol_table.in_class class_name do
+          process_function_definition impl_init_name, defn, types
+        end
         init_args = init_fun[3].rest(2)
         init_body = init_fun[4].rest.rest(-1)
         @functions_implementations[impl_name] =
