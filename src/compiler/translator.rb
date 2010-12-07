@@ -60,10 +60,8 @@ class Translator
   ReturnZero = s(:return, s(:lit, 0))
 
   # A sexp corresponding to allocation of global variables structure
-  AllocateSelf = s(:asgn,
-            s(:decl, :'Object*', :self),
-            s(:call, :xmalloc,
-              s(:args, s(:call, :sizeof, s(:args, s(:lit, MainObject))))))
+  AllocateSelf = s(:stmts, s(:decl, :'M_Object', :self_s),
+                 s(:asgn, s(:decl, :'Object*', :self), s(:var, :'&self_s')))
 
   # A list of headers to be included.
   Headers = %w/<stdio.h> <rubyc.h>/
@@ -106,6 +104,8 @@ class Translator
     sexps = sexp.drop(1).map { |s| translate_generic_sexp s }
     filtered_stmts(*sexps).with_value_of sexps.last
   end
+
+  alias :translate_scope :translate_block
 
   # Returns a block sexp with all stmts sexps expanded.
   def filtered_block(*args)
