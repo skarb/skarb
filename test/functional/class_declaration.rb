@@ -1,5 +1,7 @@
 #1
 #2
+class Empty
+end
 class A
   def initialize(a)
     @a=a
