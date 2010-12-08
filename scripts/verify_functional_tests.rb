@@ -6,6 +6,7 @@ ruby = ARGV.shift || 'ruby'
 def extract_expected_output(file)
   lines = File.open(file).readlines
   lines.shift if lines.first =~ /^#!/
+  lines.shift if lines.first =~ /^#encoding:/
   lines = lines.take_while{ |line| line =~ /^#/ }
   lines.map { |line| line.sub(/^#/, '') } .join
 end
