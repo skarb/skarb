@@ -32,8 +32,9 @@ class Translator
     # Generates a structure for class fields and class constructor after all
     # the methods were translates.
     def generate_class_structure(class_name)
-      # Build structure
       ivars_table = @symbol_table[class_name][:ivars]
+      parent_class = @symbol_table.parent class_name
+      ivars_table = ivars_table.merge(@symbol_table[parent_class][:ivars]) unless parent_class.nil?
       fields_declarations =
         ivars_table.keys.map { |key| s(:decl, :'Object*', key.rest) }
       structure_definition =

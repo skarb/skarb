@@ -53,7 +53,7 @@ class Translator
       type = get_class_name(sexp[1])
       while type
         name = get_defined_function_name(sexp[2], type)
-        return call_defined_function name, sexp if function_is_defined? name
+        return call_defined_function name, type, sexp if function_is_defined? name 
         type = @symbol_table.parent type
       end
       raise "Unknown function or method: #{sexp[2]}"
@@ -61,9 +61,8 @@ class Translator
 
     # Returns a sexp calling a defined function. If the function hasn't been
     # implemented yet implement_function is called.
-    def call_defined_function(def_name, sexp)
+    def call_defined_function(def_name, class_name, sexp)
       var = next_var_name
-      class_name = get_class_name(sexp[1])
       # Evaluate arguments. We need to know what their type is in order to call
       # appropriate overloaded function.
       if sexp[1].nil?

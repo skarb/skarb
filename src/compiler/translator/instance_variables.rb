@@ -23,7 +23,7 @@ class Translator
     # variable.
     def translate_ivar(sexp)
       unless @symbol_table.has_ivar? sexp[1]
-        die 'Use of uninitialized instance variable'
+        @symbol_table.add_ivar sexp[1]
       end
       str_name = sexp[1].to_s
       sname = str_name[1, str_name.length-1].to_sym
