@@ -8,6 +8,7 @@ require 'translator/local_variables'
 require 'translator/instance_variables'
 require 'translator/type_checks'
 require 'translator/classes'
+require 'translator/constants'
 
 # Responsible for transforming a Ruby AST to its C equivalent.
 # It performs tree traversal by recursive execution of functions
@@ -51,6 +52,7 @@ class Translator
   include InstanceVariables
   include TypeChecks
   include Classes
+  include Constants
 
   # Name of modified instance of Object class containing main program
   MainObject = :M_Object
@@ -80,19 +82,6 @@ class Translator
     else
       die 'Input contains unsupported Ruby instructions. Aborting.'
     end
-  end
-
-  # Translates a literal numeric to an empty block with a value equal to a :lit
-  # sexp equal to the given literal.
-  def translate_lit(sexp)
-    if sexp[1].floor == sexp[1]
-      # It's an integer
-      ctor = :Fixnum_new
-    else
-      # It's a float
-      ctor = :Float_new
-    end
-    s(:stmts).with_value(s(:call, ctor, s(:args, sexp)), sexp[1].class)
   end
 
   # Translates a block of expressions by translating all of them and returning a

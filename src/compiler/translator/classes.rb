@@ -14,13 +14,6 @@ class Translator
       s()
     end
 
-    # Returns empty sexp with value of an constants
-    # TODO: Add support for non-class constants
-    # FIXME: should it really belong to Translator::Classes?
-    def translate_const(sexp)
-       s().with_value(sexp[1], sexp[1])
-    end
-
     private
 
     # Sets the parent-child class relationship in the symbol table.
