@@ -23,6 +23,9 @@ class Translator
 
     # Translates a string literal.
     def translate_str(sexp)
+      sexp = sexp.clone
+      # No idea why does it need that many backslashes.
+      sexp[1] = sexp[1].gsub('\\', '\\\\\\').gsub("\n", "\\n")
       s(:stmts).with_value(s(:call, :String_new, s(:args, sexp)), String)
     end
   end
