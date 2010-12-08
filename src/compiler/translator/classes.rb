@@ -14,13 +14,6 @@ class Translator
       s()
     end
 
-    # Returns empty sexp with value of an constants
-    # TODO: Add support for non-class constants 
-    # FIXME: should it really belong to Translator::Classes?
-    def translate_const(sexp)
-       s().with_value(sexp[1], sexp[1])
-    end
-
     private
 
     # Sets the parent-child class relationship in the symbol table.
@@ -34,7 +27,7 @@ class Translator
     def generate_class_structure(class_name)
       ivars_table = @symbol_table[class_name][:ivars]
       parent_class = @symbol_table.parent class_name
-      ivars_table = ivars_table.merge(@symbol_table[parent_class][:ivars]) unless parent_class.nil?
+      ivars_table.merge! @symbol_table[parent_class][:ivars] unless parent_class.nil?
       fields_declarations =
         ivars_table.keys.map { |key| s(:decl, :'Object*', key.rest) }
       structure_definition =
@@ -56,7 +49,7 @@ class Translator
             s(:lit, @symbol_table[class_name][:id])))
       unless init_name.nil?
         block << s(:call, init_name,
-                   s(:args, s(:var, :self),                                    
+                   s(:args, s(:var, :self),
                       *(init_args.map { |x| s(:var, x[2]) })))
       end
       block << s(:return, s(:var, :self))

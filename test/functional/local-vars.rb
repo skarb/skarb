@@ -4,7 +4,7 @@
 #4
 #4
 #4
-#6
+#hopsasa
 #7.3
 a = 1
 puts a
@@ -17,7 +17,7 @@ b = 5 unless a
 puts b
 a = b
 puts a
-b = 6
+b = "hopsasa"
 puts a
 puts b
 b = 7.3

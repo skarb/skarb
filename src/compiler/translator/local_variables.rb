@@ -20,7 +20,7 @@ class Translator
     # variable.
     def translate_lvar(sexp)
       unless @symbol_table.has_lvar? sexp[1]
-        @symbol_table.add_lvar sexp[1] 
+        @symbol_table.add_lvar sexp[1]
       end
       s(:stmts).with_value(s(:var, sexp[1]), @symbol_table.get_lvar_type(sexp[1]))
     end

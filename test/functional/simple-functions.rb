@@ -5,15 +5,15 @@
 #3
 #7
 #9
-#6
-#6
+#a co to?
+#a co to?
 #87
 #93
 #13
 #13
 #132
-#12
-#12
+#qweasd
+#qweasd
 #3
 #4.5
 def fun
@@ -30,7 +30,7 @@ end
 def fun3
   puts 7
   def fun4
-    puts 6
+    puts "a co to?"
   end
   puts 9
   fun4
@@ -50,7 +50,7 @@ fun
 fun3
 fun4
 fun5 87
-fun6 13, 29, 93
-fun6 12, 43, 132
+fun6 13, "foobar", 93
+fun6 'qweasd', 43, 132
 puts fun7 3
 puts fun7 4.5

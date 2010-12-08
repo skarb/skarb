@@ -13,7 +13,7 @@ class Parent
   def set_y(value)
     @y = value
   end
-  
+
   def get_y
     @y
   end
