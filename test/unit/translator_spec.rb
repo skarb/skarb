@@ -291,21 +291,26 @@ describe Translator do
         s(:typedef,
           s(:struct, nil,
             s(:block, s(:decl, :Object, :meta), decl(:a))), :A),
+        s(:prototype, :'Object*', :A_initialize_Fixnum, s(:args, decl(:self), decl(:a))),
         s(:prototype, :'Object*', :A_new_Fixnum, s(:args, decl(:a))),
+        s(:defn, :'Object*', :A_initialize_Fixnum, s(:args, decl(:self), decl(:a)),
+          s(:block,
+            s(:asgn,
+               s(:binary_oper, :'->', s(:cast, :'A*', s(:var, :self)), s(:var, :a)), s(:var, :a)),
+            s(:return, s(:binary_oper, :'->', s(:cast, :'A*', s(:var, :self)), s(:var, :a))))),
         s(:defn, :'Object*', :A_new_Fixnum, s(:args, decl(:a)),
           s(:block,
             s(:asgn, decl(:self),
-                     s(:call, :xmalloc,
-                       s(:args, s(:call, :sizeof, s(:args, s(:lit, :A)))))),
-              s(:asgn,
-                s(:binary_oper, :'->', s(:var, :self), s(:var, :type)), s(:lit, 5)),
-              s(:asgn,
-                s(:binary_oper, :'->', s(:cast, :'A*', s(:var, :self)), s(:var, :a)), s(:var, :a)),
+              s(:call, :xmalloc,
+                s(:args, s(:call, :sizeof, s(:args, s(:lit, :A)))))),
+            s(:asgn,
+              s(:binary_oper, :'->', s(:var, :self), s(:var, :type)), s(:lit, 5)),
+                s(:call, :A_initialize_Fixnum, s(:args, s(:var, :self), s(:var, :a))),
             s(:return, s(:var, :self)))),
         main(
-          decl(:var1),
-          s(:asgn, s(:var, :var1),
-            s(:call, :'A_new_Fixnum', s(:args, fixnum_new(1))))))
+         decl(:var1),
+         s(:asgn, s(:var, :var1),
+         s(:call, :'A_new_Fixnum', s(:args, fixnum_new(1))))))
   end
 
 end

@@ -44,18 +44,22 @@ class Translator
     end
 
     # Returns C constructor code for given class
-    def class_constructor(class_name, constructor_name, init_args=[], init_body=[])
-      s(:defn, :'Object*', constructor_name, s(:args, *init_args),
-        s(:block,
+    def class_constructor(class_name, constructor_name, init_name=nil, init_args=[])
+      block = s(:block,
           s(:asgn,
             s(:decl, :'Object*', :self),
             s(:call, :xmalloc,
               s(:args, s(:call, :sizeof, s(:args, s(:lit, class_name)))))),
           s(:asgn,
             s(:binary_oper, :'->', s(:var, :self), s(:var, :type)),
-            s(:lit, @symbol_table[class_name][:id])),
-          *init_body,
-          s(:return, s(:var, :self))))
+            s(:lit, @symbol_table[class_name][:id])))
+      unless init_name.nil?
+        block << s(:call, init_name,
+                   s(:args, s(:var, :self),                                    
+                      *(init_args.map { |x| s(:var, x[2]) })))
+      end
+      block << s(:return, s(:var, :self))
+      s(:defn, :'Object*', constructor_name, s(:args, *init_args), block)
     end
   end
 end

@@ -108,12 +108,12 @@ class Translator
         impl_init_name = mangle(init_name, types)
         impl_name = mangle(def_name, types)
         init_fun = @symbol_table.in_class class_name do
-          process_function_definition impl_init_name, defn, types
+          implement_function impl_init_name, defn, types
         end
         init_args = init_fun[3].rest(2)
         init_body = init_fun[4].rest.rest(-1)
         @functions_implementations[impl_name] =
-          class_constructor(class_name, impl_name, init_args, init_body)
+          class_constructor(class_name, impl_name, impl_init_name, init_args)
       else
         args_evaluation=[]
         impl_name = mangle(def_name, [])
