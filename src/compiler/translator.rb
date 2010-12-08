@@ -38,8 +38,7 @@ class Translator
     protos = @functions_implementations.values.map do |fun|
       s(:prototype, *fun[1,3])
     end
-    includes = Headers.map { |h| s(:include, h) }
-    s(:file, *includes, *@structures_definitions.values,
+    s(:file, s(:include, '<rubyc.h>'), *@structures_definitions.values,
       *protos, *@functions_implementations.values, main)
   end
 
@@ -63,9 +62,6 @@ class Translator
   AllocateSelf = s(:stmts, s(:decl, :'M_Object', :self_s),
                  s(:asgn, s(:decl, :'Object*', :self),
                    s(:cast, :'Object*', s(:var, :'&self_s'))))
-
-  # A list of headers to be included.
-  Headers = %w/<stdio.h> <rubyc.h>/
 
   # Wraps a given body with a 'main' function. The body is expected to be a
   # collection of Sexp instances.

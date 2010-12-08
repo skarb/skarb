@@ -26,15 +26,15 @@ describe Translator do
     @translator.send :add_complex_type_check, var, type2code_hash
   end
 
-  # Returns an array of expected included headers
-  def includes
-    %w/<stdio.h> <rubyc.h>/.map { |h| s(:include, h) }
+  # Returns a sexp including the rubyc.h header.
+  def include_rubyc
+    s(:include, '<rubyc.h>')
   end
 
   # Returns a sexp representing a whole C program with a given body of the
   # 'main' function.
   def program(*body)
-    s(:file, *includes, struct_M_Object,
+    s(:file, include_rubyc, struct_M_Object,
       main(*body))
   end
 
@@ -197,7 +197,7 @@ describe Translator do
   it 'should translate a function without arguments' do
     translate_code('def fun; 5; end; fun').should ==
       s(:file,
-        *includes, struct_M_Object,
+        include_rubyc, struct_M_Object,
         s(:prototype, :'Object*', :"M_Object_fun", s(:args, decl(:self))),
         s(:defn, :'Object*', :"M_Object_fun", s(:args, decl(:self)), s(:block,
                                               s(:return, fixnum_new(5)))),
@@ -209,7 +209,7 @@ describe Translator do
   it 'should translate a function without arguments called twice' do
     translate_code('def fun; 5; end; fun; fun').should ==
       s(:file,
-        *includes, struct_M_Object,
+        include_rubyc, struct_M_Object,
         s(:prototype, :'Object*', :"M_Object_fun", s(:args, decl(:self))),
         s(:defn, :'Object*', :"M_Object_fun", s(:args, decl(:self)), s(:block,
                                               s(:return, fixnum_new(5)))),
@@ -223,7 +223,7 @@ describe Translator do
   it 'should translate an assignment to an instance variable' do
     translate_code('@a=@a').should ==
       s(:file,
-        *includes, struct_M_Object(decl(:a)),
+        include_rubyc, struct_M_Object(decl(:a)),
         main(s(:asgn, s(:binary_oper, :'->', s(:cast, :'M_Object*', s(:var, :self)), s(:var, :a)),
                 s(:binary_oper, :'->', s(:cast, :'M_Object*', s(:var, :self)), s(:var, :a)))))
   end
@@ -276,7 +276,7 @@ describe Translator do
     args = s(:args, decl(:self), decl(:x))
     translate_code('def fun(x); x; end; fun 3').should ==
       s(:file,
-        *includes, struct_M_Object,
+        include_rubyc, struct_M_Object,
         s(:prototype, :'Object*', :"M_Object_fun_Fixnum", args),
         s(:defn, :'Object*', :"M_Object_fun_Fixnum", args, s(:block,
                                           s(:return, s(:var, :x)))),
@@ -289,7 +289,7 @@ describe Translator do
   it 'should translate class declaration' do
     translate_code('class A; def initialize(a); @a=a; end; end; A.new(1)').should ==
       s(:file,
-        *includes, struct_M_Object,
+        include_rubyc, struct_M_Object,
         s(:typedef,
           s(:struct, nil,
             s(:block, s(:decl, :Object, :meta), decl(:a))), :A),
