@@ -61,7 +61,8 @@ class Translator
 
   # A sexp corresponding to allocation of global variables structure
   AllocateSelf = s(:stmts, s(:decl, :'M_Object', :self_s),
-                 s(:asgn, s(:decl, :'Object*', :self), s(:var, :'&self_s')))
+                 s(:asgn, s(:decl, :'Object*', :self),
+                   s(:cast, :'Object*', s(:var, :'&self_s'))))
 
   # A list of headers to be included.
   Headers = %w/<stdio.h> <rubyc.h>/

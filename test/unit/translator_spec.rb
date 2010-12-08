@@ -52,7 +52,8 @@ describe Translator do
     s(:defn, :int, :main, args,
       s(:block,
        s(:decl, :'M_Object', :self_s),
-       s(:asgn, s(:decl, :'Object*', :self), s(:var, :'&self_s')),
+       s(:asgn, s(:decl, :'Object*', :self),
+         s(:cast, :'Object*', s(:var, :'&self_s'))),
        *body, s(:return, s(:lit, 0))))
   end
 

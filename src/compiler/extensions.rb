@@ -36,13 +36,9 @@ class ::Sexp
   # Syntactic sugar. Sets the value_sexp and value_type to ones of a given sexp
   # and returns self.
   def with_value_of(other_sexp)
-    if other_sexp.nil?
-      @value_type = nil
-      @value_sexp = nil
-    else
-      @value_type = other_sexp.value_type
-      @value_sexp = other_sexp.value_sexp
-    end
+    return if other_sexp.nil?
+    @value_type = other_sexp.value_type
+    @value_sexp = other_sexp.value_sexp
     self
   end
 end
