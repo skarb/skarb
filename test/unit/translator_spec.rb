@@ -38,6 +38,7 @@ describe Translator do
       main(*body))
   end
 
+  # A sexp defining the main object with given fields' declarations.
   def struct_M_Object(*fields_declarations)
       s(:typedef, s(:struct, nil,
         s(:block, s(:decl, :Object, :meta),                       
