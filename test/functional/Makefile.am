@@ -12,7 +12,8 @@ TESTSCRIPTS = if.rb \
               local-vars.rb \
               overloading-functions.rb \
               class_declaration.rb \
-              inheritance.rb
+              inheritance.rb \
+              strings.rb
 TESTS_ENVIRONMENT = RUBYC_PATH=$(top_builddir)/src/compiler/rubyc.rb \
                     CFLAGS="-I$(top_builddir)/src/stdlib" \
                     LD_LIBRARY_PATH="$(top_builddir)/src/stdlib/.libs" \
