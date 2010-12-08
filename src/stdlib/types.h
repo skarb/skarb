@@ -8,6 +8,7 @@ enum {
   Object_t = 0,
   Fixnum_t,
   Float_t,
+  String_t,
   /**
    * The following identifier is the first value which can be used for
    * user-defined types.

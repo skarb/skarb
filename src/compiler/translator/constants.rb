@@ -20,5 +20,10 @@ class Translator
       end
       s(:stmts).with_value(s(:call, ctor, s(:args, sexp)), sexp[1].class)
     end
+
+    # Translates a string literal.
+    def translate_str(sexp)
+      s(:stmts).with_value(s(:call, :String_new, s(:args, sexp)), String)
+    end
   end
 end
