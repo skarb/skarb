@@ -15,7 +15,7 @@ class Translator
     end
 
     # Returns empty sexp with value of an constants
-    # TODO: Add support for non-class constants 
+    # TODO: Add support for non-class constants
     # FIXME: should it really belong to Translator::Classes?
     def translate_const(sexp)
        s().with_value(sexp[1], sexp[1])
@@ -56,7 +56,7 @@ class Translator
             s(:lit, @symbol_table[class_name][:id])))
       unless init_name.nil?
         block << s(:call, init_name,
-                   s(:args, s(:var, :self),                                    
+                   s(:args, s(:var, :self),
                       *(init_args.map { |x| s(:var, x[2]) })))
       end
       block << s(:return, s(:var, :self))

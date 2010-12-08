@@ -53,7 +53,7 @@ class Translator
       type = get_class_name(sexp[1])
       while type
         name = get_defined_function_name(sexp[2], type)
-        return call_defined_function name, type, sexp if function_is_defined? name 
+        return call_defined_function name, type, sexp if function_is_defined? name
         type = @symbol_table.parent type
       end
       raise "Unknown function or method: #{sexp[2]}"
@@ -125,7 +125,7 @@ class Translator
         filtered_stmts(*args_evaluation),
         s(:decl, :'Object*', var),
         s(:asgn, s(:var, var), call)
-      ).with_value s(:var, var), class_name 
+      ).with_value s(:var, var), class_name
     end
 
     def get_class_name(class_expr)
