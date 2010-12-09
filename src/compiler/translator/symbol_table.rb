@@ -70,9 +70,11 @@ class SymbolTable < Hash
     retval
   end
 
-  # Adds a local variable in the current function context.
+  # Adds a local variable in the current function context and sets its kind
+  # as default (:local)
   def add_lvar(lvar)
     lvars_table[lvar] ||= {}
+    lvars_table[lvar][:kind] = :local
   end
 
   # Checks whether we've got a given local variable in the current function
@@ -85,6 +87,12 @@ class SymbolTable < Hash
   # context.
   def set_lvar_type(lvar, type)
     lvars_table[lvar][:type] = type
+  end
+
+  # Marks the given local variable in the current function context as one
+  # of given type (:local or :param)
+  def set_lvar_kind(lvar, kind)
+    lvars_table[lvar][:kind] = kind
   end
 
   # Returns the type for the given local variable in the current function
@@ -136,6 +144,11 @@ class SymbolTable < Hash
     self[@cclass]
   end
 
+  # The hash of local variables in the current function context.
+  def lvars_table
+    self[@cclass][:functions][@cfunction][:lvars]
+  end
+
   private
 
   # The hash of methods in the current class context.
@@ -143,11 +156,7 @@ class SymbolTable < Hash
     self[@cclass][:functions]
   end
 
-  # The hash of local variables in the current function context.
-  def lvars_table
-    self[@cclass][:functions][@cfunction][:lvars]
-  end
-
+  
   # Each call to this method returns a new, unique id.
   def next_id
     @next_id ||= 0

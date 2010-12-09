@@ -32,7 +32,8 @@ class Translator
   # Analyses a given Ruby AST tree and returns a C AST. Both the argument and
   # the returned value are Sexps from the sexp_processor gem.
   def translate(sexp)
-    main = main_function AllocateSelf, translate_generic_sexp(sexp), ReturnZero
+    main_block = translate_generic_sexp(sexp)
+    main = main_function AllocateSelf, *lvars_declarations, main_block, ReturnZero
     # If there are any functions other than main they have to be included in
     # the output along with their prototypes.
     @user_classes.each { |x| generate_class_structure x }

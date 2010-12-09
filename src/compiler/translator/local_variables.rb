@@ -9,10 +9,9 @@ class Translator
       arg = translate_generic_sexp(sexp[2])
       unless @symbol_table.has_lvar? sexp[1]
         @symbol_table.add_lvar sexp[1]
-        decl = s(:decl, :'Object*', sexp[1])
       end
       @symbol_table.set_lvar_type sexp[1], arg.value_type
-      filtered_stmts(decl, arg, s(:asgn, s(:var, sexp[1]), arg.value_sexp))
+      filtered_stmts(arg, s(:asgn, s(:var, sexp[1]), arg.value_sexp))
       .with_value(s(:var, sexp[1]), arg.value_type)
     end
 

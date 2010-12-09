@@ -21,6 +21,14 @@ class Translator
       end
     end
 
+    # Returns an array containing local variables declarations (but not
+    # parameters since they are already defined)
+    def lvars_declarations
+      selector = lambda { |k,v| v[:kind] == :local }
+      mapper = lambda { |k| s(:decl, :'Object*', k.first) }
+      @symbol_table.lvars_table.select(&selector).map(&mapper)
+    end
+
     # Calls Object_Object_puts.
     def call_faked_puts(sexp)
       value = sexp[3][1]
@@ -160,11 +168,12 @@ class Translator
         ([:self] + defn[2].drop(1)).zip args_types do |arg, type|
           @symbol_table.add_lvar arg
           @symbol_table.set_lvar_type arg, type
+          @symbol_table.set_lvar_kind arg, :param
           defn_args << s(:decl, :'Object*', arg)
         end
         translate_generic_sexp(defn[3][1])
       end
-      body_block = filtered_block(body, s(:return, body.value_sexp))
+      body_block = filtered_block(*lvars_declarations, body, s(:return, body.value_sexp))
       s(:defn, :'Object*', impl_name, defn_args, body_block
        ).with_value_type body.value_type
     end
