@@ -188,12 +188,6 @@ describe Translator do
       program(decl(:b), s(:asgn, s(:var, :b), fixnum_new(2)))
   end
 
-  it 'should translate local assignment to known variable' do
-    translate_code_only('b=1')
-    translate_code('b=2').should ==
-      program(s(:asgn, s(:var, :b), fixnum_new(2)))
-  end
-
   it 'should translate a function without arguments' do
     translate_code('def fun; 5; end; fun').should ==
       s(:file,
@@ -313,6 +307,18 @@ describe Translator do
          decl(:var1),
          s(:asgn, s(:var, :var1),
          s(:call, :'A_new_Fixnum', s(:args, fixnum_new(1))))))
+  end
+
+  it 'should put variables declaration at the beggining of a function' do
+    translate_code('b = 0; a = if b; a = 1; b = 2; end;').should ==
+      program(decl(:b),decl(:a),s(:asgn, s(:var, :b), fixnum_new(0)),
+              decl(:var1),
+              s(:if, boolean_value(s(:var, :b)),
+                s(:block,
+                  s(:asgn, s(:var, :a), fixnum_new(1)),
+                  s(:asgn, s(:var, :b), fixnum_new(2)),
+                  s(:asgn, s(:var, :var1), s(:var, :b)))),
+              s(:asgn, s(:var, :a), s(:var, :var1)))
   end
 
 end
