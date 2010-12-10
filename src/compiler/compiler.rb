@@ -136,6 +136,6 @@ class Compiler
   # Returns flags used during linking, including the LDFLAGS environment
   # variable.
   def ldflags
-    "-lrubyc #{ENV['LDFLAGS']}"
+    "-L#{Configuration::LibDir} -lrubyc #{ENV['LDFLAGS']}"
   end
 end

@@ -6,7 +6,9 @@ dist_pkgdata_DATA = compiler.rb emitter.rb helpers.rb parser.rb translator.rb \
 dist_noinst_DATA = rubyc.rb.in config.rb.in
 
 config.rb: config.rb.in
-	sed -e s:RUBYC_INCLUDE_DIR:$(rubycincludedir):g $< > $@
+	sed -e s:RUBYC_INCLUDE_DIR:$(rubycincludedir):g \
+		-e s:RUBYC_LIB_DIR:$(libdir):g \
+		$< > $@
 
 rubyc.rb: rubyc.rb.in
 	sed -e s:RUBY_PATH:$(RUBY):g -e s:RUBYC_LIBDIR:$(pkgdatadir):g $< > $@
