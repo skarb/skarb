@@ -6,6 +6,7 @@
 #4
 #hopsasa
 #7.3
+#3
 a = 1
 puts a
 a = 2
@@ -22,3 +23,11 @@ puts a
 puts b
 b = 7.3
 puts b
+if not 2
+  a_symbol_previously_unused = 5
+else
+  a_symbol_previously_unused = 3
+end
+if 1
+  puts a_symbol_previously_unused
+end
