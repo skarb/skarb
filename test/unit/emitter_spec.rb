@@ -190,6 +190,19 @@ describe Emitter do
     emit(s(:cast, :abc, s(:var, :b))).should == '(abc)b'
   end
 
+  it 'should emit array initialization block' do
+    emit(s(:init_block, s(:lit, 1), s(:lit, 2))).should ==
+      '{1,2}'
+  end
+
+  it 'should emit single element array initialization block' do
+    emit(s(:init_block, s(:lit, 1))).should ==
+      '{1}'
+  end
+  it 'should emit empty array initialization block' do
+    emit(s(:init_block)).should == '{}'
+  end
+
   it 'should not accept a sexp with an unexpected type' do
     expect do
       emit s(:no_such_sexp)

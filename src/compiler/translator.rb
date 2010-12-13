@@ -8,6 +8,7 @@ require 'translator/local_variables'
 require 'translator/instance_variables'
 require 'translator/type_checks'
 require 'translator/classes'
+require 'translator/classes_dict'
 require 'translator/constants'
 
 # Responsible for transforming a Ruby AST to its C equivalent.
@@ -39,7 +40,8 @@ class Translator
     protos = @functions_implementations.values.map do |fun|
       s(:prototype, *fun[1,3])
     end
-    s(:file, s(:include, '<rubyc.h>'), *@structures_definitions.values,
+    s(:file, s(:include, '<rubyc.h>'), generate_elem_struct,
+      generate_dict_init, *@structures_definitions.values,
       *protos, *@functions_implementations.values, main)
   end
 
@@ -52,6 +54,7 @@ class Translator
   include InstanceVariables
   include TypeChecks
   include Classes
+  include ClassesDictionary
   include Constants
 
   # Name of modified instance of Object class containing main program

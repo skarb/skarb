@@ -9,7 +9,6 @@ class SymbolTable < Hash
   attr_reader :cclass, :cfunction
 
   def initialize
-    @function_name2id = {}
     self.cclass = Translator::MainObject
     self.cfunction = :_main
   end
@@ -75,7 +74,6 @@ class SymbolTable < Hash
   # Adds function in the current class context
   def add_function(fun, sexp)
     self[@cclass][:functions_def][fun] = sexp
-    @function_name2id[fun] ||= next_id 
   end
 
   # Check if function with given name is defined for current class
