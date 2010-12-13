@@ -1,5 +1,5 @@
 SUBDIRS = emitter translator
-nodist_bin_SCRIPTS = rubyc.rb
+nodist_bin_SCRIPTS = rubyc
 nodist_pkgdata_DATA = config.rb
 dist_pkgdata_DATA = compiler.rb emitter.rb helpers.rb parser.rb translator.rb \
                     extensions.rb
@@ -10,8 +10,8 @@ config.rb: config.rb.in
 		-e s:RUBYC_LIB_DIR:$(libdir):g \
 		$< > $@
 
-rubyc.rb: rubyc.rb.in
+rubyc: rubyc.rb.in
 	sed -e s:RUBY_PATH:$(RUBY):g -e s:RUBYC_LIBDIR:$(pkgdatadir):g $< > $@
 
 clean-local:
-	rm -f config.rb rubyc.rb
+	rm -f config.rb rubyc
