@@ -9,6 +9,9 @@ describe Translator do
     @rp = RubyParser.new
   end
 
+  # Temporal solution
+  StandardClassesCount = 4
+
   # Parses given Ruby code and passes it to the Translator.
   def translate_code(code)
     @translator.translate @rp.parse code
@@ -30,11 +33,33 @@ describe Translator do
   def include_rubyc
     s(:include, '<rubyc.h>')
   end
+  
+  # Returns sexp containing dict_elem struct definition
+  def dict_elem
+    s(:typedef,
+      s(:struct,
+       nil,
+       s(:block,
+        s(:decl, :uint32_t, :parent),
+        s(:decl, :"void*", :method_table),
+         s(:decl, :"void*", :fields_table))),
+       :dict_elem)
+  end
+
+  # Returns sexp containing class dictionary definition
+  def class_dict(custom_classes_count = 0)
+     init_blocks = (StandardClassesCount + custom_classes_count).times.map do
+       s(:init_block, s(:lit, 0), s(:lit, :NULL), s(:lit, :NULL))
+     end
+     s(:asgn,
+       s(:decl, :dict_elem, :'classes_dictionary[]'),
+       s(:init_block, *init_blocks))
+  end 
 
   # Returns a sexp representing a whole C program with a given body of the
   # 'main' function.
   def program(*body)
-    s(:file, include_rubyc, struct_M_Object,
+    s(:file, include_rubyc, dict_elem, class_dict, struct_M_Object,
       main(*body))
   end
 
@@ -191,7 +216,7 @@ describe Translator do
   it 'should translate a function without arguments' do
     translate_code('def fun; 5; end; fun').should ==
       s(:file,
-        include_rubyc, struct_M_Object,
+        include_rubyc, dict_elem, class_dict, struct_M_Object,
         s(:prototype, :'Object*', :"M_Object_fun", s(:args, decl(:self))),
         s(:defn, :'Object*', :"M_Object_fun", s(:args, decl(:self)), s(:block,
                                               s(:return, fixnum_new(5)))),
@@ -203,7 +228,7 @@ describe Translator do
   it 'should translate a function without arguments called twice' do
     translate_code('def fun; 5; end; fun; fun').should ==
       s(:file,
-        include_rubyc, struct_M_Object,
+        include_rubyc, dict_elem, class_dict, struct_M_Object,
         s(:prototype, :'Object*', :"M_Object_fun", s(:args, decl(:self))),
         s(:defn, :'Object*', :"M_Object_fun", s(:args, decl(:self)), s(:block,
                                               s(:return, fixnum_new(5)))),
@@ -217,7 +242,7 @@ describe Translator do
   it 'should translate an assignment to an instance variable' do
     translate_code('@a=@a').should ==
       s(:file,
-        include_rubyc, struct_M_Object(decl(:a)),
+        include_rubyc, dict_elem, class_dict, struct_M_Object(decl(:a)),
         main(s(:asgn, s(:binary_oper, :'->', s(:cast, :'M_Object*', s(:var, :self)), s(:var, :a)),
                 s(:binary_oper, :'->', s(:cast, :'M_Object*', s(:var, :self)), s(:var, :a)))))
   end
@@ -270,7 +295,7 @@ describe Translator do
     args = s(:args, decl(:self), decl(:x))
     translate_code('def fun(x); x; end; fun 3').should ==
       s(:file,
-        include_rubyc, struct_M_Object,
+        include_rubyc, dict_elem, class_dict, struct_M_Object,
         s(:prototype, :'Object*', :"M_Object_fun_Fixnum", args),
         s(:defn, :'Object*', :"M_Object_fun_Fixnum", args, s(:block,
                                           s(:return, s(:var, :x)))),
@@ -283,7 +308,7 @@ describe Translator do
   it 'should translate class declaration' do
     translate_code('class A; def initialize(a); @a=a; end; end; A.new(1)').should ==
       s(:file,
-        include_rubyc, struct_M_Object,
+        include_rubyc, dict_elem, class_dict(1), struct_M_Object,
         s(:typedef,
           s(:struct, nil,
             s(:block, s(:decl, :Object, :meta), decl(:a))), :A),
