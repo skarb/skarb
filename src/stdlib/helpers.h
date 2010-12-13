@@ -8,4 +8,9 @@
  */
 int boolean_value(Object *object);
 
+/**
+ * Returns a logical negation of the value of a given object.
+ */
+Object * not(Object *object);
+
 #endif /* HELPERS_H_ */

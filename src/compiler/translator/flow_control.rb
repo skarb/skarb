@@ -4,10 +4,8 @@ class Translator
   module FlowControl
     def translate_if(sexp)
       # Rewrite the sexp if it's an unless expression.
-      boolean_value_applied = false
       if sexp[2].nil?
         sexp = s(:if, s(:not, sexp[1]), sexp[3], nil)
-        boolean_value_applied = true
       end
       return translate_if_else sexp if sexp[3]
       var = next_var_name
@@ -16,7 +14,7 @@ class Translator
       filtered_stmts(
         s(:decl, :'Object*', var),
         cond,
-        s(:if, (boolean_value_applied ? cond.value_sexp: boolean_value(cond.value_sexp)),
+        s(:if, boolean_value(cond.value_sexp),
           filtered_block(if_true, s(:asgn, s(:var, var), if_true.value_sexp)))
       ).with_value_sexp s(:var, var)
     end

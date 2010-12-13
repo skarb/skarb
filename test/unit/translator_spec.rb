@@ -102,7 +102,7 @@ describe Translator do
     translate_code('unless 1; 2 end').should ==
       program(decl(:var1),
              s(:if,
-               s(:l_unary_oper, :!, boolean_value(fixnum_new(1))),
+               boolean_value(s(:call , :not, s(:args, fixnum_new(1)))),
                s(:block, s(:asgn, s(:var, :var1), fixnum_new(2)))))
   end
 
@@ -125,6 +125,20 @@ describe Translator do
                   decl(:var2),
                   s(:if,
                     boolean_value(fixnum_new(5)),
+                    s(:block, s(:asgn, s(:var, :var2), fixnum_new(3)))
+                   ), s(:asgn, s(:var, :var1), s(:var, :var2)))))
+  end
+
+  it 'should translate if elsif not' do
+    translate_code('if 1; 2 elsif not 5; 3 end').should ==
+      program(decl(:var1),
+              s(:if,
+                boolean_value(fixnum_new(1)),
+                s(:block, s(:asgn, s(:var, :var1), fixnum_new(2))),
+                s(:block,
+                  decl(:var2),
+                  s(:if,
+                    boolean_value(s(:call, :not, s(:args, fixnum_new(5)))),
                     s(:block, s(:asgn, s(:var, :var2), fixnum_new(3)))
                    ), s(:asgn, s(:var, :var1), s(:var, :var2)))))
   end
