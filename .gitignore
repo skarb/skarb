@@ -15,6 +15,14 @@ config.status
 config.sub
 configure
 depcomp
+doc/*.aux
+doc/*.last_version
+doc/*.log
+doc/*.mtime
+doc/*.out
+doc/*.pdf
+doc/*.toc
+doc/*.versions
 doc/rdoc
 gc-7.1
 gc-7.1.tar.gz
