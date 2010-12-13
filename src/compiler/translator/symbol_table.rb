@@ -9,6 +9,7 @@ class SymbolTable < Hash
   attr_reader :cclass, :cfunction
 
   def initialize
+    @function_name2id = {}
     self.cclass = Translator::MainObject
     self.cfunction = :_main
   end
@@ -23,6 +24,7 @@ class SymbolTable < Hash
     @cclass = value
     add_class @cclass
     self[@cclass][:functions] ||= {}
+    self[@cclass][:functions_def] ||= {}
     self[@cclass][:ivars] ||= {}
   end
 
@@ -68,6 +70,17 @@ class SymbolTable < Hash
     retval = yield
     self.cclass = prev_class
     retval
+  end
+
+  # Adds function in the current class context
+  def add_function(fun, sexp)
+    self[@cclass][:functions_def][fun] = sexp
+    @function_name2id[fun] ||= next_id 
+  end
+
+  # Check if function with given name is defined for current class
+  def has_function?(name)
+    self[@cclass][:functions_def].has_key? name 
   end
 
   # Adds a local variable in the current function context and sets its kind
@@ -150,12 +163,11 @@ class SymbolTable < Hash
   end
 
   private
-
+  
   # The hash of methods in the current class context.
   def functions_table
     self[@cclass][:functions]
   end
-
   
   # Each call to this method returns a new, unique id.
   def next_id

@@ -14,8 +14,7 @@ class Translator
       if sexp[2] == :puts
         call_faked_puts sexp
       elsif sexp[2] == :new
-        def_name = get_defined_function_name(sexp[2], get_class_name(sexp[1]))
-        call_constructor def_name, sexp
+        call_constructor sexp[2], sexp
       else
         look_up_and_call sexp
       end
@@ -44,24 +43,24 @@ class Translator
     # statements sexp.
     def translate_defn(sexp)
       class_name = @symbol_table.cclass
-      def_name = get_defined_function_name(sexp[1], class_name)
-      @functions_definitions[def_name] = sexp
+      @symbol_table.add_function sexp[1], sexp
       s(:stmts)
     end
 
     private
 
-    # Returns true if a given function (not a method!) has been already defined.
-    def function_is_defined?(name)
-      @functions_definitions.include? name
+    # Returns true if a given function (method) has been already defined.
+    def function_defined?(name, type = @symbol_table.cclass)
+      @symbol_table[type][:functions_def].has_key? name
     end
 
     # Tries to find a method in the inheritance chain and call it.
     def look_up_and_call(sexp)
       type = get_class_name(sexp[1])
       while type
-        name = get_defined_function_name(sexp[2], type)
-        return call_defined_function name, type, sexp if function_is_defined? name
+        if function_defined? sexp[2], type
+          return call_defined_function sexp[2], type, sexp
+        end
         type = @symbol_table.parent type
       end
       raise "Unknown function or method: #{sexp[2]}"
@@ -80,11 +79,11 @@ class Translator
       end
       args_evaluation += sexp[3].rest.map { |arg_sexp| translate_generic_sexp arg_sexp }
       # Get the defn sexp in which the function has been defined.
-      defn = @functions_definitions[def_name]
+      defn = @symbol_table[class_name][:functions_def][def_name]
       types = args_evaluation.map { |arg| arg.value_type }
-      impl_name = mangle(def_name, types.rest)
+      impl_name = mangle(def_name, class_name, types.rest)
       # Have we got an implementation of this function for given args' types?
-      unless function_is_implemented? impl_name
+      unless function_implemented? impl_name
         @symbol_table.in_class class_name do
           implement_function impl_name, defn, types
         end
@@ -103,17 +102,16 @@ class Translator
     def call_constructor(def_name, sexp)
       var = next_var_name
       class_name = get_class_name(sexp[1])
-      init_name = get_defined_function_name(:initialize, class_name)
-      if function_is_defined? init_name
+      if function_defined? :initialize, class_name 
         # Evaluate arguments. We need to know what their type is in order to call
         # appropriate overloaded function.
         args_evaluation = sexp[3].rest.map { |arg_sexp| translate_generic_sexp arg_sexp }
         # Get the defn sexp in which the function has been defined.
-        defn = @functions_definitions[init_name]
+        defn = @symbol_table[class_name][:functions_def][:initialize]
         # Get types of arguments.
         types = args_evaluation.map { |arg| arg.value_type }
-        impl_init_name = mangle(init_name, types)
-        impl_name = mangle(def_name, types)
+        impl_init_name = mangle(:initialize, class_name, types)
+        impl_name = mangle(def_name, class_name, types)
         init_fun = @symbol_table.in_class class_name do
           implement_function impl_init_name, defn, types
         end
@@ -123,7 +121,7 @@ class Translator
           class_constructor(class_name, impl_name, impl_init_name, init_args)
       else
         args_evaluation=[]
-        impl_name = mangle(def_name, [])
+        impl_name = mangle(def_name, class_name, [])
         @functions_implementations[impl_name] =
           class_constructor(class_name, impl_name)
       end
@@ -141,22 +139,17 @@ class Translator
       translate_generic_sexp(class_expr).value_type
     end
 
-    # Returns function name preceded by class name
-    def get_defined_function_name(name, class_name)
-      [class_name.to_s, name.to_s].join('_').to_sym
-    end
-
-    # Returns a mangled function name for a given name and a array of arguments'
-    # types.
-    def mangle(name, args_types)
-      [name, *args_types].join('_').to_sym
+    # Returns a mangled function name for a given name, class, and
+    # an array of arguments' types.
+    def mangle(name, class_name, args_types)
+      [class_name.to_s, name.to_s, *args_types].join('_').to_sym
     end
 
     alias :get_implemented_function_name :mangle
 
     # Returns true if an implementation of the given function (or method)
     # defined with a full name has been already added to @functions_implementations.
-    def function_is_implemented?(name)
+    def function_implemented?(name)
       @functions_implementations.has_key? name
     end
 

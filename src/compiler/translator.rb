@@ -23,7 +23,6 @@ class Translator
   def initialize
     @symbol_table = SymbolTable.new
     [:Object, :Fixnum, :Float, MainObject].each {|x| @symbol_table.add_class x }
-    @functions_definitions = {}
     @functions_implementations = {}
     @structures_definitions = {}
     @user_classes = [MainObject]
