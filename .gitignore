@@ -22,6 +22,7 @@ doc/*.mtime
 doc/*.out
 doc/*.pdf
 doc/*.rb.tex
+doc/*.sh.tex
 doc/*.toc
 doc/*.versions
 doc/rdoc
