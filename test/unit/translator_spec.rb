@@ -9,7 +9,7 @@ describe Translator do
     @rp = RubyParser.new
   end
 
-  # Temporal solution
+  # FIXME: Temporal solution
   StandardClassesCount = 4
 
   # Parses given Ruby code and passes it to the Translator.
