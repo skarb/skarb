@@ -110,6 +110,11 @@ class Translator
                                               boolean_value(child.value_sexp))
   end
 
+  # Translates a 'nil'.
+  def translate_nil(sexp)
+    s(:stmts).with_value s(:var, :nil), :NilClass
+  end
+
   # Returns an array of sexps with all stmts sexps expanded.
   def expand_stmts(sexps)
     # This array of sexps will be the content of the returned block.
