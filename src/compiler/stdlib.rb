@@ -4,4 +4,16 @@ class Fixnum < Object
   def +
     defined_as :Fixnum__PLUS_
   end
+
+  def ==
+    defined_as :Fixnum__EQ__EQ_
+  end
+
+  def <
+    defined_as :Fixnum__LT_
+  end
+
+  def >
+    defined_as :Fixnum__GT_
+  end
 end
