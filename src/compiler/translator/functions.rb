@@ -151,8 +151,6 @@ class Translator
       [class_name.to_s, name.to_s, *args_types].join('_').to_sym
     end
 
-    alias :get_implemented_function_name :mangle
-
     # Returns true if an implementation of the given function (or method)
     # defined with a full name has been already added to @functions_implementations.
     def function_implemented?(name)
