@@ -2,10 +2,7 @@
 #include "xalloc.h"
 #include "object.h"
 #include "types.h"
-#include "nil.h"
-
-// FIXME: we need a real true
-#define true Fixnum_new(1)
+#include "helpers.h"
 
 /**
  * Casts a given Object to Fixnum.
@@ -31,18 +28,15 @@ Object * Fixnum__MINUS_(Object *self, Object *other) {
 
 Object * Fixnum__EQ__EQ_(Object *self, Object *other) {
     // TODO: type check and error reporting
-    return (as_fixnum(self)->val == as_fixnum(other)->val) ?
-        true : nil;
+    return boolean_to_object(as_fixnum(self)->val == as_fixnum(other)->val);
 }
 
 Object * Fixnum__LT_(Object *self, Object *other) {
     // TODO: type check and error reporting
-    return (as_fixnum(self)->val < as_fixnum(other)->val) ?
-        true : nil;
+    return boolean_to_object(as_fixnum(self)->val < as_fixnum(other)->val);
 }
 
 Object * Fixnum__GT_(Object *self, Object *other) {
     // TODO: type check and error reporting
-    return (as_fixnum(self)->val > as_fixnum(other)->val) ?
-        true : nil;
+    return boolean_to_object(as_fixnum(self)->val > as_fixnum(other)->val);
 }
