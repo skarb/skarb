@@ -24,6 +24,11 @@ Object * Fixnum__PLUS_(Object *self, Object *other) {
     return Fixnum_new(as_fixnum(self)->val + as_fixnum(other)->val);
 }
 
+Object * Fixnum__MINUS_(Object *self, Object *other) {
+    // TODO: type check and error reporting
+    return Fixnum_new(as_fixnum(self)->val - as_fixnum(other)->val);
+}
+
 Object * Fixnum__EQ__EQ_(Object *self, Object *other) {
     // TODO: type check and error reporting
     return (as_fixnum(self)->val == as_fixnum(other)->val) ?

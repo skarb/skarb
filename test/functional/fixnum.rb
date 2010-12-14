@@ -1,5 +1,7 @@
 #5
 #5
+#-1
+#1
 #ok
 #ok
 #ok
@@ -7,6 +9,8 @@ a = 3
 b = 2
 puts a + b
 puts b + a
+puts b - a
+puts a - b
 puts 'ok' if a > b
 puts 'fail' if a < b
 puts 'fail' if a == b

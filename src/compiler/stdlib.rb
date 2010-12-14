@@ -5,6 +5,10 @@ class Fixnum < Object
     defined_as :Fixnum__PLUS_
   end
 
+  def -
+    defined_as :Fixnum__MINUS_
+  end
+
   def ==
     defined_as :Fixnum__EQ__EQ_
   end
