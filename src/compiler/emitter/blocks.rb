@@ -1,5 +1,6 @@
 # Blocks
 # - :block -- "{" + statements + "}"
+# - :init_block -- "{" + values + "}"
 module Emitter::Blocks
   def emit_file(sexp)
     sexp.rest.map do |elem|
