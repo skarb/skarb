@@ -13,4 +13,29 @@ typedef struct {
  */
 Object * Float_new(double value);
 
+/**
+ * Float#+
+ */
+Object * Float__PLUS_(Object *self, Object *other);
+
+/**
+ * Float#-
+ */
+Object * Float__MINUS_(Object *self, Object *other);
+
+/**
+ * Float#==
+ */
+Object * Float__EQ__EQ_(Object *self, Object *other);
+
+/**
+ * Float#<
+ */
+Object * Float__LT_(Object *self, Object *other);
+
+/**
+ * Float#>
+ */
+Object * Float__GT_(Object *self, Object *other);
+
 #endif /* FLOAT_H_ */

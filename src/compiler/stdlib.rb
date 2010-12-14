@@ -21,3 +21,27 @@ class Fixnum < Object
     defined_as :Fixnum__GT_
   end
 end
+
+class Float < Object
+  defined_in_stdlib
+
+  def +
+    defined_as :Float__PLUS_
+  end
+
+  def -
+    defined_as :Float__MINUS_
+  end
+
+  def ==
+    defined_as :Float__EQ__EQ_
+  end
+
+  def <
+    defined_as :Float__LT_
+  end
+
+  def >
+    defined_as :Float__GT_
+  end
+end
