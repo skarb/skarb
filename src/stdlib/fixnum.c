@@ -3,11 +3,7 @@
 #include "object.h"
 #include "types.h"
 #include "helpers.h"
-
-/**
- * Casts a given Object to Fixnum.
- */
-#define as_fixnum(obj) ((Fixnum*) (obj))
+#include "float.h"
 
 Object * Fixnum_new(int value) {
     Fixnum *self = xmalloc(sizeof(Fixnum));
@@ -17,26 +13,46 @@ Object * Fixnum_new(int value) {
 }
 
 Object * Fixnum__PLUS_(Object *self, Object *other) {
-    // TODO: type check and error reporting
-    return Fixnum_new(as_fixnum(self)->val + as_fixnum(other)->val);
+    if (is_a(other, Fixnum))
+        return Fixnum_new(as_fixnum(self)->val + as_fixnum(other)->val);
+    else if (is_a(other, Float))
+        return Float_new(as_fixnum(self)->val + as_float(other)->val);
+    die("TypeError");
+    return 0;
 }
 
 Object * Fixnum__MINUS_(Object *self, Object *other) {
-    // TODO: type check and error reporting
-    return Fixnum_new(as_fixnum(self)->val - as_fixnum(other)->val);
+    if (is_a(other, Fixnum))
+        return Fixnum_new(as_fixnum(self)->val - as_fixnum(other)->val);
+    else if (is_a(other, Float))
+        return Float_new(as_fixnum(self)->val - as_float(other)->val);
+    die("TypeError");
+    return 0;
 }
 
 Object * Fixnum__EQ__EQ_(Object *self, Object *other) {
-    // TODO: type check and error reporting
-    return boolean_to_object(as_fixnum(self)->val == as_fixnum(other)->val);
+    if (is_a(other, Fixnum))
+        return boolean_to_object(as_fixnum(self)->val == as_fixnum(other)->val);
+    else if (is_a(other, Float))
+        return boolean_to_object(as_fixnum(self)->val == as_float(other)->val);
+    die("TypeError");
+    return 0;
 }
 
 Object * Fixnum__LT_(Object *self, Object *other) {
-    // TODO: type check and error reporting
-    return boolean_to_object(as_fixnum(self)->val < as_fixnum(other)->val);
+    if (is_a(other, Fixnum))
+        return boolean_to_object(as_fixnum(self)->val < as_fixnum(other)->val);
+    else if (is_a(other, Float))
+        return boolean_to_object(as_fixnum(self)->val < as_float(other)->val);
+    die("TypeError");
+    return 0;
 }
 
 Object * Fixnum__GT_(Object *self, Object *other) {
-    // TODO: type check and error reporting
-    return boolean_to_object(as_fixnum(self)->val > as_fixnum(other)->val);
+    if (is_a(other, Fixnum))
+        return boolean_to_object(as_fixnum(self)->val > as_fixnum(other)->val);
+    else if (is_a(other, Float))
+        return boolean_to_object(as_fixnum(self)->val > as_float(other)->val);
+    die("TypeError");
+    return 0;
 }

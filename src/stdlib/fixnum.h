@@ -9,6 +9,11 @@ typedef struct {
 } Fixnum;
 
 /**
+ * Casts a given Object to Fixnum.
+ */
+#define as_fixnum(obj) ((Fixnum*) (obj))
+
+/**
  * Fixnum#new
  */
 Object * Fixnum_new(int value);

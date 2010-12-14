@@ -9,6 +9,11 @@ typedef struct {
 } Float;
 
 /**
+ * Casts a given Object to Float.
+ */
+#define as_float(obj) ((Float*) (obj))
+
+/**
  * Float#new
  */
 Object * Float_new(double value);

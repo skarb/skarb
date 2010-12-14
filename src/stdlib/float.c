@@ -3,11 +3,7 @@
 #include "object.h"
 #include "types.h"
 #include "helpers.h"
-
-/**
- * Casts a given Object to Float.
- */
-#define as_float(obj) ((Float*) (obj))
+#include "fixnum.h"
 
 Object * Float_new(double value) {
     Float *self = xmalloc(sizeof(Float));
@@ -17,26 +13,47 @@ Object * Float_new(double value) {
 }
 
 Object * Float__PLUS_(Object *self, Object *other) {
-    // TODO: type check and error reporting
-    return Float_new(as_float(self)->val + as_float(other)->val);
+    if (is_a(other, Float))
+        return Float_new(as_float(self)->val + as_float(other)->val);
+    else if (is_a(other, Fixnum))
+        return Float_new(as_float(self)->val + as_fixnum(other)->val);
+    die("TypeError");
+    return 0;
 }
 
 Object * Float__MINUS_(Object *self, Object *other) {
-    // TODO: type check and error reporting
-    return Float_new(as_float(self)->val - as_float(other)->val);
+    if (is_a(other, Float))
+        return Float_new(as_float(self)->val - as_float(other)->val);
+    else if (is_a(other, Fixnum))
+        return Float_new(as_float(self)->val - as_fixnum(other)->val);
+    die("TypeError");
+    return 0;
 }
 
 Object * Float__EQ__EQ_(Object *self, Object *other) {
-    // TODO: type check and error reporting
-    return boolean_to_object(as_float(self)->val == as_float(other)->val);
+    if (is_a(other, Float))
+        return boolean_to_object(as_float(self)->val == as_float(other)->val);
+    else if (is_a(other, Fixnum))
+        return boolean_to_object(as_float(self)->val ==
+            (double) as_fixnum(other)->val);
+    die("TypeError");
+    return 0;
 }
 
 Object * Float__LT_(Object *self, Object *other) {
-    // TODO: type check and error reporting
-    return boolean_to_object(as_float(self)->val < as_float(other)->val);
+    if (is_a(other, Float))
+        return boolean_to_object(as_float(self)->val < as_float(other)->val);
+    else if (is_a(other, Fixnum))
+        return boolean_to_object(as_float(self)->val < as_fixnum(other)->val);
+    die("TypeError");
+    return 0;
 }
 
 Object * Float__GT_(Object *self, Object *other) {
-    // TODO: type check and error reporting
-    return boolean_to_object(as_float(self)->val > as_float(other)->val);
+    if (is_a(other, Float))
+        return boolean_to_object(as_float(self)->val > as_float(other)->val);
+    else if (is_a(other, Fixnum))
+        return boolean_to_object(as_float(self)->val > as_fixnum(other)->val);
+    die("TypeError");
+    return 0;
 }

@@ -19,4 +19,9 @@ Object * not(Object *object);
  */
 Object * boolean_to_object(int value);
 
+/**
+ * Prints arguments to stderr and exits with an error status.
+ */
+void die(const char *format, ...);
+
 #endif /* HELPERS_H_ */
