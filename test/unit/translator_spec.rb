@@ -10,7 +10,7 @@ describe Translator do
   end
 
   # FIXME: Temporal solution
-  StandardClasses = [ :M_Object, :Object, :Fixnum, :Float ]
+  StandardClasses = [ :Object, :M_Object, :Fixnum, :Float ]
 
   # Parses given Ruby code and passes it to the Translator.
   def translate_code(code)
@@ -58,7 +58,7 @@ describe Translator do
   def class_dict(custom_classes = [])
      classes = (StandardClasses + custom_classes)
      init_blocks = (0..classes.length-1).map do |i|
-       s(:init_block, s(:lit, i+1),
+       s(:init_block, s(:lit, 0),
          s(:var, ('mtab_'+classes[i].to_s).to_sym),
          s(:lit, :NULL))
      end
@@ -244,8 +244,9 @@ describe Translator do
       s(:file,
         include_rubyc, dict_elem, struct_M_Object,
         s(:prototype, :'Object*', :"M_Object_fun", s(:args, decl(:self))),
+        methods_array(:Object),
         methods_array(:M_Object, [:M_Object_fun]),
-        *StandardClasses.rest.map { |c| methods_array(c) },
+        *StandardClasses.rest(2).map { |c| methods_array(c) },
         class_dict,
         s(:defn, :'Object*', :"M_Object_fun", s(:args, decl(:self)), s(:block,
                                               s(:return, fixnum_new(5)))),
@@ -259,8 +260,9 @@ describe Translator do
       s(:file,
         include_rubyc, dict_elem, struct_M_Object,
         s(:prototype, :'Object*', :"M_Object_fun", s(:args, decl(:self))),
+        methods_array(:Object),
         methods_array(:M_Object, [:M_Object_fun]),
-        *StandardClasses.rest.map { |c| methods_array(c) },
+        *StandardClasses.rest(2).map { |c| methods_array(c) },
         class_dict,
         s(:defn, :'Object*', :"M_Object_fun", s(:args, decl(:self)), s(:block,
                                               s(:return, fixnum_new(5)))),
@@ -287,7 +289,7 @@ describe Translator do
         s(:decl, :int, :var1),
         s(:if,
            s(:binary_oper, :==, s(:binary_oper, :'->', s(:var, :b), s(:var, :type)),
-             s(:lit, 3)),
+             s(:lit, 2)),
            s(:block, s(:asgn, s(:var, :var1), fixnum_new(1)))))
   end
 
@@ -297,10 +299,10 @@ describe Translator do
         s(:decl, :int, :var1),
         s(:switch, s(:binary_oper, :'->', s(:var, :b), s(:var, :type)),
           s(:block,
-           s(:case, s(:lit, 3)),
+           s(:case, s(:lit, 2)),
            s(:asgn, s(:var, :var1), fixnum_new(1)),
            s(:break),
-           s(:case, s(:lit, 2)),
+           s(:case, s(:lit, 0)),
            s(:asgn, s(:var, :var1), fixnum_new(2)),
            s(:break))))
   end
@@ -332,8 +334,9 @@ describe Translator do
         include_rubyc, dict_elem, struct_M_Object,
         s(:prototype, :'Object*', :"M_Object_fun_Fixnum", args),
         s(:prototype, :'Object*', :"M_Object_fun_", args),
+         methods_array(:Object),
          methods_array(:M_Object, [:M_Object_fun_]),
-        *StandardClasses.rest.map { |c| methods_array(c) },
+        *StandardClasses.rest(2).map { |c| methods_array(c) },
         class_dict,
         s(:defn, :'Object*', :"M_Object_fun_Fixnum", args, s(:block,
                                           s(:return, s(:var, :x)))),
@@ -370,7 +373,7 @@ describe Translator do
               s(:call, :xmalloc,
                 s(:args, s(:call, :sizeof, s(:args, s(:lit, :A)))))),
             s(:asgn,
-              s(:binary_oper, :'->', s(:var, :self), s(:var, :type)), s(:lit, 5)),
+              s(:binary_oper, :'->', s(:var, :self), s(:var, :type)), s(:lit, 4)),
                 s(:call, :A_initialize_Fixnum, s(:args, s(:var, :self), s(:var, :a))),
             s(:return, s(:var, :self)))),
         
