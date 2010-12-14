@@ -9,6 +9,7 @@ enum {
   Fixnum_t,
   Float_t,
   String_t,
+  NilClass_t,
   /**
    * The following identifier is the first value which can be used for
    * user-defined types.

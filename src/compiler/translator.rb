@@ -109,8 +109,13 @@ class Translator
   # Translates a 'not' or a '!'.
   def translate_not(sexp)
     child = translate_generic_sexp sexp[1]
-    filtered_stmts(child).with_value_sexp s(:l_unary_oper, :!,
-                                              boolean_value(child.value_sexp))
+    filtered_stmts(child).with_value_sexp(
+      s(:call, :not, s(:args, child.value_sexp)))
+  end
+
+  # Translates a 'nil'.
+  def translate_nil(sexp)
+    s(:stmts).with_value s(:var, :nil), :NilClass
   end
 
   # Returns an array of sexps with all stmts sexps expanded.
