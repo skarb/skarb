@@ -56,7 +56,7 @@ class SymbolTable < Hash
     prev_function = cfunction
     self.cfunction = name
     retval = yield
-    self.cfunction = prev_function
+    @cfunction = prev_function
     retval
   end
 

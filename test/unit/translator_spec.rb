@@ -10,7 +10,7 @@ describe Translator do
   end
 
   # FIXME: Temporal solution
-  StandardClassesCount = 4
+  StandardClasses = [ :M_Object, :Object, :Fixnum, :Float ]
 
   # Parses given Ruby code and passes it to the Translator.
   def translate_code(code)
@@ -33,7 +33,15 @@ describe Translator do
   def include_rubyc
     s(:include, '<rubyc.h>')
   end
-  
+ 
+  # Returns class methods array definition
+  def methods_array(class_name, methods=[])
+    s(:asgn,
+      s(:decl, :'void*', ('mtab_'+class_name.to_s+'[]').to_sym),
+      s(:init_block,
+        *methods.map { |m| s(:var, ('&' + m.to_s).to_sym) }))
+  end
+
   # Returns sexp containing dict_elem struct definition
   def dict_elem
     s(:typedef,
@@ -42,14 +50,17 @@ describe Translator do
        s(:block,
         s(:decl, :uint32_t, :parent),
         s(:decl, :"void*", :method_table),
-         s(:decl, :"void*", :fields_table))),
+        s(:decl, :"void*", :fields_table))),
        :dict_elem)
   end
 
   # Returns sexp containing class dictionary definition
-  def class_dict(custom_classes_count = 0)
-     init_blocks = (StandardClassesCount + custom_classes_count).times.map do
-       s(:init_block, s(:lit, 0), s(:lit, :NULL), s(:lit, :NULL))
+  def class_dict(custom_classes = [])
+     classes = (StandardClasses + custom_classes)
+     init_blocks = (0..classes.length-1).map do |i|
+       s(:init_block, s(:lit, i+1),
+         s(:var, ('mtab_'+classes[i].to_s).to_sym),
+         s(:lit, :NULL))
      end
      s(:asgn,
        s(:decl, :dict_elem, :'classes_dictionary[]'),
@@ -59,7 +70,8 @@ describe Translator do
   # Returns a sexp representing a whole C program with a given body of the
   # 'main' function.
   def program(*body)
-    s(:file, include_rubyc, dict_elem, class_dict, struct_M_Object,
+    s(:file, include_rubyc, dict_elem, struct_M_Object,
+      *StandardClasses.map { |c| methods_array(c) }, class_dict, 
       main(*body))
   end
 
@@ -230,8 +242,11 @@ describe Translator do
   it 'should translate a function without arguments' do
     translate_code('def fun; 5; end; fun').should ==
       s(:file,
-        include_rubyc, dict_elem, class_dict, struct_M_Object,
+        include_rubyc, dict_elem, struct_M_Object,
         s(:prototype, :'Object*', :"M_Object_fun", s(:args, decl(:self))),
+        methods_array(:M_Object, [:M_Object_fun]),
+        *StandardClasses.rest.map { |c| methods_array(c) },
+        class_dict,
         s(:defn, :'Object*', :"M_Object_fun", s(:args, decl(:self)), s(:block,
                                               s(:return, fixnum_new(5)))),
         main(
@@ -242,8 +257,11 @@ describe Translator do
   it 'should translate a function without arguments called twice' do
     translate_code('def fun; 5; end; fun; fun').should ==
       s(:file,
-        include_rubyc, dict_elem, class_dict, struct_M_Object,
+        include_rubyc, dict_elem, struct_M_Object,
         s(:prototype, :'Object*', :"M_Object_fun", s(:args, decl(:self))),
+        methods_array(:M_Object, [:M_Object_fun]),
+        *StandardClasses.rest.map { |c| methods_array(c) },
+        class_dict,
         s(:defn, :'Object*', :"M_Object_fun", s(:args, decl(:self)), s(:block,
                                               s(:return, fixnum_new(5)))),
         main(
@@ -256,7 +274,9 @@ describe Translator do
   it 'should translate an assignment to an instance variable' do
     translate_code('@a=@a').should ==
       s(:file,
-        include_rubyc, dict_elem, class_dict, struct_M_Object(decl(:a)),
+        include_rubyc, dict_elem, struct_M_Object(decl(:a)),
+        *StandardClasses.map { |c| methods_array(c) },
+        class_dict,
         main(s(:asgn, s(:binary_oper, :'->', s(:cast, :'M_Object*', s(:var, :self)), s(:var, :a)),
                 s(:binary_oper, :'->', s(:cast, :'M_Object*', s(:var, :self)), s(:var, :a)))))
   end
@@ -309,10 +329,17 @@ describe Translator do
     args = s(:args, decl(:self), decl(:x))
     translate_code('def fun(x); x; end; fun 3').should ==
       s(:file,
-        include_rubyc, dict_elem, class_dict, struct_M_Object,
+        include_rubyc, dict_elem, struct_M_Object,
         s(:prototype, :'Object*', :"M_Object_fun_Fixnum", args),
+        s(:prototype, :'Object*', :"M_Object_fun_", args),
+         methods_array(:M_Object, [:M_Object_fun_]),
+        *StandardClasses.rest.map { |c| methods_array(c) },
+        class_dict,
         s(:defn, :'Object*', :"M_Object_fun_Fixnum", args, s(:block,
                                           s(:return, s(:var, :x)))),
+        s(:defn, :'Object*', :"M_Object_fun_", args, s(:block,
+                                          s(:return, s(:var, :x)))),
+
         main(
           decl(:var1),
           s(:asgn, s(:var, :var1), s(:call, :"M_Object_fun_Fixnum",
@@ -321,18 +348,22 @@ describe Translator do
 
   it 'should translate class declaration' do
     translate_code('class A; def initialize(a); @a=a; end; end; A.new(1)').should ==
-      s(:file,
-        include_rubyc, dict_elem, class_dict(1), struct_M_Object,
+    s(:file, include_rubyc, dict_elem, struct_M_Object,
         s(:typedef,
           s(:struct, nil,
             s(:block, s(:decl, :Object, :meta), decl(:a))), :A),
         s(:prototype, :'Object*', :A_initialize_Fixnum, s(:args, decl(:self), decl(:a))),
         s(:prototype, :'Object*', :A_new_Fixnum, s(:args, decl(:a))),
+        s(:prototype, :'Object*', :A_initialize_, s(:args, decl(:self), decl(:a))),
+        *StandardClasses.map { |c| methods_array(c) },
+        methods_array(:A, [:A_initialize_]),
+        class_dict([:A]), 
         s(:defn, :'Object*', :A_initialize_Fixnum, s(:args, decl(:self), decl(:a)),
           s(:block,
             s(:asgn,
                s(:binary_oper, :'->', s(:cast, :'A*', s(:var, :self)), s(:var, :a)), s(:var, :a)),
             s(:return, s(:binary_oper, :'->', s(:cast, :'A*', s(:var, :self)), s(:var, :a))))),
+            
         s(:defn, :'Object*', :A_new_Fixnum, s(:args, decl(:a)),
           s(:block,
             s(:asgn, decl(:self),
@@ -342,6 +373,13 @@ describe Translator do
               s(:binary_oper, :'->', s(:var, :self), s(:var, :type)), s(:lit, 5)),
                 s(:call, :A_initialize_Fixnum, s(:args, s(:var, :self), s(:var, :a))),
             s(:return, s(:var, :self)))),
+        
+        s(:defn, :'Object*', :A_initialize_, s(:args, decl(:self), decl(:a)),
+          s(:block,
+            s(:asgn,
+               s(:binary_oper, :'->', s(:cast, :'A*', s(:var, :self)), s(:var, :a)), s(:var, :a)),
+            s(:return, s(:binary_oper, :'->', s(:cast, :'A*', s(:var, :self)), s(:var, :a))))),
+
         main(
          decl(:var1),
          s(:asgn, s(:var, :var1),

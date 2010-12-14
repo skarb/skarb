@@ -14,8 +14,7 @@ module Emitter::Blocks
 
   def emit_init_block(sexp)
     return '{}' if sexp.length == 1
-    '{' + emit_generic_elem(sexp[1]) +
-      sexp.rest(2).map { |elem| ',' + emit_generic_elem(elem) }.join + '}'
+    '{' + sexp.rest.map { |elem| emit_generic_elem(elem) }.join(',') + '}'
   end
 
   private

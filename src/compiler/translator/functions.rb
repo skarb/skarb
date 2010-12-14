@@ -157,6 +157,7 @@ class Translator
     def process_function_definition(impl_name, defn, args_types)
       # We don't want to destroy the original table
       defn_args = s(:args)
+      lvars = []
       body = @symbol_table.in_function defn[1] do
         ([:self] + defn[2].drop(1)).zip args_types do |arg, type|
           @symbol_table.add_lvar arg
@@ -164,9 +165,10 @@ class Translator
           @symbol_table.set_lvar_kind arg, :param
           defn_args << s(:decl, :'Object*', arg)
         end
+        lvars = lvars_declarations
         translate_generic_sexp(defn[3][1])
       end
-      body_block = filtered_block(*lvars_declarations, body, s(:return, body.value_sexp))
+      body_block = filtered_block(*lvars, body, s(:return, body.value_sexp))
       s(:defn, :'Object*', impl_name, defn_args, body_block
        ).with_value_type body.value_type
     end

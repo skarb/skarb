@@ -37,12 +37,14 @@ class Translator
     # If there are any functions other than main they have to be included in
     # the output along with their prototypes.
     @user_classes.each { |x| generate_class_structure x }
+    methods_arrays = generate_methods_arrays
+    dict_init = generate_dict_init
     protos = @functions_implementations.values.map do |fun|
       s(:prototype, *fun[1,3])
     end
     s(:file, s(:include, '<rubyc.h>'), generate_elem_struct,
-      generate_dict_init, *@structures_definitions.values,
-      *protos, *@functions_implementations.values, main)
+      *@structures_definitions.values, *protos, *methods_arrays,
+      dict_init, *@functions_implementations.values, main)
   end
 
   private

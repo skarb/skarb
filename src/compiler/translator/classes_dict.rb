@@ -5,12 +5,13 @@ class Translator
     # Generates definition of class dictionary and initializes it with
     # values from @symbol_table.
     def generate_dict_init
-      sorter = lambda { |x,y| x[:id] <=> y[:id] }
-      mapper = lambda do |val|
+      sorter = lambda { |x,y| x[1][:id] <=> y[1][:id] }
+      mapper = lambda do |k|
         # TODO: replace with real values
-        s(:init_block, s(:lit, 0), s(:lit, :NULL), s(:lit, :NULL))
+        s(:init_block, s(:lit, k[1][:id]), s(:var, ('mtab_'+k[0].to_s).to_sym),
+          s(:lit, :NULL))
       end
-      elem_inits = @symbol_table.each_value.sort(&sorter).map(&mapper)
+      elem_inits = @symbol_table.each.sort(&sorter).map(&mapper)
       s(:asgn, s(:decl, :dict_elem, :'classes_dictionary[]'),
         s(:init_block, *elem_inits))
     end
@@ -26,5 +27,28 @@ class Translator
               s(:decl, :'void*', :fields_table))), :dict_elem)
     end
 
+    # Generates class methods arrays declarations and initilizes it according
+    # to @symbol_table.
+    def generate_methods_arrays
+      @symbol_table.each.map do |cname, chash|
+        if chash.has_key?(:functions_def)
+          methods_init = chash[:functions_def].each.map do |fname, fdef|
+            types = fdef[2].rest.map { nil }
+            impl_name = mangle(fname, cname, types)
+            unless function_implemented? impl_name
+              @symbol_table.in_class cname do
+                implement_function impl_name, fdef, types
+              end
+            end
+            s(:var, ('&'+impl_name.to_s).to_sym)
+          end
+        else
+          methods_init = []
+        end
+        s(:asgn,
+         s(:decl, :'void*', ('mtab_'+cname.to_s+'[]').to_sym),
+         s(:init_block, *methods_init))
+      end
+    end
   end
 end
