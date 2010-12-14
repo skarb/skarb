@@ -9,6 +9,14 @@ class Fixnum < Object
     defined_as :Fixnum__MINUS_
   end
 
+  def *
+    defined_as :Fixnum__MUL_
+  end
+
+  def /
+    defined_as :Fixnum__DIV_
+  end
+
   def ==
     defined_as :Fixnum__EQ__EQ_
   end
@@ -31,6 +39,14 @@ class Float < Object
 
   def -
     defined_as :Float__MINUS_
+  end
+
+  def *
+    defined_as :Float__MUL_
+  end
+
+  def /
+    defined_as :Float__DIV_
   end
 
   def ==

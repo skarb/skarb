@@ -29,6 +29,16 @@ Object * Fixnum__PLUS_(Object *self, Object *other);
 Object * Fixnum__MINUS_(Object *self, Object *other);
 
 /**
+ * Fixnum#*
+ */
+Object * Fixnum__MUL_(Object *self, Object *other);
+
+/**
+ * Fixnum#/
+ */
+Object * Fixnum__DIV_(Object *self, Object *other);
+
+/**
  * Fixnum#==
  */
 Object * Fixnum__EQ__EQ_(Object *self, Object *other);

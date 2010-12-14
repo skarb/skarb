@@ -30,6 +30,25 @@ Object * Fixnum__MINUS_(Object *self, Object *other) {
     return 0;
 }
 
+Object * Fixnum__MUL_(Object *self, Object *other) {
+    if (is_a(other, Fixnum))
+        return Fixnum_new(as_fixnum(self)->val * as_fixnum(other)->val);
+    else if (is_a(other, Float))
+        return Float_new(as_fixnum(self)->val * as_float(other)->val);
+    die("TypeError");
+    return 0;
+}
+
+Object * Fixnum__DIV_(Object *self, Object *other) {
+    if (is_a(other, Fixnum))
+        return Fixnum_new(as_fixnum(self)->val / as_fixnum(other)->val);
+    else if (is_a(other, Float))
+        return Float_new(as_fixnum(self)->val / as_float(other)->val);
+    die("TypeError");
+    return 0;
+}
+
+
 Object * Fixnum__EQ__EQ_(Object *self, Object *other) {
     if (is_a(other, Fixnum))
         return boolean_to_object(as_fixnum(self)->val == as_fixnum(other)->val);
