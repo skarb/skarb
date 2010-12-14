@@ -33,4 +33,9 @@ Object * Fixnum__LT_(Object *self, Object *other);
  */
 Object * Fixnum__GT_(Object *self, Object *other);
 
+/**
+ * Fixnum#to_s
+ */
+Object * Fixnum_to_s(Object *self);
+
 #endif /* FIXNUM_H_ */

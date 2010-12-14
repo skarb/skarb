@@ -81,7 +81,7 @@ class Translator
       # Get the defn sexp in which the function has been defined.
       if @symbol_table.class_defined_in_stdlib? class_name
         impl_name = @symbol_table[class_name][:functions_def][def_name]
-        ret_type = :'Object*'
+        ret_type = :Object
       else
         defn = @symbol_table[class_name][:functions_def][def_name]
         types = args_evaluation.map { |arg| arg.value_type }

@@ -1,8 +1,10 @@
+#include <stdio.h>
 #include "fixnum.h"
 #include "xalloc.h"
 #include "object.h"
 #include "types.h"
 #include "nil.h"
+#include "stringclass.h"
 
 // FIXME: we need a real true
 #define true Fixnum_new(1)
@@ -40,4 +42,11 @@ Object * Fixnum__GT_(Object *self, Object *other) {
     // TODO: type check and error reporting
     return (as_fixnum(self)->val > as_fixnum(other)->val) ?
         true : nil;
+}
+
+Object * Fixnum_to_s(Object *self) {
+  static const int maxlen = sizeof("1234567890");
+  char *buffer = xmalloc(maxlen + 1);
+  snprintf(buffer, maxlen, "%i", as_fixnum(self)->val);
+  return String_new(buffer);
 }
