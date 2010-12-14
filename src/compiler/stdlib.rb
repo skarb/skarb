@@ -61,3 +61,19 @@ class Float < Object
     defined_as :Float__GT_
   end
 end
+
+class String < Object
+  defined_in_stdlib
+
+  def +
+    defined_as :String__PLUS_
+  end
+
+  def *
+    defined_as :String__MUL_
+  end
+
+  def length
+    defined_as :String_length
+  end
+end

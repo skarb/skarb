@@ -14,8 +14,28 @@ typedef struct {
 } String;
 
 /**
+ * Casts a given Object to String.
+ */
+#define as_string(obj) ((String*) (obj))
+
+/**
  * String#new
  */
 Object * String_new(char *value);
+
+/**
+ * String#+
+ */
+Object * String__PLUS_(Object *self, Object *other);
+
+/**
+ * String#*
+ */
+Object * String__MUL_(Object *self, Object *other);
+
+/**
+ * String#length
+ */
+Object * String_length(Object *self);
 
 #endif /* STRING_H_ */
