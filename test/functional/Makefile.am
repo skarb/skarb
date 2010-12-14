@@ -14,7 +14,8 @@ TESTSCRIPTS = if.rb \
               class_declaration.rb \
               inheritance.rb \
               strings.rb \
-              nil.rb
+              nil.rb \
+              fixnum.rb
 TESTS_ENVIRONMENT = RUBYC_PATH=$(top_builddir)/src/compiler/rubyc \
                     CFLAGS="-I$(top_builddir)/src/stdlib" \
                     LD_LIBRARY_PATH="$(top_builddir)/src/stdlib/.libs" \

@@ -1,10 +1,7 @@
 #!/usr/bin/env RUBY_PATH
 require 'optparse'
 $: << 'RUBYC_LIBDIR'
-require 'compiler'
-require 'emitter'
-require 'translator'
-require 'parser'
+require 'manager'
 
 ARGV.push '-h' if ARGV.empty?
 
@@ -38,5 +35,4 @@ input = if ARGV[0] == '-'
           File.open ARGV.pop
         end
 
-Compiler.new.compile(Emitter.new.emit(
-  Translator.new.translate(Parser.new.parse(input))), options)
+Manager.new.compile input, options

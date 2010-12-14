@@ -9,3 +9,9 @@ Object * Fixnum_new(int value) {
     self->val = value;
     return TO_OBJECT(self);
 }
+
+Object * Fixnum__PLUS_(Object *self, Object *other) {
+    // TODO: type check and error reporting
+    return Fixnum_new(((Fixnum*) self)->val +
+            ((Fixnum*) other)->val);
+}
