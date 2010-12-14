@@ -66,40 +66,51 @@ class Translator
       raise "Unknown function or method: #{sexp[2]}"
     end
 
+    # Evaluates arguments of a call sexp. We need to know what their type is in
+    # order to call an appropriate overloaded function.
+    def evaluate_call_args(sexp, class_name)
+      if sexp[1].nil?
+        args = [s().with_value(s(:var, :self), class_name)]
+      else
+        args = [translate_generic_sexp(sexp[1])]
+      end
+      args + sexp[3].rest.map { |arg_sexp| translate_generic_sexp arg_sexp }
+    end
+
+    # Finds a C function implementing method with a given name in a given class
+    # which accepts given evaluated arguments. If the function isn't implemeted
+    # yet its AST gets translated.
+    def find_defined_function(class_name, def_name, args_evaluation)
+      defn = @symbol_table[class_name][:functions_def][def_name]
+      types = args_evaluation.map { |arg| arg.value_type }
+      impl_name = mangle(def_name, class_name, types.rest)
+      # Have we got an implementation of this function for given args' types?
+      unless function_implemented? impl_name
+        @symbol_table.in_class class_name do
+          implement_function impl_name, defn, types
+        end
+      end
+      impl_name
+    end
+
     # Returns a sexp calling a defined function. If the function hasn't been
     # implemented yet implement_function is called.
     def call_defined_function(def_name, class_name, sexp)
-      var = next_var_name
-      # Evaluate arguments. We need to know what their type is in order to call
-      # appropriate overloaded function.
-      if sexp[1].nil?
-        args_evaluation = [s().with_value(s(:var, :self), class_name)]
-      else
-        args_evaluation = [translate_generic_sexp(sexp[1])]
-      end
-      args_evaluation += sexp[3].rest.map { |arg_sexp| translate_generic_sexp arg_sexp }
+      args = evaluate_call_args sexp, class_name
       # Get the defn sexp in which the function has been defined.
       if @symbol_table.class_defined_in_stdlib? class_name
         impl_name = @symbol_table[class_name][:functions_def][def_name]
         ret_type = :'Object*'
       else
-        defn = @symbol_table[class_name][:functions_def][def_name]
-        types = args_evaluation.map { |arg| arg.value_type }
-        impl_name = mangle(def_name, class_name, types.rest)
-        # Have we got an implementation of this function for given args' types?
-        unless function_implemented? impl_name
-          @symbol_table.in_class class_name do
-            implement_function impl_name, defn, types
-          end
-        end
+        impl_name = find_defined_function class_name, def_name, args
         ret_type = return_type impl_name
       end
-      call = s(:call, impl_name,
-               s(:args, *args_evaluation.map { |arg| arg.value_sexp } ))
+      var = next_var_name
       filtered_stmts(
-        filtered_stmts(*args_evaluation),
+        filtered_stmts(*args),
         s(:decl, :'Object*', var),
-        s(:asgn, s(:var, var), call)
+        s(:asgn, s(:var, var), s(:call, impl_name,
+                                 s(:args, *args.map { |arg| arg.value_sexp } )))
       ).with_value s(:var, var), ret_type
     end
 
