@@ -56,7 +56,7 @@ class Translator
 
     # Tries to find a method in the inheritance chain and call it.
     def look_up_and_call(sexp)
-      type = get_class_name(sexp[1])
+      type = get_class_name(sexp[1]).to_s.to_sym
       while type
         if function_defined? sexp[2], type
           return call_defined_function sexp[2], type, sexp
@@ -79,14 +79,20 @@ class Translator
       end
       args_evaluation += sexp[3].rest.map { |arg_sexp| translate_generic_sexp arg_sexp }
       # Get the defn sexp in which the function has been defined.
-      defn = @symbol_table[class_name][:functions_def][def_name]
-      types = args_evaluation.map { |arg| arg.value_type }
-      impl_name = mangle(def_name, class_name, types.rest)
-      # Have we got an implementation of this function for given args' types?
-      unless function_implemented? impl_name
-        @symbol_table.in_class class_name do
-          implement_function impl_name, defn, types
+      if @symbol_table.class_defined_in_stdlib? class_name
+        impl_name = @symbol_table[class_name][:functions_def][def_name]
+        ret_type = :'Object*'
+      else
+        defn = @symbol_table[class_name][:functions_def][def_name]
+        types = args_evaluation.map { |arg| arg.value_type }
+        impl_name = mangle(def_name, class_name, types.rest)
+        # Have we got an implementation of this function for given args' types?
+        unless function_implemented? impl_name
+          @symbol_table.in_class class_name do
+            implement_function impl_name, defn, types
+          end
         end
+        ret_type = return_type impl_name
       end
       call = s(:call, impl_name,
                s(:args, *args_evaluation.map { |arg| arg.value_sexp } ))
@@ -94,7 +100,7 @@ class Translator
         filtered_stmts(*args_evaluation),
         s(:decl, :'Object*', var),
         s(:asgn, s(:var, var), call)
-      ).with_value s(:var, var), return_type(impl_name)
+      ).with_value s(:var, var), ret_type
     end
 
     # Returns a sexp calling a constructor. If the constructor hasn't been

@@ -25,6 +25,7 @@ class SymbolTable < Hash
     self[@cclass][:functions] ||= {}
     self[@cclass][:functions_def] ||= {}
     self[@cclass][:ivars] ||= {}
+    self[@cclass][:defined_in_stdlib] ||= false
   end
 
   # Sets the parent class for a given symbol. Both args are symbols.
@@ -158,6 +159,18 @@ class SymbolTable < Hash
   # The hash of local variables in the current function context.
   def lvars_table
     self[@cclass][:functions][@cfunction][:lvars]
+  end
+
+  # Saves an information that the current class has been defined in the standard
+  # library.
+  def class_defined_in_stdlib
+    class_table[:defined_in_stdlib] = true
+  end
+
+  # True if a given class has been defined in the standard library. If no class
+  # name is given the current class is taken as a default.
+  def class_defined_in_stdlib?(class_name=@cclass)
+    self[class_name][:defined_in_stdlib]
   end
 
   private

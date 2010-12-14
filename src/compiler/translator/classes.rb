@@ -1,15 +1,23 @@
+require 'translator/stdlib_classes'
+
 class Translator
   # A module consisting of functions which handle translation of nodes related
   # to classes.
   module Classes
+    include StdLibClasses
+
     # Translates class definition.
     def translate_class(sexp)
       class_name=sexp[1]
-      @symbol_table.in_class class_name do
-        set_parent sexp if sexp[2]
-        body = translate_generic_sexp(sexp[3])
+      if declared_as_defined_in_stdlib? sexp
+        load_stdlib_class sexp
+      else
+        @symbol_table.in_class class_name do
+          set_parent sexp if sexp[2]
+          body = translate_generic_sexp(sexp[3])
+        end
+        @user_classes << class_name
       end
-      @user_classes << class_name
       # TODO: Build main function for class
       s()
     end
