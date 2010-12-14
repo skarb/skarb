@@ -23,7 +23,7 @@ class Translator
           s(:struct, nil,
             s(:block,
               s(:decl, :uint32_t, :parent),
-              s(:decl, :'void*', :method_table),
+              s(:decl, :'void**', :method_table),
               s(:decl, :'void*', :fields_table))), :dict_elem)
     end
 
@@ -33,14 +33,18 @@ class Translator
       @symbol_table.each.map do |cname, chash|
         if chash.has_key?(:functions_def)
           methods_init = chash[:functions_def].each.map do |fname, fdef|
-            types = fdef[2].rest.map { nil }
-            impl_name = mangle(fname, cname, types)
-            unless function_implemented? impl_name
-              @symbol_table.in_class cname do
-                implement_function impl_name, fdef, types
+            if fdef.class == Sexp
+              types = fdef[2].rest.map { nil }
+              impl_name = mangle(fname, cname, types)
+              unless function_implemented? impl_name
+                @symbol_table.in_class cname do
+                  implement_function impl_name, fdef, types
+                end
               end
+              s(:var, ('&'+impl_name.to_s).to_sym)
+            else
+              s(:var, ('&'+fdef.to_s).to_sym) 
             end
-            s(:var, ('&'+impl_name.to_s).to_sym)
           end
         else
           methods_init = []

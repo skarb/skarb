@@ -49,7 +49,7 @@ describe Translator do
        nil,
        s(:block,
         s(:decl, :uint32_t, :parent),
-        s(:decl, :"void*", :method_table),
+        s(:decl, :"void**", :method_table),
         s(:decl, :"void*", :fields_table))),
        :dict_elem)
   end
