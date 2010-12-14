@@ -8,8 +8,8 @@ class Translator
   # whose types are respectively X, Y and Z its mangled name will be 'B_A_X_Y_Z'.
   # See Functions#mangle for an implementation.
   module Functions
-    # Translates a call to the Kernel#puts method or a simple function defined
-    # previously. All other calls cause an error.
+    # Translates a method call. Kernel#puts calls and constructors are treated
+    # in special way.
     def translate_call(sexp)
       if sexp[2] == :puts
         call_faked_puts sexp
@@ -140,6 +140,9 @@ class Translator
       ).with_value s(:var, var), class_name
     end
 
+    # Returns the class name of a given expression. If it's nil it returns the
+    # class we're currently in. It's used to determine whose method are we
+    # supposed to call when translating a call sexp.
     def get_class_name(class_expr)
       return @symbol_table.cclass if class_expr.nil?
       translate_generic_sexp(class_expr).value_type
