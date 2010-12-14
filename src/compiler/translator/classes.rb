@@ -61,7 +61,8 @@ class Translator
                       *(init_args.map { |x| s(:var, x[2]) })))
       end
       block << s(:return, s(:var, :self))
-      s(:defn, :'Object*', constructor_name, s(:args, *init_args), block)
+      s(:static,
+        s(:defn, :'Object*', constructor_name, s(:args, *init_args), block))
     end
   end
 end

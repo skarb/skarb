@@ -118,9 +118,9 @@ class Translator
         types = args_evaluation.map { |arg| arg.value_type }
         impl_init_name = mangle(:initialize, class_name, types)
         impl_name = mangle(def_name, class_name, types)
-        init_fun = @symbol_table.in_class class_name do
+        init_fun = unpack_static(@symbol_table.in_class(class_name) do
           implement_function impl_init_name, defn, types
-        end
+        end)
         init_args = init_fun[3].rest(2)
         init_body = init_fun[4].rest.rest(-1)
         @functions_implementations[impl_name] =
@@ -176,7 +176,7 @@ class Translator
         translate_generic_sexp(defn[3][1])
       end
       body_block = filtered_block(*lvars, body, s(:return, body.value_sexp))
-      s(:defn, :'Object*', impl_name, defn_args, body_block
+      s(:static, s(:defn, :'Object*', impl_name, defn_args, body_block)
        ).with_value_type body.value_type
     end
 
@@ -189,6 +189,27 @@ class Translator
     # Returns the type of values returned by a function with given arguments.
     def return_type(impl_name)
       @functions_implementations[impl_name].value_type
+    end
+
+    # Generates prototypes of all functions' implementations.
+    def generate_prototypes
+      @functions_implementations.values.map do |fun|
+        if fun[0] == :static
+          s(:static, s(:prototype, *fun[1][1,3]))
+        else
+          s(:prototype, *fun[1,3])
+        end
+      end
+    end
+
+    # If a given sexp is a static sexp its second element is returned. Otherwise
+    # the original sexp is returned.
+    def unpack_static(sexp)
+      if sexp[0] == :static
+        sexp[1]
+      else
+        sexp
+      end
     end
   end
 end
