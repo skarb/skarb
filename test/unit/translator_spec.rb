@@ -274,20 +274,26 @@ describe Translator do
     $stdout = StringIO.new
     expect do
       translate_code('begin; puts 1; rescue; puts 2; end')
-    end .to raise_error
+    end .to raise_error SystemExit
     $stdout = STDOUT
   end
 
   it 'should not translate an undefined local variable' do
     expect do
       translate_code('puts oh_my_goodness_what_is_that')
-    end .to raise_error
+    end .to raise_error SystemExit
   end
 
   it 'should not translate an undefined function' do
     expect do
       translate_code('there_is_no_such_function(4)')
-    end .to raise_error
+    end .to raise_error SystemExit
+  end
+
+  it 'should not translate a constructor of an undefined class' do
+    expect do
+      translate_code('x = WhatMightThisBe.new')
+    end .to raise_error SystemExit
   end
 
   it 'should translate a function with arguments' do
