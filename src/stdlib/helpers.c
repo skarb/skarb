@@ -29,4 +29,6 @@ void die(const char *format, ...) {
 }
 
 void initialize() {
+  GMemVTable vtable = { &xmalloc, &xrealloc, &xfree, NULL, NULL, NULL };
+  g_mem_set_vtable(&vtable);
 }

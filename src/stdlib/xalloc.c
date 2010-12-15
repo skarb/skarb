@@ -30,3 +30,7 @@ void* xrealloc(void *ptr, size_t s) {
     }
     return ptr;
 }
+
+void xfree(void *ptr) {
+  GC_FREE(ptr);
+}
