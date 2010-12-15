@@ -1,4 +1,5 @@
 #include <string.h>
+#include <glib.h>
 #include "stringclass.h"
 #include "xalloc.h"
 #include "object.h"

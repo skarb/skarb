@@ -17,6 +17,11 @@ AC_TYPE_UINT32_T
 AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 
+PKG_CHECK_MODULES([GLib], [glib-2.0 >= 2.24.1])
+if test x = "x$GLib_CFLAGS"; then
+	AC_MSG_ERROR([cannot find GLib >= 2.24.1])
+fi
+
 # Other tests
 AC_PROG_AWK
 AC_CHECK_PROGS(RUBBER, [rubber])
