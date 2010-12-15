@@ -30,5 +30,10 @@ class Translator
       sexp[1] = sexp[1].gsub('\\', '\\\\\\').gsub("\n", "\\n")
       s(:stmts).with_value(s(:call, :String_new, s(:args, sexp)), String)
     end
+
+    # Translates an array literal, such as [1, 2, "three"].
+    def translate_array(sexp)
+      s().with_value(s(:call, :Array_new, s(:args)), Array)
+    end
   end
 end
