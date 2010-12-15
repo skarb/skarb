@@ -24,4 +24,10 @@ Object * boolean_to_object(int value);
  */
 void die(const char *format, ...);
 
+/**
+ * Performs all required operations which cannot be done statically and have to
+ * be done at the very beginning of run time.
+ */
+void initialize();
+
 #endif /* HELPERS_H_ */

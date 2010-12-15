@@ -33,7 +33,8 @@ class Translator
   # the returned value are Sexps from the sexp_processor gem.
   def translate(sexp)
     main_block = translate_generic_sexp(sexp)
-    main = main_function AllocateSelf, *lvars_declarations, main_block, ReturnZero
+    main = main_function CallInitialize, AllocateSelf, *lvars_declarations,
+      main_block, ReturnZero
     # If there are any functions other than main they have to be included in
     # the output along with their prototypes.
     @user_classes.each { |x| generate_class_structure x }
@@ -67,6 +68,9 @@ class Translator
   AllocateSelf = s(:stmts, s(:decl, :'M_Object', :self_s),
                  s(:asgn, s(:decl, :'Object*', :self),
                    s(:cast, :'Object*', s(:var, :'&self_s'))))
+
+  # A call to the initialize function
+  CallInitialize = s(:call, :initialize, s(:args))
 
   # Wraps a given body with a 'main' function. The body is expected to be a
   # collection of Sexp instances.

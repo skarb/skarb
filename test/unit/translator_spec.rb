@@ -89,6 +89,7 @@ describe Translator do
              s(:decl, :'char**', :args))
     s(:defn, :int, :main, args,
       s(:block,
+       s(:call, :initialize, s(:args)),
        s(:decl, :'M_Object', :self_s),
        s(:asgn, s(:decl, :'Object*', :self),
          s(:cast, :'Object*', s(:var, :'&self_s'))),
