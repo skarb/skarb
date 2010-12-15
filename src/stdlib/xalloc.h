@@ -18,4 +18,9 @@ void* xcalloc(int nmemb, size_t size);
  */
 void* xrealloc(void *ptr, size_t size);
 
+/**
+ * A wrapper around the GC_FREE macro.
+ */
+void xfree(void *ptr);
+
 #endif /* XALLOC_H_ */

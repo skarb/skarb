@@ -11,10 +11,11 @@
  * ends with one.
  */
 static void puts_string(String *str) {
-  if ('\n' == str->val[strlen(str->val) - 1])
-    printf("%s", ((String*) str)->val);
+  const char *value = String_to_char_array(TO_OBJECT(str));
+  if ('\n' == value[strlen(value) - 1])
+    printf("%s", value);
   else
-    printf("%s\n", ((String*) str)->val);
+    printf("%s\n", value);
 }
 
 Object * Object_Object_puts(Object *obj) {
