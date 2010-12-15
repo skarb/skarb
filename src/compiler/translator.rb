@@ -39,9 +39,7 @@ class Translator
     @user_classes.each { |x| generate_class_structure x }
     methods_arrays = generate_methods_arrays
     dict_init = generate_dict_init
-    protos = @functions_implementations.values.map do |fun|
-      s(:prototype, *fun[1,3])
-    end
+    protos = generate_prototypes
     s(:file, s(:include, '<rubyc.h>'), generate_elem_struct,
       *@structures_definitions.values, *protos, *methods_arrays,
       dict_init, *@functions_implementations.values, main)

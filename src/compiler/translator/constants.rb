@@ -14,11 +14,13 @@ class Translator
       if sexp[1].floor == sexp[1]
         # It's an integer
         ctor = :Fixnum_new
+        type = Fixnum
       else
         # It's a float
         ctor = :Float_new
+        type = Float
       end
-      s(:stmts).with_value(s(:call, ctor, s(:args, sexp)), sexp[1].class)
+      s(:stmts).with_value(s(:call, ctor, s(:args, sexp)), type)
     end
 
     # Translates a string literal.

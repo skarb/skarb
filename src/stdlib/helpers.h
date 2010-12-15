@@ -13,4 +13,15 @@ int boolean_value(Object *object);
  */
 Object * not(Object *object);
 
+/**
+ * Returns an Object representing a given logical value, that is a nil or
+ * something which isn't a nil.
+ */
+Object * boolean_to_object(int value);
+
+/**
+ * Prints arguments to stderr and exits with an error status.
+ */
+void die(const char *format, ...);
+
 #endif /* HELPERS_H_ */
