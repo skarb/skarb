@@ -35,7 +35,8 @@ class Translator
     def generate_class_structure(class_name)
       ivars_table = @symbol_table[class_name][:ivars]
       parent_class = @symbol_table.parent class_name
-      ivars_table.merge! @symbol_table[parent_class][:ivars] unless parent_class.nil?
+      parent_ivars = @symbol_table[parent_class][:ivars]
+      ivars_table.merge! parent_ivars unless parent_ivars.nil?
       fields_declarations =
         ivars_table.keys.map { |key| s(:decl, :'Object*', key.rest) }
       structure_definition =

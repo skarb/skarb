@@ -9,13 +9,14 @@ class SymbolTable < Hash
   attr_reader :cclass, :cfunction
 
   def initialize
+    self.add_class(:Object)
     self.cclass = Translator::MainObject
     self.cfunction = :_main
   end
 
   # Adds a new class and generates id for it
   def add_class(class_name)
-    self[class_name] ||= { id: next_id }
+    self[class_name] ||= { id: next_id, parent: :Object }
   end
 
   # Setter for cclass -- curent class context
@@ -32,8 +33,6 @@ class SymbolTable < Hash
   def set_parent(child, parent)
     # Begin with checking whether we know both classes.
     [child, parent].each { |cls| raise "Unknown class: #{cls}" if !self[cls] }
-    # The parent cannot be re-set.
-    raise "There's already a parent for #{child}" if self[child][:parent]
     self[child][:parent] = parent
   end
 
@@ -182,7 +181,7 @@ class SymbolTable < Hash
   
   # Each call to this method returns a new, unique id.
   def next_id
-    @next_id ||= 0
+    @next_id ||= -1
     @next_id += 1
   end
 

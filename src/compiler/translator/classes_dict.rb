@@ -8,8 +8,14 @@ class Translator
       sorter = lambda { |x,y| x[1][:id] <=> y[1][:id] }
       mapper = lambda do |k|
         # TODO: replace with real values
-        s(:init_block, s(:lit, k[1][:id]), s(:var, ('mtab_'+k[0].to_s).to_sym),
-          s(:lit, :NULL))
+        if @symbol_table[k[1][:parent]] == k[0]
+          parent_id = -1
+        else
+          parent_id = @symbol_table[k[1][:parent]][:id]
+        end
+        s(:init_block, s(:lit, parent_id),
+          s(:var, ('mtab_'+k[0].to_s).to_sym),
+            s(:lit, :NULL))
       end
       elem_inits = @symbol_table.each.sort(&sorter).map(&mapper)
       s(:asgn, s(:decl, :dict_elem, :'classes_dictionary[]'),
