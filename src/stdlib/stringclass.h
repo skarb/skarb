@@ -8,7 +8,10 @@
 
 #include "object.h"
 
-#ifndef HAVE_GLIB_H
+/*
+ * Was glib.h included? Define a fake GString type if it wasn't.
+ */
+#ifndef GLIB_MAJOR_VERSION
 typedef void GString;
 #endif /* GString */
 
