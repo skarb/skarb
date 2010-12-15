@@ -29,18 +29,21 @@ class Translator
   end
 
   # Analyses a given Ruby AST tree and returns a C AST. Both the argument and
-  # the returned value are Sexps from the sexp_processor gem.
+  # the returned value are Sexps from the sexp_processor gem. AST is splitted
+  # in 4 sections: structs, prototypes, functions, global variables + main
   def translate(sexp)
     main_block = translate_generic_sexp(sexp)
     main = main_function AllocateSelf, *lvars_declarations, main_block, ReturnZero
     # If there are any functions other than main they have to be included in
     # the output along with their prototypes.
     @user_classes.each { |x| generate_class_structure x }
+    implement_generic_methods
     protos = generate_prototypes
-    s(:file, s(:include, '<rubyc.h>'), 
-      *@structures_definitions.values, *protos,
-      *@functions_implementations.values, main)
+    [s(:file, *@structures_definitions.values), s(:file, *protos),
+      s(:file, *@functions_implementations.values), s(:file, main)]
   end
+
+  attr_accessor :symbol_table
 
   private
 
@@ -143,5 +146,25 @@ class Translator
   def boolean_value(value)
     s(:call, :boolean_value, s(:args,
                                s(:call, :TO_OBJECT, s(:args, value))))
+  end
+
+  # Implements all methods for generic (unknown) arguments unless they
+  # are already implemented.
+  def implement_generic_methods
+    @symbol_table.each do |cname, chash|
+      if chash.has_key?(:functions_def)
+        methods_init = chash[:functions_def].each.map do |fname, fdef|
+          if fdef.class == Sexp
+            types = fdef[2].rest.map { nil }
+            impl_name = mangle(fname, cname, types)
+            unless function_implemented? impl_name
+              @symbol_table.in_class cname do
+                implement_function impl_name, fdef, types
+              end
+            end
+          end
+        end
+      end
+    end
   end
 end
