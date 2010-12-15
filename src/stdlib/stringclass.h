@@ -8,9 +8,13 @@
 
 #include "object.h"
 
+#ifndef HAVE_GLIB_H
+typedef void GString;
+#endif /* GString */
+
 typedef struct {
    Object meta;
-   char *val;
+   GString *val;
 } String;
 
 /**
@@ -37,5 +41,10 @@ Object * String__MUL_(Object *self, Object *other);
  * String#length
  */
 Object * String_length(Object *self);
+
+/**
+ * Returns a char array which stores the string.
+ */
+const char * String_to_char_array(Object *self);
 
 #endif /* STRING_H_ */
