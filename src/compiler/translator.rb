@@ -8,7 +8,6 @@ require 'translator/local_variables'
 require 'translator/instance_variables'
 require 'translator/type_checks'
 require 'translator/classes'
-require 'translator/classes_dict'
 require 'translator/constants'
 
 # Responsible for transforming a Ruby AST to its C equivalent.
@@ -23,7 +22,7 @@ require 'translator/constants'
 class Translator
   def initialize
     @symbol_table = SymbolTable.new
-    [:Object, :Fixnum, :Float, MainObject].each {|x| @symbol_table.add_class x }
+    [:Object, MainObject].each {|x| @symbol_table.add_class x }
     @functions_implementations = {}
     @structures_definitions = {}
     @user_classes = [MainObject]
@@ -37,12 +36,10 @@ class Translator
     # If there are any functions other than main they have to be included in
     # the output along with their prototypes.
     @user_classes.each { |x| generate_class_structure x }
-    methods_arrays = generate_methods_arrays
-    dict_init = generate_dict_init
     protos = generate_prototypes
-    s(:file, s(:include, '<rubyc.h>'), generate_elem_struct,
-      *@structures_definitions.values, *protos, *methods_arrays,
-      dict_init, *@functions_implementations.values, main)
+    s(:file, s(:include, '<rubyc.h>'), 
+      *@structures_definitions.values, *protos,
+      *@functions_implementations.values, main)
   end
 
   private
@@ -54,7 +51,6 @@ class Translator
   include InstanceVariables
   include TypeChecks
   include Classes
-  include ClassesDictionary
   include Constants
 
   # Name of modified instance of Object class containing main program

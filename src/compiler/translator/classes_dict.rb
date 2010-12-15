@@ -1,23 +1,24 @@
-class Translator
-  # A module consisting of functions which handle C structure representing
-  # classes.
-  module ClassesDictionary
+require 'hash_builder'
+
+# This class contains tools used to construct C static structures for storing
+# information about classes -- their methods, static fields etc.
+class ClassesDictionaryBuilder
     # Generates definition of class dictionary and initializes it with
     # values from @symbol_table.
-    def generate_dict_init
+    def generate_dict_init(symbol_table)
       sorter = lambda { |x,y| x[1][:id] <=> y[1][:id] }
       mapper = lambda do |k|
         # TODO: replace with real values
-        if @symbol_table[k[1][:parent]] == k[0]
+        if symbol_table[k[1][:parent]] == k[0]
           parent_id = -1
         else
-          parent_id = @symbol_table[k[1][:parent]][:id]
+          parent_id = symbol_table[k[1][:parent]][:id]
         end
         s(:init_block, s(:lit, parent_id),
-          s(:var, ('mtab_'+k[0].to_s).to_sym),
+          s(:var, ('&'+k[0].to_s+"_method_find").to_sym),
             s(:lit, :NULL))
       end
-      elem_inits = @symbol_table.each.sort(&sorter).map(&mapper)
+      elem_inits = symbol_table.each.sort(&sorter).map(&mapper)
       s(:asgn, s(:decl, :dict_elem, :'classes_dictionary[]'),
         s(:init_block, *elem_inits))
     end
@@ -29,7 +30,7 @@ class Translator
           s(:struct, nil,
             s(:block,
               s(:decl, :uint32_t, :parent),
-              s(:decl, :'void**', :method_table),
+              s(:decl, :'void*', :method_hash),
               s(:decl, :'void*', :fields_table))), :dict_elem)
     end
 
@@ -47,18 +48,17 @@ class Translator
                   implement_function impl_name, fdef, types
                 end
               end
-              s(:var, ('&'+impl_name.to_s).to_sym)
+              [@symbol_table.fname_id(fname), ('&'+impl_name.to_s).to_sym]
             else
-              s(:var, ('&'+fdef.to_s).to_sym) 
+              [@symbol_table.fname_id(fname), ('&'+fdef.to_s).to_sym]
             end
           end
         else
           methods_init = []
         end
-        s(:asgn,
-         s(:decl, :'void*', ('mtab_'+cname.to_s+'[]').to_sym),
-         s(:init_block, *methods_init))
+        hb = HashBuilder.new(('mhash_'+cname.to_s).to_sym, methods_init)
+        chash[:mhash_len] = hb.length
+        hb.generate_table
       end
     end
-  end
 end

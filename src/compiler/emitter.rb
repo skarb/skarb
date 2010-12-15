@@ -4,7 +4,7 @@ require 'extensions'
 # Generates code from given C abstract syntax tree. It does
 # not perform any validation.
 class Emitter
-  def emit(sexp)
+  def Emitter.emit(sexp)
     emit_generic_elem(sexp)
   end
 
@@ -27,13 +27,13 @@ class Emitter
   include Composite
   include Errors
 
-  def emit_cast(sexp)
+  def Emitter.emit_cast(sexp)
     '(' + sexp[1].to_s + ')' + emit_arg_expr(sexp[2])
   end
 
   # Universal function for emitting any argument expression
   # with correct parenthesis
-  def emit_arg_expr(elem)
+  def Emitter.emit_arg_expr(elem)
     case elem[0]
     when :str, :lit, :var, :decl, :init_block
       emit_generic_elem(elem)
@@ -44,12 +44,12 @@ class Emitter
 
   # Emits a symbol or executes a "emit_..." method according to the sexp[0]
   # symbol.
-  def emit_generic_elem(sexp)
+  def Emitter.emit_generic_elem(sexp)
     if sexp.is_a? Symbol
       sexp
     elsif sexp.is_a? Sexp
       begin
-        self.send 'emit_' + sexp[0].to_s, sexp
+        Emitter.send 'emit_' + sexp[0].to_s, sexp
       rescue NoMethodError
         raise UnexpectedSexpError.new sexp[0]
       end

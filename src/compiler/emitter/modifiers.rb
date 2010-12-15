@@ -13,13 +13,14 @@ require 'emitter/helpers'
 module Emitter::Modifiers
   include Emitter::Helpers
 
-  alias :emit_unsigned :output_type_and_children
-  alias :emit_signed :output_type_and_children
-  alias :emit_const :output_type_and_children
-  alias :emit_volatile :output_type_and_children
-  alias :emit_static :output_type_and_children
-  alias :emit_auto :output_type_and_children
-  alias :emit_extern :output_type_and_children
-  alias :emit_register :output_type_and_children
-
+  class << Emitter
+    alias :emit_unsigned :output_type_and_children
+    alias :emit_signed :output_type_and_children
+    alias :emit_const :output_type_and_children
+    alias :emit_volatile :output_type_and_children
+    alias :emit_static :output_type_and_children
+    alias :emit_auto :output_type_and_children
+    alias :emit_extern :output_type_and_children
+    alias :emit_register :output_type_and_children
+  end
 end

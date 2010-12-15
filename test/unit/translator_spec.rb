@@ -10,7 +10,7 @@ describe Translator do
   end
 
   # FIXME: Temporal solution
-  StandardClasses = [ :Object, :M_Object, :Fixnum, :Float ]
+  StandardClasses = [ :Object, :M_Object ]
 
   # Parses given Ruby code and passes it to the Translator.
   def translate_code(code)
@@ -37,7 +37,7 @@ describe Translator do
   # Returns class methods array definition
   def methods_array(class_name, methods=[])
     s(:asgn,
-      s(:decl, :'void*', ('mtab_'+class_name.to_s+'[]').to_sym),
+      s(:decl, :fhash_elem, ('mhash_'+class_name.to_s+'[]').to_sym),
       s(:init_block,
         *methods.map { |m| s(:var, ('&' + m.to_s).to_sym) }))
   end
@@ -49,17 +49,19 @@ describe Translator do
        nil,
        s(:block,
         s(:decl, :uint32_t, :parent),
-        s(:decl, :"void**", :method_table),
+        s(:decl, :fhash, :methods_hash),
         s(:decl, :"void*", :fields_table))),
        :dict_elem)
   end
 
   # Returns sexp containing class dictionary definition
-  def class_dict(custom_classes = [])
+  def class_dict(custom_classes = [], custom_sizes = nil)
      classes = (StandardClasses + custom_classes)
+     custom_sizes = Array.new(classes.length, 0) if custom_sizes.nil?
      init_blocks = (0..classes.length-1).map do |i|
        s(:init_block, s(:lit, 0),
-         s(:var, ('mtab_'+classes[i].to_s).to_sym),
+         s(:init_block, s(:lit, custom_sizes[i]),
+           s(:var, ('mhash_'+classes[i].to_s).to_sym)),
          s(:lit, :NULL))
      end
      s(:asgn,
@@ -288,22 +290,22 @@ describe Translator do
   end
 
   it 'should add simple type check in the output code' do
-    simple_type_check(:b, :Fixnum, s(:lit, 1)).should ==
+    simple_type_check(:b, :Object, s(:lit, 1)).should ==
       s(:stmts,
         s(:decl, :int, :var1),
         s(:if,
            s(:binary_oper, :==, s(:binary_oper, :'->', s(:var, :b), s(:var, :type)),
-             s(:lit, 2)),
+             s(:lit, 0)),
            s(:block, s(:asgn, s(:var, :var1), fixnum_new(1)))))
   end
 
   it 'should add complex type check in the output code' do
-    complex_type_check(:b, {Fixnum: s(:lit, 1), Object: s(:lit, 2)}).should ==
+    complex_type_check(:b, {M_Object: s(:lit, 1), Object: s(:lit, 2)}).should ==
       s(:stmts,
         s(:decl, :int, :var1),
         s(:switch, s(:binary_oper, :'->', s(:var, :b), s(:var, :type)),
           s(:block,
-           s(:case, s(:lit, 2)),
+           s(:case, s(:lit, 1)),
            s(:asgn, s(:var, :var1), fixnum_new(1)),
            s(:break),
            s(:case, s(:lit, 0)),
@@ -372,7 +374,7 @@ describe Translator do
             s(:args, decl(:self), decl(:a)))),
         *StandardClasses.map { |c| methods_array(c) },
         methods_array(:A, [:A_initialize_]),
-        class_dict([:A]), 
+        class_dict([:A],[0,0,2]), 
         s(:static,
           s(:defn, :'Object*', :A_initialize_Fixnum, s(:args, decl(:self), decl(:a)),
             s(:block,
@@ -386,7 +388,7 @@ describe Translator do
                 s(:call, :xmalloc,
                   s(:args, s(:call, :sizeof, s(:args, s(:lit, :A)))))),
               s(:asgn,
-                s(:binary_oper, :'->', s(:var, :self), s(:var, :type)), s(:lit, 4)),
+                s(:binary_oper, :'->', s(:var, :self), s(:var, :type)), s(:lit, 2)),
                   s(:call, :A_initialize_Fixnum, s(:args, s(:var, :self), s(:var, :a))),
               s(:return, s(:var, :self))))),
         s(:static,

@@ -4,12 +4,9 @@ require 'emitter/errors'
 require 'sexp_processor'
 
 describe Emitter do
-  before do
-    @emitter = Emitter.new
-  end
 
   def emit(sexp)
-    @emitter.emit sexp
+    Emitter.emit sexp
   end
 
   it 'should emit include declaration' do

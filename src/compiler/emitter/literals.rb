@@ -4,17 +4,19 @@
 # - :var -- reference to variable
 # - :decl -- variable declaration, two child nodes: type and name
 module Emitter::Literals
-  def emit_str(sexp)
+  def Emitter.emit_str(sexp)
     '"' + sexp[1] + '"'
   end
 
-  def emit_lit(sexp)
+  def Emitter.emit_lit(sexp)
     sexp[1].to_s
   end
 
-  alias :emit_var :emit_lit
+  class << Emitter
+    alias :emit_var :emit_lit
+  end
 
-  def emit_decl(sexp)
+  def Emitter.emit_decl(sexp)
     sexp[1,2].join ' '
   end
 end

@@ -9,7 +9,7 @@ class Manager
   # pipeline.
   def compile(file, options)
     code = stdlib_declarations + file.read
-    Compiler.new.compile(Emitter.new.emit(
+    Compiler.new.compile(Emitter.emit(
       Translator.new.translate(Parser.new.parse(code))), options)
   end
 

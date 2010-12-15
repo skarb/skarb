@@ -16,42 +16,44 @@ require 'emitter/helpers'
 module Emitter::FlowControl
   include Emitter::Helpers
 
-  def emit_if(sexp)
+  def Emitter.emit_if(sexp)
     'if(' + emit_arg_expr(sexp[1]) + ')' + emit_generic_elem(sexp[2]) +
       ('else' + emit_generic_elem(sexp[3]) unless sexp[3].nil?).to_s
   end
 
-  def emit_while(sexp)
+  def Emitter.emit_while(sexp)
     'while(' + emit_arg_expr(sexp[1]) + ')' + emit_generic_elem(sexp[2])
   end
 
-  def emit_do(sexp)
+  def Emitter.emit_do(sexp)
     'do' + emit_generic_elem(sexp[1]) + 'while(' + emit_arg_expr(sexp[2]) + ');'
   end
 
-  def emit_for(sexp)
+  def Emitter.emit_for(sexp)
     'for(' + emit_generic_elem(sexp[1]) + ';' + emit_generic_elem(sexp[2]) +
       ';' + emit_generic_elem(sexp[3]) + ')' + emit_generic_elem(sexp[4])
   end
 
-  def emit_switch(sexp)
+  def Emitter.emit_switch(sexp)
     'switch(' + emit_generic_elem(sexp[1]) + ')' + emit_generic_elem(sexp[2])
   end
 
-  def emit_default(sexp)
+  def Emitter.emit_default(sexp)
     'default:'
   end
 
-  def emit_case(sexp)
+  def Emitter.emit_case(sexp)
     'case ' + emit_generic_elem(sexp[1]) + ':'
   end
 
-  def emit_label(sexp)
+  def Emitter.emit_label(sexp)
     "#{emit_generic_elem(sexp[1])}:"
   end
 
-  alias :emit_continue :output_type_and_children
-  alias :emit_break :output_type_and_children
-  alias :emit_return :output_type_and_children
-  alias :emit_goto :output_type_and_children
+  class << Emitter
+    alias :emit_continue :output_type_and_children
+    alias :emit_break :output_type_and_children
+    alias :emit_return :output_type_and_children
+    alias :emit_goto :output_type_and_children
+  end
 end

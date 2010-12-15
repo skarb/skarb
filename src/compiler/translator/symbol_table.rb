@@ -12,6 +12,7 @@ class SymbolTable < Hash
     self.add_class(:Object)
     self.cclass = Translator::MainObject
     self.cfunction = :_main
+    @fname2id = {}
   end
 
   # Adds a new class and generates id for it
@@ -74,6 +75,7 @@ class SymbolTable < Hash
   # Adds function in the current class context
   def add_function(fun, sexp)
     self[@cclass][:functions_def][fun] = sexp
+    @fname2id[fun] ||= fnext_id
   end
 
   # Check if function with given name is defined for current class
@@ -172,6 +174,12 @@ class SymbolTable < Hash
     self[class_name][:defined_in_stdlib]
   end
 
+  # Returns ID of function name. IDs are guaranted to be unique. Methods with
+  # same names defined in different classes share the same ID.
+  def fname_id(fname)
+    @fname2id[fname]
+  end
+
   private
   
   # The hash of methods in the current class context.
@@ -185,4 +193,9 @@ class SymbolTable < Hash
     @next_id += 1
   end
 
+  # Each call to this method returns a new, unique id.
+  def fnext_id
+    @fnext_id ||= -1
+    @fnext_id += 1
+  end
 end
