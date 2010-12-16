@@ -119,28 +119,30 @@ class Translator
     def call_constructor(def_name, sexp)
       var = next_var_name
       class_name = get_class_name(sexp[1])
-      if function_defined? :initialize, class_name 
-        # Evaluate arguments. We need to know what their type is in order to call
-        # appropriate overloaded function.
-        args_evaluation = sexp[3].rest.map { |arg_sexp| translate_generic_sexp arg_sexp }
-        # Get the defn sexp in which the function has been defined.
-        defn = @symbol_table[class_name][:functions_def][:initialize]
-        # Get types of arguments.
-        types = args_evaluation.map { |arg| arg.value_type }
-        impl_init_name = mangle(:initialize, class_name, types)
-        impl_name = mangle(def_name, class_name, types)
-        init_fun = unpack_static(@symbol_table.in_class(class_name) do
-          implement_function impl_init_name, defn, types
-        end)
-        init_args = init_fun[3].rest(2)
-        init_body = init_fun[4].rest.rest(-1)
-        @functions_implementations[impl_name] =
-          class_constructor(class_name, impl_name, impl_init_name, init_args)
-      else
-        args_evaluation=[]
-        impl_name = mangle(def_name, class_name, [])
-        @functions_implementations[impl_name] =
-          class_constructor(class_name, impl_name)
+      args_evaluation=[]
+      impl_name = mangle(def_name, class_name, [])
+      if not @symbol_table.class_defined_in_stdlib? class_name
+        if function_defined? :initialize, class_name
+          # Evaluate arguments. We need to know what their type is in order to call
+          # appropriate overloaded function.
+          args_evaluation = sexp[3].rest.map { |arg_sexp| translate_generic_sexp arg_sexp }
+          # Get the defn sexp in which the function has been defined.
+          defn = @symbol_table[class_name][:functions_def][:initialize]
+          # Get types of arguments.
+          types = args_evaluation.map { |arg| arg.value_type }
+          impl_init_name = mangle(:initialize, class_name, types)
+          impl_name = mangle(def_name, class_name, types)
+          init_fun = unpack_static(@symbol_table.in_class(class_name) do
+            implement_function impl_init_name, defn, types
+          end)
+          init_args = init_fun[3].rest(2)
+          init_body = init_fun[4].rest.rest(-1)
+          @functions_implementations[impl_name] =
+            class_constructor(class_name, impl_name, impl_init_name, init_args)
+        else
+          @functions_implementations[impl_name] =
+            class_constructor(class_name, impl_name)
+        end
       end
       call = s(:call, impl_name,
                s(:args, *args_evaluation.map { |arg| arg.value_sexp } ))
