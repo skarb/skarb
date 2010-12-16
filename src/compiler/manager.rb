@@ -13,9 +13,9 @@ class Manager
     translator = Translator.new
     translated_ast = translator.translate(Parser.new.parse(code))
     translated_code = translated_ast.map { |x| Emitter.emit(x) }
-    classed_dict_code = ClassesDictionaryBuilder.emit_classes_dictionary(
-      translator.symbol_table)
-    final_code = Header + translated_code.zip(classed_dict_code).join 
+    dict_builder = ClassesDictionaryBuilder.new translator.symbol_table
+    classes_dict_code = dict_builder.emit_classes_dictionary
+    final_code = Header + classes_dict_code.zip(translated_code).join 
     Compiler.new.compile(final_code, options)
   end
 

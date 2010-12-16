@@ -8,7 +8,8 @@
  * */
 typedef struct {
   char *name;
-  void *val;
+  void *function;
+  void *wrapper;
 } hash_elem;
 
 typedef struct {

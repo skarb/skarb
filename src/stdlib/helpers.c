@@ -9,6 +9,8 @@
 #include "fixnum.h"
 #include "xalloc.h"
 
+extern dict_elem classes_dictionary[];
+
 int boolean_value(Object *object) {
   return object != nil;
 }
