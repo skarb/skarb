@@ -10,7 +10,7 @@ class Translator
       return translate_if_else sexp if sexp[3]
       var = next_var_name
       cond = translate_generic_sexp sexp[1]
-      if_true = translate_generic_sexp sexp[2]
+      if_true = @symbol_table.in_block(:cond) { translate_generic_sexp sexp[2] }
       filtered_stmts(
         s(:decl, :'Object*', var),
         cond,
@@ -23,8 +23,8 @@ class Translator
     def translate_if_else(sexp)
       var = next_var_name
       cond = translate_generic_sexp sexp[1]
-      if_true = translate_generic_sexp sexp[2]
-      if_false = translate_generic_sexp sexp[3]
+      if_true = @symbol_table.in_block(:cond) { translate_generic_sexp sexp[2] }
+      if_false = @symbol_table.in_block(:cond) { translate_generic_sexp sexp[3] }
       filtered_stmts(
         s(:decl, :'Object*', var),
         cond,
@@ -40,7 +40,7 @@ class Translator
   # not set the value_sexp attribute.
   def translate_while(sexp)
     cond = translate_generic_sexp sexp[1]
-    body = translate_generic_sexp sexp[2]
+    body = @symbol_table.in_block(:cond) { translate_generic_sexp sexp[2] }
     filtered_stmts(cond,
                    s(:while,
                      boolean_value(cond.value_sexp),
@@ -51,7 +51,7 @@ class Translator
   # not set the value_sexp attribute.
   def translate_until(sexp)
     cond = translate_generic_sexp sexp[1]
-    body = translate_generic_sexp sexp[2]
+    body = @symbol_table.in_block(:cond) { translate_generic_sexp sexp[2] }
     filtered_stmts(cond,
                    s(:while,
                      s(:l_unary_oper, :!, boolean_value(cond.value_sexp)),

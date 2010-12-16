@@ -6,7 +6,7 @@
 # Symbol tables are nested in each other:
 # Classes --> Functions --> Local variables
 class SymbolTable < Hash
-  attr_reader :cclass, :cfunction
+  attr_reader :cclass, :cfunction, :cblock
 
   def initialize
     self.add_class(:Object)
@@ -69,6 +69,20 @@ class SymbolTable < Hash
     self.cclass = name
     retval = yield
     self.cclass = prev_class
+    retval
+  end
+
+  # Executes a block in a given block context and resets the context
+  # to the previous value.
+  # TODO: Shall block be merely an identifier or more complex structure?
+  # Perhabs this method should perform certain action after exiting from
+  # the block.
+  def in_block(name)
+    raise 'Block expected' unless block_given?
+    prev_block = @cblock
+    @cblock = name
+    retval = yield
+    @cblock = prev_block
     retval
   end
 
