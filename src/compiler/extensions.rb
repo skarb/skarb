@@ -57,6 +57,24 @@ class ::Array
     return self[index..self.length-1] if index >= 0
     return self[0, self.length+index]
   end
+
+  # Returns first, third and every second element of the array
+  def odd
+    if any?
+      [self[0]] + drop(2).odd
+    else
+      []
+    end
+  end
+
+  # Returns second, fourth and every second element of the array
+  def even
+    if any?
+      drop(1).odd
+    else
+      []
+    end
+  end
 end
 
 # Extensions for standard Symbol class used by the Translator
