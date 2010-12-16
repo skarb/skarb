@@ -4,6 +4,20 @@
 #include "object.h"
 
 /**
+ * Structures used in static class dictionary.
+ * */
+typedef struct {
+  char *name;
+  void *val;
+} hash_elem;
+
+typedef struct {
+  int parent;
+  hash_elem *(*msearch) (char *, unsigned int);
+  void *fields;
+} dict_elem;
+
+/**
  * Returns the value of a given object in a boolean context.
  */
 int boolean_value(Object *object);
@@ -29,5 +43,11 @@ void die(const char *format, ...);
  * be done at the very beginning of run time.
  */
 void initialize();
+
+/**
+ * Looks for a method though inheritance hierarchy and calls it or causes program
+ * to die with an error.
+ */
+Object* call_method(int, int, ...);
 
 #endif /* HELPERS_H_ */

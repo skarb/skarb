@@ -7,8 +7,7 @@ class ClassesDictionaryBuilder
     # Generates full code for classes dictionary. Returns code splitted
     # in structs, prototypes, methods and global variables + main
     def emit_classes_dictionary(symbol_table)
-      [HashBuilder.emit_hash_elem_struct + emit_dict_elem_struct,
-        nil,
+      [nil, nil,
         emit_methods_arrays(symbol_table),
         emit_dict_init(symbol_table)]
     end
