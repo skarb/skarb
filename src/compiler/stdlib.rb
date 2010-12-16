@@ -109,3 +109,19 @@ class Array < Object
     defined_as :Array__EQ__EQ_
   end
 end
+
+class Hash < Object
+  defined_in_stdlib
+
+  def []
+    defined_as :Hash__INDEX_
+  end
+
+  def []=
+    defined_as :Hash__INDEX__EQ_
+  end
+
+  def delete
+    defined_as :Hash_delete
+  end
+end
