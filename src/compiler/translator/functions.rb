@@ -47,6 +47,13 @@ class Translator
       s(:stmts)
     end
 
+    # Translates a call to the []= method. It's treated exactly as a call sexp.
+    def translate_attrasgn(sexp)
+      sexp = sexp.clone
+      sexp[0] = :call
+      translate_call sexp
+    end
+
     private
 
     # Returns true if a given function (method) has been already defined.
