@@ -16,7 +16,8 @@ tests = Dir.glob('test/functional/*.rb') .delete_if { |f| f =~ /runner\.rb/ }
 describe 'Functional test' do
   tests.each do |file|
     it "#{File.basename file} should be valid in #{ruby}" do
-      IO.popen(ruby + ' ' + file).read.should == extract_expected_output(file)
+      IO.popen(ruby + ' ' + file + ' 2>&1').read.should ==
+        extract_expected_output(file)
     end
   end
 end
