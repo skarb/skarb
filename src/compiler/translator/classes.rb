@@ -31,7 +31,7 @@ class Translator
     end
 
     # Generates a structure for class fields and class constructor after all
-    # the methods were translates.
+    # the methods were translated.
     def generate_class_structure(class_name)
       ivars_table = @symbol_table[class_name][:ivars]
       parent_class = @symbol_table.parent class_name

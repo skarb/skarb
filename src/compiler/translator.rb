@@ -158,7 +158,7 @@ class Translator
     @symbol_table.each do |cname, chash|
       if chash.has_key?(:functions_def)
         methods_init = chash[:functions_def].each.map do |fname, fdef|
-          if fdef.class == Sexp
+          if fdef[0] != :stdlib_defn # Ignore stdlib functions
             types = fdef[2].rest.map { nil }
             impl_name = mangle(fname, cname, types)
             unless function_implemented? impl_name

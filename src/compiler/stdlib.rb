@@ -1,7 +1,7 @@
 class Fixnum < Object
   defined_in_stdlib
 
-  def +
+  def +(arg)
     defined_as :Fixnum__PLUS_
   end
 
@@ -33,7 +33,7 @@ end
 class Float < Object
   defined_in_stdlib
 
-  def +
+  def +(arg)
     defined_as :Float__PLUS_
   end
 

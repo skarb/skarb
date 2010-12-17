@@ -37,7 +37,7 @@ class Translator
         if not stdlib_method? defn
           raise "#{@symbol_table.cclass}.#{defn[1]} isn't a stdlib method"
         end
-        @symbol_table.add_function defn[1], fun_name(defn)
+        @symbol_table.add_function defn[1], s(:stdlib_defn, fun_name(defn), defn[2])
       end
     end
 

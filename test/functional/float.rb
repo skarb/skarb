@@ -9,6 +9,7 @@
 #ok
 #10.25
 #2.25
+#5.5
 a = 3.25
 b = 2.125
 puts a + b
@@ -34,3 +35,5 @@ puts '> fail' if a > 4
 puts '< fail' if a < 3
 a = 4.0
 puts '== fail' unless a == 4
+
+puts 2.5 + 1 + 2

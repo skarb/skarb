@@ -52,19 +52,18 @@ class ClassesDictionaryBuilder
     @symbol_table.map do |cname, chash|
       if chash.has_key? :functions_def
         id2fun_records = chash[:functions_def].map do |fname,fdef|
-          if fdef.class == Sexp
-            args_number = fdef[2].rest.length
+          args_number = fdef[2].rest.length
+          add_wrapper (args_number+1) unless @wrappers.has_key? (args_number+1)
+          if fdef[0] == :stdlib_defn
+            # Method defined in stdlib
+            [fname, ('&'+fdef[1].to_s).to_sym, "&wrapper_#{args_number+1}".to_sym]
+          else
             # We have to count in 'self' argument
-            add_wrapper (args_number+1) unless @wrappers.has_key? (args_number+1)
+            # TODO: It should call mangle instead
             suffix = '_' * args_number
             [fname,
              ('&'+cname.to_s+'_'+fname.to_s+suffix).to_sym,
              "&wrapper_#{args_number+1}".to_sym]
-          else
-            # Method defined in stdlib
-            # FIXME: The number of arguments of stdlib function must be
-            # known in order to add wrapper
-            [fname, ('&'+fdef.to_s).to_sym, :NULL]
           end 
         end
         HashBuilder.emit_table(cname, HashElemStruct, id2fun_records)

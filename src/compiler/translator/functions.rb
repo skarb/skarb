@@ -135,7 +135,7 @@ class Translator
       args = evaluate_call_args sexp, class_name
       # Get the defn sexp in which the function has been defined.
       if @symbol_table.class_defined_in_stdlib? class_name
-        impl_name = @symbol_table[class_name][:functions_def][def_name]
+        impl_name = @symbol_table[class_name][:functions_def][def_name][1]
         ret_type = nil
       else
         impl_name = find_defined_function class_name, def_name, args
