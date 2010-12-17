@@ -1,9 +1,11 @@
+#include <stdio.h>
 #include "fixnum.h"
 #include "xalloc.h"
 #include "object.h"
 #include "types.h"
 #include "helpers.h"
 #include "float.h"
+#include "stringclass.h"
 
 Object * Fixnum_new(int value) {
     Fixnum *self = xmalloc(sizeof(Fixnum));
@@ -74,4 +76,11 @@ Object * Fixnum__GT_(Object *self, Object *other) {
         return boolean_to_object(as_fixnum(self)->val > as_float(other)->val);
     die("TypeError");
     return 0;
+}
+
+Object * Fixnum_to_s(Object *self) {
+  static const int maxlen = sizeof("1234567890");
+  char *buffer = xmalloc(maxlen + 1);
+  snprintf(buffer, maxlen, "%i", as_fixnum(self)->val);
+  return String_new(buffer);
 }

@@ -26,4 +26,9 @@ Object * Object_Object_puts(Object *obj);
  */
 #define set_type(obj, type_symbol) (TO_OBJECT(obj)->type = (type_symbol##_t))
 
+/**
+ * Object#to_s
+ */
+Object * Object_to_s(Object *obj);
+
 #endif /* OBJECTS_H_ */

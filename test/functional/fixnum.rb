@@ -7,8 +7,10 @@
 #ok
 #ok
 #ok
+#6
 #3.5
 #1.5
+
 a = 3
 b = 2
 puts a + b
@@ -24,6 +26,7 @@ b = 3
 puts 'ok' if a == b
 b = a + b
 puts 'ok' if a < b
+puts b.to_s
 
 # Mixing Fixnum with Float
 
