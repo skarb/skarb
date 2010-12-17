@@ -21,13 +21,18 @@ PKG_CHECK_MODULES([GLib], [glib-2.0 >= 2.24.1])
 
 # Other tests
 AC_PROG_AWK
+AC_CHECK_PROGS([GPERF], [gperf])
+if test -z "$GPERF"; then
+	AC_MSG_ERROR([cannot find GNU gperf])
+fi
 AC_CHECK_PROGS(RUBBER, [rubber])
 if test -z "$RUBBER"; then
 	AC_CHECK_PROGS(PDFLATEX, [pdflatex])
 	if test -z "$PDFLATEX"; then
 		AC_MSG_NOTICE([cannot find neither rubber nor pdflatex])
+	else
+		AC_SUBST(LATEXC, ["\$(top_srcdir)/scripts/twice.sh $PDFLATEX"])
 	fi
-	AC_SUBST(LATEXC, ["\$(top_srcdir)/scripts/twice.sh $PDFLATEX"])
 else
 	AC_SUBST(LATEXC, ["$RUBBER -d"])
 fi

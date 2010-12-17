@@ -18,7 +18,7 @@ describe 'Compiler' do
     it "should compile #{file}" do
       ARGV.replace [file]
       load rubyc_path
-      IO.popen('./a.out').read.should == extract_expected_output(file)
+      IO.popen('./a.out 2>&1').read.should == extract_expected_output(file)
     end
   end
 

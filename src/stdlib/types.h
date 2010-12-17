@@ -10,6 +10,8 @@ enum {
   Float_t,
   String_t,
   NilClass_t,
+  Array_t,
+  Hash_t,
   /**
    * The following identifier is the first value which can be used for
    * user-defined types.

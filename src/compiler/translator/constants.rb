@@ -30,5 +30,44 @@ class Translator
       sexp[1] = sexp[1].gsub('\\', '\\\\\\').gsub("\n", "\\n")
       s(:stmts).with_value(s(:call, :String_new, s(:args, sexp)), String)
     end
+
+    # Translates an array literal, such as [1, 2, "three"].
+    def translate_array(sexp)
+      if sexp.count == 1
+        s().with_value s(:call, :Array_new, s(:args)), :Array
+      else
+        args = sexp.rest.map { |child| translate_generic_sexp child }
+        var = next_var_name
+        filtered_stmts(
+          s(:decl, :'Object*', var),
+          s(:asgn, s(:var, var), s(:call, :Array_new, s(:args))),
+          filtered_block(
+            *args,
+            *args.map { |arg| s(:call, :Array_push,
+                                s(:args, s(:var, var), arg.value_sexp)) }
+        )).with_value s(:var, var), :Array
+      end
+    end
+
+    # Translates a hash literal, such as {1 => nil, 2 => "three"}.
+    def translate_hash(sexp)
+      if sexp.count == 1
+        s().with_value s(:call, :Hash_new, s(:args)), :Hash
+      else
+        args = sexp.rest.map { |child| translate_generic_sexp child }
+        pairs = args.odd.zip args.even
+        var = next_var_name
+        filtered_stmts(
+          s(:decl, :'Object*', var),
+          s(:asgn, s(:var, var), s(:call, :Hash_new, s(:args))),
+          filtered_block(
+            *args,
+            *pairs.map do |key,val|
+              s(:call, :Hash__INDEX__EQ_,
+                s(:args, s(:var, var), key.value_sexp, val.value_sexp))
+            end
+        )).with_value s(:var, var), :Hash
+      end
+    end
   end
 end

@@ -77,3 +77,51 @@ class String < Object
     defined_as :String_length
   end
 end
+
+class Array < Object
+  defined_in_stdlib
+
+  def []
+    defined_as :Array__INDEX_
+  end
+
+  def pop
+    defined_as :Array_pop
+  end
+
+  def push
+    defined_as :Array_push
+  end
+
+  def shift
+    defined_as :Array_shift
+  end
+
+  def unshift
+    defined_as :Array_unshift
+  end
+
+  def delete
+    defined_as :Array_delete
+  end
+
+  def ==
+    defined_as :Array__EQ__EQ_
+  end
+end
+
+class Hash < Object
+  defined_in_stdlib
+
+  def []
+    defined_as :Hash__INDEX_
+  end
+
+  def []=
+    defined_as :Hash__INDEX__EQ_
+  end
+
+  def delete
+    defined_as :Hash_delete
+  end
+end
