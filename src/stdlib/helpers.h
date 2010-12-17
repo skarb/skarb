@@ -46,8 +46,8 @@ void die(const char *format, ...);
 void initialize();
 
 /**
- * Looks for a method though inheritance hierarchy and calls it or causes program
- * to die with an error.
+ * Looks for a method through inheritance hierarchy and calls it or causes the
+ * program to die with an error.
  */
 Object* call_method(int, dict_elem*, char*, Object**);
 
