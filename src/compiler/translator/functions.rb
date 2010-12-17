@@ -65,8 +65,8 @@ class Translator
     def look_up_and_call(sexp)
       class_expr = evaluate_class_expr(sexp[1])
       type = class_expr.value_type.to_s.to_sym
-      # Type is unknown, we have to perform method search at runtime
-      return generate_runtime_call class_expr, sexp if type == :""
+      # If the type is unknown we have to perform method search at runtime
+      return generate_runtime_call class_expr, sexp if type.empty?
       while type
         if function_defined? sexp[2], type
           return call_defined_function sexp[2], class_expr, type, sexp
@@ -85,7 +85,7 @@ class Translator
         filtered_stmts(class_expr),
         filtered_stmts(*args),
         s(:asgn,
-          s(:decl, :'Object*', (args_tab.to_s+"[#{args.length}]").to_sym),
+          s(:decl, :'Object*', "#{args_tab}[#{args.length}]".to_sym),
           s(:init_block, *args.map { |arg| arg.value_sexp })),
         s(:decl, :'Object*', var),
         s(:asgn,
@@ -99,7 +99,7 @@ class Translator
               # Small hack: length of the string is converted to char
               # and concatenated at the beggining.
               s(:str, sexp[2].length.chr+sexp[2].to_s),
-              s(:var, args_tab))))).with_value s(:var, var), nil 
+              s(:var, args_tab))))).with_value_sexp s(:var, var)
     end
 
     # Evaluates arguments of a call sexp. We need to know what their type is in
@@ -143,8 +143,8 @@ class Translator
       end
       var = next_var_name
       filtered_stmts(
-       filtered_stmts(class_expr),
-       filtered_stmts(*args),
+        filtered_stmts(class_expr),
+        filtered_stmts(*args),
         s(:decl, :'Object*', var),
         s(:asgn, s(:var, var), s(:call, impl_name,
                                  s(:args, *args.map { |arg| arg.value_sexp } )))

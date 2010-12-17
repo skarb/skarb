@@ -15,8 +15,11 @@ module Emitter::Functions
   end
 
   def Emitter.emit_call(sexp)
-    (sexp[1].class == Symbol ? sexp[1].to_s : emit_generic_elem(sexp[1])) +
-     '(' + emit_actual_args(sexp[2]) + ')'
+    if sexp[1].is_a? Symbol
+      sexp[1].to_s
+    else
+      emit_generic_elem(sexp[1])
+    end + '(' + emit_actual_args(sexp[2]) + ')'
   end
 
   private
