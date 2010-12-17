@@ -15,7 +15,8 @@ class ClassesDictionaryBuilder
   def emit_classes_dictionary
     methods = emit_methods_arrays + emit_wrappers
     protos = emit_wrappers_protos
-    [nil, protos, methods, emit_dict_init]
+    # TODO: fix this temporary hack.
+    ['extern dict_elem classes_dictionary[];', protos, methods, emit_dict_init]
   end
 
   private  
