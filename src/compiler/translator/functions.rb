@@ -143,8 +143,8 @@ class Translator
       end
       var = next_var_name
       filtered_stmts(
-       filtered_stmts(class_expr),
-       filtered_stmts(*args),
+        filtered_stmts(class_expr),
+        filtered_stmts(*args),
         s(:decl, :'Object*', var),
         s(:asgn, s(:var, var), s(:call, impl_name,
                                  s(:args, *args.map { |arg| arg.value_sexp } )))
