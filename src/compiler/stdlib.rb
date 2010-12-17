@@ -5,27 +5,27 @@ class Fixnum < Object
     defined_as :Fixnum__PLUS_
   end
 
-  def -
+  def -(arg)
     defined_as :Fixnum__MINUS_
   end
 
-  def *
+  def *(arg)
     defined_as :Fixnum__MUL_
   end
 
-  def /
+  def /(arg)
     defined_as :Fixnum__DIV_
   end
 
-  def ==
+  def ==(arg)
     defined_as :Fixnum__EQ__EQ_
   end
 
-  def <
+  def <(arg)
     defined_as :Fixnum__LT_
   end
 
-  def >
+  def >(arg)
     defined_as :Fixnum__GT_
   end
 end
@@ -37,27 +37,27 @@ class Float < Object
     defined_as :Float__PLUS_
   end
 
-  def -
+  def -(arg)
     defined_as :Float__MINUS_
   end
 
-  def *
+  def *(arg)
     defined_as :Float__MUL_
   end
 
-  def /
+  def /(arg)
     defined_as :Float__DIV_
   end
 
-  def ==
+  def ==(arg)
     defined_as :Float__EQ__EQ_
   end
 
-  def <
+  def <(arg)
     defined_as :Float__LT_
   end
 
-  def >
+  def >(arg)
     defined_as :Float__GT_
   end
 end
@@ -65,11 +65,11 @@ end
 class String < Object
   defined_in_stdlib
 
-  def +
+  def +(arg)
     defined_as :String__PLUS_
   end
 
-  def *
+  def *(arg)
     defined_as :String__MUL_
   end
 
@@ -81,7 +81,7 @@ end
 class Array < Object
   defined_in_stdlib
 
-  def []
+  def [](arg)
     defined_as :Array__INDEX_
   end
 
@@ -89,7 +89,7 @@ class Array < Object
     defined_as :Array_pop
   end
 
-  def push
+  def push(arg)
     defined_as :Array_push
   end
 
@@ -97,15 +97,15 @@ class Array < Object
     defined_as :Array_shift
   end
 
-  def unshift
+  def unshift(arg)
     defined_as :Array_unshift
   end
 
-  def delete
+  def delete(arg)
     defined_as :Array_delete
   end
 
-  def ==
+  def ==(arg)
     defined_as :Array__EQ__EQ_
   end
 end
@@ -113,15 +113,15 @@ end
 class Hash < Object
   defined_in_stdlib
 
-  def []
+  def [](arg)
     defined_as :Hash__INDEX_
   end
 
-  def []=
+  def []=(key, val)
     defined_as :Hash__INDEX__EQ_
   end
 
-  def delete
+  def delete(arg)
     defined_as :Hash_delete
   end
 end
