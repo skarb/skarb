@@ -28,7 +28,7 @@ class Emitter
   include Errors
 
   def Emitter.emit_cast(sexp)
-    '(' + sexp[1].to_s + ')' + emit_arg_expr(sexp[2])
+    '((' + sexp[1].to_s + ')' + emit_arg_expr(sexp[2]) + ')'
   end
 
   # Universal function for emitting any argument expression

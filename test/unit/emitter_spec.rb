@@ -184,7 +184,7 @@ describe Emitter do
   end
 
   it 'should emit cast' do
-    emit(s(:cast, :abc, s(:var, :b))).should == '(abc)b'
+    emit(s(:cast, :abc, s(:var, :b))).should == '((abc)b)'
   end
 
   it 'should emit array initialization block' do

@@ -191,7 +191,7 @@ class SymbolTable < Hash
   # Returns ID of function name. IDs are guaranted to be unique. Methods with
   # same names defined in different classes share the same ID.
   def fname_id(fname)
-    @fname2id[fname]
+    @fname2id[fname] ||= fnext_id
   end
 
   private

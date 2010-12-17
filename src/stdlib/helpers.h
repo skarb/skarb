@@ -9,7 +9,7 @@
 typedef struct {
   char *name;
   void *function;
-  void *wrapper;
+  Object* (*wrapper)(Object**, void*);
 } hash_elem;
 
 typedef struct {
@@ -49,6 +49,6 @@ void initialize();
  * Looks for a method though inheritance hierarchy and calls it or causes program
  * to die with an error.
  */
-Object* call_method(int, int, ...);
+Object* call_method(int, dict_elem*, char*, Object**);
 
 #endif /* HELPERS_H_ */

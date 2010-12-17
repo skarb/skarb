@@ -28,7 +28,7 @@ class ClassesDictionaryBuilder
     sorter = lambda { |x,y| x[1][:id] <=> y[1][:id] }
     mapper = lambda do |k|
       # TODO: replace with real values
-      if @symbol_table[k[1][:parent]] == k[0]
+      if @symbol_table[k[1][:parent]][:id] == k[1][:id]
         parent_id = -1
       else
         parent_id = @symbol_table[k[1][:parent]][:id]
@@ -57,14 +57,14 @@ class ClassesDictionaryBuilder
             # We have to count in 'self' argument
             add_wrapper (args_number+1) unless @wrappers.has_key? (args_number+1)
             suffix = '_' * args_number
-            [@symbol_table.fname_id(fname),
+            [fname,
              ('&'+cname.to_s+'_'+fname.to_s+suffix).to_sym,
              "&wrapper_#{args_number+1}".to_sym]
           else
             # Method defined in stdlib
             # FIXME: The number of arguments of stdlib function must be
             # known in order to add wrapper
-            [@symbol_table.fname_id(fname), ('&'+fdef.to_s).to_sym, :NULL]
+            [fname, ('&'+fdef.to_s).to_sym, :NULL]
           end 
         end
         HashBuilder.emit_table(cname, HashElemStruct, id2fun_records)
@@ -79,11 +79,13 @@ class ClassesDictionaryBuilder
       s(:static,
         s(:defn, :'Object*', ('wrapper_' + n.to_s).to_sym,
           s(:args, s(:decl, :'Object**', :args_tab),
-            s(:decl, :'Object*',
-              ('(*fun)('+n.times.map { 'Object*' }.join(',')+')').to_sym)),
+            s(:decl, :'void*', :fun)),
           s(:block,
             s(:return,
-              s(:call, :fun,
+              s(:call, 
+                s(:cast,
+                  ('Object* (*)('+n.times.map { 'Object*' }.join(',')+')').to_sym,
+                  s(:var, :fun)),
                 s(:args, *n.times.map { |x| s(:var, "args_tab[#{x}]") }))))))
   end
 

@@ -9,8 +9,6 @@
 #include "fixnum.h"
 #include "xalloc.h"
 
-extern dict_elem classes_dictionary[];
-
 int boolean_value(Object *object) {
   return object != nil;
 }
@@ -37,6 +35,20 @@ void initialize() {
   g_mem_set_vtable(&vtable);
 }
 
-Object* call_method(int class_id, int fun_id, ...) {
-  return NULL;
+Object* call_method(int class_id, dict_elem* classes_dictionary,
+    char* fname, Object** args) {
+  dict_elem d_elem;
+  hash_elem* h_elem;
+  unsigned int len = fname[0];
+  int id = class_id;
+  fname++;
+  while(1) {
+    d_elem = classes_dictionary[id];
+    if(d_elem.parent == -1)
+      die("Method %s in class with id %d not found.\n", fname, class_id);
+    if( d_elem.msearch != NULL && (h_elem = d_elem.msearch(fname, len)) != 0 )
+      break;
+    id = d_elem.parent;
+  }
+  return h_elem->wrapper(args, h_elem->function);
 }

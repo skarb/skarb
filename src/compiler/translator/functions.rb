@@ -56,19 +56,48 @@ class Translator
 
     # Tries to find a method in the inheritance chain and call it.
     def look_up_and_call(sexp)
-      type = get_class_name(sexp[1]).to_s.to_sym
+      class_expr = evaluate_class_expr(sexp[1])
+      type = class_expr.value_type.to_s.to_sym
+      # Type is unknown, we have to perform method search at runtime
+      return generate_runtime_call class_expr, sexp if type == :""
       while type
         if function_defined? sexp[2], type
-          return call_defined_function sexp[2], type, sexp
+          return call_defined_function sexp[2], class_expr, type, sexp
         end
         type = @symbol_table.parent type
       end
       raise "Unknown function or method: #{sexp[2]}"
     end
 
+    # Generate AST representing args evaluation and call_method call.
+    def generate_runtime_call(class_expr, sexp)
+      args = evaluate_call_args sexp
+      var = next_var_name
+      args_tab = next_var_name
+      filtered_stmts(
+        filtered_stmts(class_expr),
+        filtered_stmts(*args),
+        s(:asgn,
+          s(:decl, :'Object*', (args_tab.to_s+"[#{args.length}]").to_sym),
+          s(:init_block, *args.map { |arg| arg.value_sexp })),
+        s(:decl, :'Object*', var),
+        s(:asgn,
+          s(:var, var),
+          s(:call, :call_method,
+            s(:args,
+              s(:binary_oper, :'->',
+                s(:cast, :'Object*', class_expr.value_sexp),
+                s(:var, :type)),
+              s(:var, :classes_dictionary),
+              # Small hack: length of the string is converted to char
+              # and concatenated at the beggining.
+              s(:str, sexp[2].length.chr+sexp[2].to_s),
+              s(:var, args_tab))))).with_value s(:var, var), nil 
+    end
+
     # Evaluates arguments of a call sexp. We need to know what their type is in
     # order to call an appropriate overloaded function.
-    def evaluate_call_args(sexp, class_name)
+    def evaluate_call_args(sexp, class_name=nil)
       if sexp[1].nil?
         args = [s().with_value(s(:var, :self), class_name)]
       else
@@ -95,7 +124,7 @@ class Translator
 
     # Returns a sexp calling a defined function. If the function hasn't been
     # implemented yet implement_function is called.
-    def call_defined_function(def_name, class_name, sexp)
+    def call_defined_function(def_name, class_expr, class_name, sexp)
       args = evaluate_call_args sexp, class_name
       # Get the defn sexp in which the function has been defined.
       if @symbol_table.class_defined_in_stdlib? class_name
@@ -107,7 +136,8 @@ class Translator
       end
       var = next_var_name
       filtered_stmts(
-        filtered_stmts(*args),
+       filtered_stmts(class_expr),
+       filtered_stmts(*args),
         s(:decl, :'Object*', var),
         s(:asgn, s(:var, var), s(:call, impl_name,
                                  s(:args, *args.map { |arg| arg.value_sexp } )))
@@ -118,7 +148,8 @@ class Translator
     # implemented yet implement_constructor is called.
     def call_constructor(def_name, sexp)
       var = next_var_name
-      class_name = get_class_name(sexp[1])
+      class_expr = evaluate_class_expr(sexp[1])
+      class_name = class_expr.value_type
       if function_defined? :initialize, class_name 
         # Evaluate arguments. We need to know what their type is in order to call
         # appropriate overloaded function.
@@ -145,18 +176,19 @@ class Translator
       call = s(:call, impl_name,
                s(:args, *args_evaluation.map { |arg| arg.value_sexp } ))
       filtered_stmts(
+        filtered_stmts(class_expr),
         filtered_stmts(*args_evaluation),
         s(:decl, :'Object*', var),
         s(:asgn, s(:var, var), call)
       ).with_value s(:var, var), class_name
     end
 
-    # Returns the class name of a given expression. If it's nil it returns the
+    # Returns the translated class expression. If it's nil it returns the
     # class we're currently in. It's used to determine whose method are we
     # supposed to call when translating a call sexp.
-    def get_class_name(class_expr)
-      return @symbol_table.cclass if class_expr.nil?
-      translate_generic_sexp(class_expr).value_type
+    def evaluate_class_expr(class_expr)
+      return s().with_value_type @symbol_table.cclass if class_expr.nil?
+      translate_generic_sexp(class_expr)
     end
 
     # Returns a mangled function name for a given name, class, and
