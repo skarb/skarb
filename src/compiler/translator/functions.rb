@@ -123,6 +123,7 @@ class Translator
       # Have we got an implementation of this function for given args' types?
       unless function_implemented? impl_name
         @symbol_table.in_class class_name do
+          @functions_implementations[impl_name] = s().with_value_type :Object
           implement_function impl_name, defn, types
         end
       end
