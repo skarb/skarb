@@ -19,7 +19,8 @@ TESTSCRIPTS = if.rb \
               float.rb \
 	      dynamic-types.rb\
               array.rb \
-              hash.rb
+              hash.rb \
+              recur.rb
 
 TESTS_ENVIRONMENT = RUBYC_PATH=$(top_builddir)/src/compiler/rubyc \
                     CFLAGS="-I$(top_builddir)/src/stdlib" \
