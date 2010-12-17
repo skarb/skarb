@@ -29,7 +29,7 @@ class ClassesDictionaryBuilder
     sorter = lambda { |x,y| x[1][:id] <=> y[1][:id] }
     mapper = lambda do |k|
       # TODO: replace with real values
-      if @symbol_table[k[1][:parent]][:id] == k[1][:id]
+      if k[1][:parent].nil?
         parent_id = -1
       else
         parent_id = @symbol_table[k[1][:parent]][:id]

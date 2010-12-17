@@ -1,3 +1,5 @@
+require 'helpers'
+
 class Translator
   # A module consisting of functions which handle translation of nodes related
   # to defining and calling functions and methods.
@@ -8,6 +10,8 @@ class Translator
   # whose types are respectively X, Y and Z its mangled name will be 'B_A_X_Y_Z'.
   # See Functions#mangle for an implementation.
   module Functions
+    include Helpers
+
     # Translates a method call. Kernel#puts calls and constructors are treated
     # in special way.
     def translate_call(sexp)
@@ -73,7 +77,7 @@ class Translator
         end
         type = @symbol_table.parent type
       end
-      raise "Unknown function or method: #{sexp[2]}"
+      die "Unknown function or method: #{sexp[2]}"
     end
 
     # Generate AST representing args evaluation and call_method call.
@@ -158,6 +162,7 @@ class Translator
       var = next_var_name
       class_expr = evaluate_class_expr(sexp[1])
       class_name = class_expr.value_type
+      die "Unknown class: '#{class_name}'" unless @symbol_table[class_name]
       args_evaluation=[]
       impl_name = mangle(def_name, class_name, [])
       if not @symbol_table.class_defined_in_stdlib? class_name
