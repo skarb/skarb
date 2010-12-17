@@ -12,7 +12,7 @@ typedef struct {
 /**
  * Object#puts. Well, actually it's Kernel#puts but who cares.
  */
-Object * Object_Object_puts(Object *obj);
+Object * Object_puts(Object *obj, Object *what);
 
 /**
  * Checks whether a given object is of a given type. The second parameter should

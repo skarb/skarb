@@ -2,10 +2,10 @@
 #include <string.h>
 #include "object.h"
 #include "types.h"
-#include "fixnum.h"
-#include "float.h"
 #include "stringclass.h"
 #include "xalloc.h"
+#include "nil.h"
+#include "helpers.h"
 
 /**
  * Outputs a String. It doesn't emit a new line character if the string already
@@ -19,16 +19,15 @@ static void puts_string(String *str) {
     printf("%s\n", value);
 }
 
-Object * Object_Object_puts(Object *obj) {
-  if (is_a(obj, Fixnum))
-    printf("%i\n", ((Fixnum*) obj)->val);
-  else if (is_a(obj, Float))
-    printf("%g\n", ((Float*) obj)->val);
-  else if (is_a(obj, String))
-    puts_string((String*) obj);
-  else
-    printf("#<Object:%p>\n", obj);
-  return NULL;
+Object * Object_puts(Object *self, Object *what) {
+  static const char method[] = { 4, 't', 'o', '_', 's', '\0' };
+  Object *args[] = { what };
+  Object *str = call_method(what->type, classes_dictionary, (char*) method,
+      args);
+  if (!is_a(str, String))
+    die("Internal error");
+  puts_string((String*) str);
+  return nil;
 }
 
 Object * Object_to_s(Object *obj) {

@@ -18,6 +18,8 @@ typedef struct {
   void *fields;
 } dict_elem;
 
+extern dict_elem classes_dictionary[];
+
 /**
  * Returns the value of a given object in a boolean context.
  */

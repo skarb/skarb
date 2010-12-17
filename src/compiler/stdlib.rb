@@ -4,6 +4,11 @@ class Object
   def to_s
     defined_as :Object_to_s
   end
+
+  # TODO: it should be a static method!
+  def puts(what)
+    defined_as :Object_puts
+  end
 end
 
 class Fixnum < Object

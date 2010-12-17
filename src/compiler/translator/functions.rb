@@ -12,12 +12,9 @@ class Translator
   module Functions
     include Helpers
 
-    # Translates a method call. Kernel#puts calls and constructors are treated
-    # in special way.
+    # Translates a method call. Constructors are treated in special way.
     def translate_call(sexp)
-      if sexp[2] == :puts
-        call_faked_puts sexp
-      elsif sexp[2] == :new
+      if sexp[2] == :new
         call_constructor sexp[2], sexp
       else
         look_up_and_call sexp
