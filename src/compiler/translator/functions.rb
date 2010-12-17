@@ -99,7 +99,7 @@ class Translator
               # Small hack: length of the string is converted to char
               # and concatenated at the beggining.
               s(:str, sexp[2].length.chr+sexp[2].to_s),
-              s(:var, args_tab))))).with_value s(:var, var), nil 
+              s(:var, args_tab))))).with_value_sexp s(:var, var)
     end
 
     # Evaluates arguments of a call sexp. We need to know what their type is in
