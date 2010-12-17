@@ -65,8 +65,8 @@ class Translator
     def look_up_and_call(sexp)
       class_expr = evaluate_class_expr(sexp[1])
       type = class_expr.value_type.to_s.to_sym
-      # Type is unknown, we have to perform method search at runtime
-      return generate_runtime_call class_expr, sexp if type == :""
+      # If the type is unknown we have to perform method search at runtime
+      return generate_runtime_call class_expr, sexp if type.empty?
       while type
         if function_defined? sexp[2], type
           return call_defined_function sexp[2], class_expr, type, sexp
@@ -85,7 +85,7 @@ class Translator
         filtered_stmts(class_expr),
         filtered_stmts(*args),
         s(:asgn,
-          s(:decl, :'Object*', (args_tab.to_s+"[#{args.length}]").to_sym),
+          s(:decl, :'Object*', "#{args_tab}[#{args.length}]".to_sym),
           s(:init_block, *args.map { |arg| arg.value_sexp })),
         s(:decl, :'Object*', var),
         s(:asgn,
