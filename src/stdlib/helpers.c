@@ -44,10 +44,10 @@ Object* call_method(int class_id, dict_elem* classes_dictionary,
   fname++;
   while(1) {
     d_elem = classes_dictionary[id];
-    if(d_elem.parent == -1)
-      die("Method \"%s\" in class with id %d not found.\n", fname, class_id);
     if( d_elem.msearch != NULL && (h_elem = d_elem.msearch(fname, len)) != 0 )
       break;
+    if(d_elem.parent == -1)
+      die("Method \"%s\" in class with id %d not found.\n", fname, class_id);
     id = d_elem.parent;
   }
   return h_elem->wrapper(args, h_elem->function);
