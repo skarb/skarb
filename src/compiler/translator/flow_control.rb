@@ -41,10 +41,11 @@ class Translator
   def translate_while(sexp)
     cond = translate_generic_sexp sexp[1]
     body = @symbol_table.in_block(:cond) { translate_generic_sexp sexp[2] }
-    filtered_stmts(cond,
-                   s(:while,
-                     boolean_value(cond.value_sexp),
-                     filtered_block(body)))
+    s(:while, s(:lit, 1),
+      filtered_block(
+        cond,
+        s(:if, s(:l_unary_oper, :!, boolean_value(cond.value_sexp)), s(:break)),
+        body))
   end
 
   # Translates an until loop. Such loop in Ruby doesn't return a value so we do
@@ -52,10 +53,10 @@ class Translator
   def translate_until(sexp)
     cond = translate_generic_sexp sexp[1]
     body = @symbol_table.in_block(:cond) { translate_generic_sexp sexp[2] }
-    filtered_stmts(cond,
-                   s(:while,
-                     s(:l_unary_oper, :!, boolean_value(cond.value_sexp)),
-                     filtered_block(body)))
+    s(:while, s(:lit, 1),
+      filtered_block(cond,
+                     s(:if, boolean_value(cond.value_sexp), s(:break)),
+                     body))
   end
 
   # A trivial break translation.

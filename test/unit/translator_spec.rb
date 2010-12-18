@@ -161,14 +161,16 @@ describe Translator do
 
   it 'should translate while' do
     translate_code('while 1; 2 end').should ==
-      program(s(:while, boolean_value(fixnum_new(1)), s(:block)))
+      program(s(:while, s(:lit, 1),
+                s(:block,
+                  s(:if, s(:l_unary_oper, :!,
+                           boolean_value(fixnum_new(1))), s(:break)))))
   end
 
   it 'should translate until' do
     translate_code('until 1; 2 end').should ==
-      program(s(:while,
-                s(:l_unary_oper, :!, boolean_value(fixnum_new(1))),
-                s(:block)))
+      program(s(:while, s(:lit, 1),
+                s(:block, s(:if, boolean_value(fixnum_new(1)), s(:break)))))
   end
 
   it 'should detect type of fixnum literal' do
