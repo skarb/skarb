@@ -24,6 +24,7 @@ class Object
   # TODO: it should be a static method!
   def puts(what)
     defined_as :Object_puts
+    returns NilClass
   end
 end
 
@@ -69,18 +70,22 @@ class Float < Object
 
   def +(arg)
     defined_as :Float__PLUS_
+    returns Float
   end
 
   def -(arg)
     defined_as :Float__MINUS_
+    returns Float
   end
 
   def *(arg)
     defined_as :Float__MUL_
+    returns Float
   end
 
   def /(arg)
     defined_as :Float__DIV_
+    returns Float
   end
 
   def ==(arg)
@@ -106,14 +111,17 @@ class String < Object
 
   def +(arg)
     defined_as :String__PLUS_
+    returns String
   end
 
   def *(arg)
     defined_as :String__MUL_
+    returns String
   end
 
   def length
     defined_as :String_length
+    returns Fixnum
   end
 
   def to_s
