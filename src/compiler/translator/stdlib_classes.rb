@@ -37,7 +37,9 @@ class Translator
         if not stdlib_method? defn
           raise "#{@symbol_table.cclass}.#{defn[1]} isn't a stdlib method"
         end
-        @symbol_table.add_function defn[1], s(:stdlib_defn, fun_name(defn), defn[2])
+        @symbol_table.add_function defn[1],
+            s(:stdlib_defn,
+              fun_name(defn), defn[2]).with_value_type(returned_type defn)
       end
     end
 
@@ -55,6 +57,22 @@ class Translator
     def fun_name(defn)
       # The ultimate masterpiece of illegible code.
       defn[3][1][1][3][1][1]
+    end
+
+    # Looks up a call to 'returns' which defines the returned type. If it's
+    # present it returns the specified type. Otherwise returns nil.
+    def returned_type(defn)
+      returns = defn[3][1].rest.select do |child|
+        child[0..2] == s(:call, nil, :returns)
+      end
+      if returns.count > 1
+        raise 'Invalid stdlib class method definition: ' +
+          "#{@symbol_table.cclass}.#{defn[1]}"
+      elsif returns.count == 1
+        returns[0][3][1][1]
+      else
+        nil
+      end
     end
   end
 end

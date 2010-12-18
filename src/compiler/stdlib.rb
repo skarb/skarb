@@ -18,6 +18,7 @@ class Object
 
   def to_s
     defined_as :Object_to_s
+    returns String
   end
 
   # TODO: it should be a static method!
@@ -59,6 +60,7 @@ class Fixnum < Object
 
   def to_s
     defined_as :Fixnum_to_s
+    returns String
   end
 end
 
@@ -95,6 +97,7 @@ class Float < Object
 
   def to_s
     defined_as :Float_to_s
+    returns String
   end
 end
 
@@ -115,6 +118,7 @@ class String < Object
 
   def to_s
     defined_as :String_to_s
+    returns String
   end
 end
 
