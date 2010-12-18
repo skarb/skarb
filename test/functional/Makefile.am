@@ -5,6 +5,7 @@ TESTSCRIPTS = if.rb \
               puts.rb \
               unless-else.rb \
               unless.rb \
+              while.rb \
               while-break.rb \
               until.rb \
               zero-as-a-condition.rb \
