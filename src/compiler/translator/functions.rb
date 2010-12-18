@@ -12,6 +12,25 @@ class Translator
   module Functions
     include Helpers
 
+    SpecialCharsConversion = {
+        '+'  => '__PLUS__',
+        '-'  => '__MINUS__',
+        '*'  => '__MUL__',
+        '/'  => '__DIV__',
+        '='  => '__EQ__',
+        '[]' => '__INDEX__',
+        '?'  => '__QMARK' }
+
+    # Returns a mangled function name for a given name, class, and
+    # an array of arguments' types.
+    def Translator.mangle(name, class_name, args_types)
+      sname = name.to_s
+      SpecialCharsConversion.each_pair do |char, subst|
+        sname.gsub! char, subst
+      end
+      [class_name.to_s, sname, *args_types].join('_').to_sym
+    end
+
     # Translates a method call. Constructors are treated in special way.
     def translate_call(sexp)
       if sexp[2] == :new
@@ -120,7 +139,7 @@ class Translator
     def find_defined_function(class_name, def_name, args_evaluation)
       defn = @symbol_table[class_name][:functions_def][def_name]
       types = args_evaluation.map { |arg| arg.value_type }
-      impl_name = mangle(def_name, class_name, types.rest)
+      impl_name = Translator.mangle(def_name, class_name, types.rest)
       # Have we got an implementation of this function for given args' types?
       unless function_implemented? impl_name
         @symbol_table.in_class class_name do
@@ -161,7 +180,7 @@ class Translator
       class_name = class_expr.value_type
       die "Unknown class: '#{class_name}'" unless @symbol_table[class_name]
       args_evaluation=[]
-      impl_name = mangle(def_name, class_name, [])
+      impl_name = Translator.mangle(def_name, class_name, [])
       if not @symbol_table.class_defined_in_stdlib? class_name
         if function_defined? :initialize, class_name
           # Evaluate arguments. We need to know what their type is in order to call
@@ -171,8 +190,8 @@ class Translator
           defn = @symbol_table[class_name][:functions_def][:initialize]
           # Get types of arguments.
           types = args_evaluation.map { |arg| arg.value_type }
-          impl_init_name = mangle(:initialize, class_name, types)
-          impl_name = mangle(def_name, class_name, types)
+          impl_init_name = Translator.mangle(:initialize, class_name, types)
+          impl_name = Translator.mangle(def_name, class_name, types)
           init_fun = unpack_static(@symbol_table.in_class(class_name) do
             implement_function impl_init_name, defn, types
           end)
@@ -203,11 +222,6 @@ class Translator
       translate_generic_sexp(class_expr)
     end
 
-    # Returns a mangled function name for a given name, class, and
-    # an array of arguments' types.
-    def mangle(name, class_name, args_types)
-      [class_name.to_s, name.to_s, *args_types].join('_').to_sym
-    end
 
     # Returns true if an implementation of the given function (or method)
     # defined with a full name has been already added to @functions_implementations.

@@ -160,7 +160,7 @@ class Translator
         methods_init = chash[:functions_def].each.map do |fname, fdef|
           if fdef[0] != :stdlib_defn # Ignore stdlib functions
             types = fdef[2].rest.map { nil }
-            impl_name = mangle(fname, cname, types)
+            impl_name = Translator.mangle(fname, cname, types)
             unless function_implemented? impl_name
               @symbol_table.in_class cname do
                 implement_function impl_name, fdef, types
