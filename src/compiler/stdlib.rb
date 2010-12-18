@@ -33,18 +33,26 @@ class Fixnum < Object
 
   def +(arg)
     defined_as :Fixnum__PLUS_
+    Fixnum.returned_if Fixnum
+    Float.returned_if Float
   end
 
   def -(arg)
     defined_as :Fixnum__MINUS_
+    Fixnum.returned_if Fixnum
+    Float.returned_if Float
   end
 
   def *(arg)
     defined_as :Fixnum__MUL_
+    Fixnum.returned_if Fixnum
+    Float.returned_if Float
   end
 
   def /(arg)
     defined_as :Fixnum__DIV_
+    Fixnum.returned_if Fixnum
+    Float.returned_if Float
   end
 
   def ==(arg)

@@ -148,7 +148,12 @@ class Translator
       if @symbol_table.class_defined_in_stdlib? class_name
         defn = @symbol_table[class_name][:functions_def][def_name]
         impl_name = defn[1]
-        ret_type = defn.value_type
+        if defn.value_type.is_a? Hash
+          actual_args_types = args.rest.map { |arg| arg.value_type }
+          ret_type = defn.value_type[actual_args_types.join '_']
+        else
+          ret_type = defn.value_type
+        end
       else
         impl_name = find_defined_function class_name, def_name, args
         ret_type = return_type impl_name

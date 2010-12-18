@@ -59,9 +59,15 @@ class Translator
       defn[3][1][1][3][1][1]
     end
 
+    # Passes the argument to single_returned_type. If a nil is returned it calls
+    # conditional_returned_types with the same argument.
+    def returned_type(defn)
+      single_returned_type(defn) or conditional_returned_types(defn)
+    end
+
     # Looks up a call to 'returns' which defines the returned type. If it's
     # present it returns the specified type. Otherwise returns nil.
-    def returned_type(defn)
+    def single_returned_type(defn)
       returns = defn[3][1].rest.select do |child|
         child[0..2] == s(:call, nil, :returns)
       end
@@ -70,8 +76,22 @@ class Translator
           "#{@symbol_table.cclass}.#{defn[1]}"
       elsif returns.count == 1
         returns[0][3][1][1]
-      else
-        nil
+      end
+    end
+
+    # Looks up all calls to 'returned_if' which define the returned type
+    # depending on the arguments' types. If any 'returned_if's are present a
+    # hash assigning strings of arguments' types joined with an underscore to a
+    # respective returned type is returned. Otherwise it returns nil.
+    def conditional_returned_types(defn)
+      returns = defn[3][1].rest.select do |child|
+        child[0] == :call and child[2] == :returned_if
+      end
+      if returns.any?
+        returns.reduce({}) do |hash,rule|
+          hash.merge({rule[3].rest.map { |arg| arg[1].to_s } .join('_') =>
+                     rule[1][1]})
+        end
       end
     end
   end
