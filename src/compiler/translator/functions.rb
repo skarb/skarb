@@ -62,7 +62,7 @@ class Translator
       return generate_runtime_call class_expr, sexp if type.empty?
       while type
         if function_defined? sexp[2], type
-          return call_defined_function sexp[2], class_expr, type, sexp
+          return call_defined_function sexp[2], type, sexp
         end
         type = @symbol_table.parent type
       end
@@ -125,7 +125,7 @@ class Translator
 
     # Returns a sexp calling a defined function. If the function hasn't been
     # implemented yet implement_function is called.
-    def call_defined_function(def_name, class_expr, class_name, sexp)
+    def call_defined_function(def_name, class_name, sexp)
       args = evaluate_call_args sexp, class_name
       # Get the defn sexp in which the function has been defined.
       if @symbol_table.class_defined_in_stdlib? class_name
@@ -143,7 +143,6 @@ class Translator
       end
       var = next_var_name
       filtered_stmts(
-        filtered_stmts(class_expr),
         filtered_stmts(*args),
         s(:decl, :'Object*', var),
         s(:asgn, s(:var, var), s(:call, impl_name,
