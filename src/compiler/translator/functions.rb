@@ -48,16 +48,6 @@ class Translator
       @symbol_table.lvars_table.select(&selector).map(&mapper)
     end
 
-    # Calls Object_Object_puts.
-    def call_faked_puts(sexp)
-      value = sexp[3][1]
-      arg_evaluation = translate_generic_sexp value
-      filtered_stmts(
-        arg_evaluation,
-        s(:call, :Object_Object_puts, s(:args, arg_evaluation.value_sexp))
-      ).with_value s(:var, :nil), NilClass
-    end
-
     # Functions' definitions don't get translated immediately. We'll wait for the
     # actual call. Meanwhile the defining sexp is saved and we return an empty
     # statements sexp.
