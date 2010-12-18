@@ -28,7 +28,7 @@ class Object
   end
 end
 
-class Fixnum < Object
+class Fixnum
   defined_in_stdlib
 
   def +(arg)
@@ -73,7 +73,7 @@ class Fixnum < Object
   end
 end
 
-class Float < Object
+class Float
   defined_in_stdlib
 
   def +(arg)
@@ -114,7 +114,7 @@ class Float < Object
   end
 end
 
-class String < Object
+class String
   defined_in_stdlib
 
   def +(arg)
@@ -138,7 +138,7 @@ class String < Object
   end
 end
 
-class Array < Object
+class Array
   defined_in_stdlib
 
   def [](arg)
@@ -172,7 +172,7 @@ class Array < Object
   end
 end
 
-class Hash < Object
+class Hash
   defined_in_stdlib
 
   def [](arg)
