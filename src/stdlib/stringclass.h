@@ -50,4 +50,9 @@ Object * String_length(Object *self);
  */
 const char * String_to_char_array(Object *self);
 
+/**
+ * String#to_s
+ */
+Object * String_to_s(Object *self);
+
 #endif /* STRING_H_ */

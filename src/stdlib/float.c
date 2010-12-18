@@ -1,9 +1,11 @@
+#include <stdio.h>
 #include "float.h"
 #include "xalloc.h"
 #include "object.h"
 #include "types.h"
 #include "helpers.h"
 #include "fixnum.h"
+#include "stringclass.h"
 
 Object * Float_new(double value) {
     Float *self = xmalloc(sizeof(Float));
@@ -74,4 +76,11 @@ Object * Float__GT_(Object *self, Object *other) {
         return boolean_to_object(as_float(self)->val > as_fixnum(other)->val);
     die("TypeError");
     return 0;
+}
+
+Object * Float_to_s(Object *self) {
+  static const int maxlen = sizeof("1234567890.1234567890");
+  char *buffer = xmalloc(maxlen + 1);
+  snprintf(buffer, maxlen, "%g", as_float(self)->val);
+  return String_new(buffer);
 }

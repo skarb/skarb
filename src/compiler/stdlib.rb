@@ -77,6 +77,10 @@ class Float < Object
   def >(arg)
     defined_as :Float__GT_
   end
+
+  def to_s
+    defined_as :Float_to_s
+  end
 end
 
 class String < Object
@@ -92,6 +96,10 @@ class String < Object
 
   def length
     defined_as :String_length
+  end
+
+  def to_s
+    defined_as :String_to_s
   end
 end
 

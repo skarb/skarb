@@ -53,3 +53,7 @@ Object * String_length(Object *self) {
 const char * String_to_char_array(Object *self) {
     return as_string(self)->val->str;
 }
+
+Object * String_to_s(Object *self) {
+    return self;
+}

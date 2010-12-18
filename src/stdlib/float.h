@@ -53,4 +53,9 @@ Object * Float__LT_(Object *self, Object *other);
  */
 Object * Float__GT_(Object *self, Object *other);
 
+/**
+ * Float#to_s
+ */
+Object * Float_to_s(Object *self);
+
 #endif /* FLOAT_H_ */
