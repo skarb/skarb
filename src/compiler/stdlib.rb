@@ -1,3 +1,18 @@
+# A following convention is used in class defintions below. A first expression
+# in a class declaration should be a call to 'defined_in_stdlib'. Each method
+# should specify it's arity by listing it's arguments. Their names doesn't
+# matter. Method bodies should begin with a call to 'defined_as' and it's
+# argument should be the name of a C function which implements a given method.
+# Afterwards it can define it's arguments' types and the type of a returned
+# value. If a function returns a Float after being called with an Array and a
+# Fixnum arguments a following expression should be added to the method body:
+#
+#   Float.returned_if Array, Fixnum
+#
+# If it always returns a certain type, e.g. Fixnum, irrespective of arguments'
+# types a following expression is expected:
+#
+#   returns Fixnum
 class Object
   defined_in_stdlib
 
