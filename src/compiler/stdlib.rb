@@ -151,6 +151,7 @@ class Array < Object
 
   def push(arg)
     defined_as :Array_push
+    returns Array
   end
 
   def shift
@@ -159,6 +160,7 @@ class Array < Object
 
   def unshift(arg)
     defined_as :Array_unshift
+    returns Array
   end
 
   def delete(arg)
