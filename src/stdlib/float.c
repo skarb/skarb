@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <glib.h>
 #include "float.h"
 #include "xalloc.h"
 #include "object.h"
@@ -80,7 +81,7 @@ Object * Float__GT_(Object *self, Object *other) {
 
 Object * Float_to_s(Object *self) {
   static const int maxlen = sizeof("1234567890.1234567890");
-  char *buffer = xmalloc(maxlen + 1);
+  char *buffer = g_alloca(maxlen + 1);
   snprintf(buffer, maxlen, "%g", as_float(self)->val);
   return String_new(buffer);
 }

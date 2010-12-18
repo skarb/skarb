@@ -19,7 +19,7 @@ Object * String__PLUS_(Object *self, Object *other) {
       die("TypeError");
     const int self_len = as_string(self)->val->len,
               other_len = as_string(other)->val->len;
-    char *buffer = xmalloc(self_len + other_len + 1);
+    char *buffer = g_alloca(self_len + other_len + 1);
     strncpy(buffer, as_string(self)->val->str, self_len + 1);
     strncpy(buffer + self_len, as_string(other)->val->str, other_len + 1);
     return String_new(buffer);
@@ -30,7 +30,7 @@ Object * String__MUL_(Object *self, Object *other) {
       die("TypeError");
     const int self_len = as_string(self)->val->len;
     int times = as_fixnum(other)->val, offset = 0;
-    char *buffer = xcalloc(times * self_len + 1, sizeof(char));
+    char *buffer = g_alloca(times * self_len + 1);
     while (times--) {
         strncpy(buffer + offset, as_string(self)->val->str, self_len + 1);
         offset += self_len;

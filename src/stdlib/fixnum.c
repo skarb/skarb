@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <glib.h>
 #include "fixnum.h"
 #include "xalloc.h"
 #include "object.h"
@@ -80,7 +81,7 @@ Object * Fixnum__GT_(Object *self, Object *other) {
 
 Object * Fixnum_to_s(Object *self) {
   static const int maxlen = sizeof("1234567890");
-  char *buffer = xmalloc(maxlen + 1);
+  char *buffer = g_alloca(maxlen + 1);
   snprintf(buffer, maxlen, "%i", as_fixnum(self)->val);
   return String_new(buffer);
 }
