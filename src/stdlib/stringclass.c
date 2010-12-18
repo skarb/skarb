@@ -11,7 +11,7 @@ Object * String_new(char *value) {
     String *self = xmalloc(sizeof(String));
     set_type(self, String);
     self->val = g_string_new(value);
-    return TO_OBJECT(self);
+    return as_object(self);
 }
 
 Object * String__PLUS_(Object *self, Object *other) {

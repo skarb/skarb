@@ -12,7 +12,7 @@
  * ends with one.
  */
 static void puts_string(String *str) {
-  const char *value = String_to_char_array(TO_OBJECT(str));
+  const char *value = String_to_char_array(as_object(str));
   if ('\n' == value[strlen(value) - 1])
     printf("%s", value);
   else

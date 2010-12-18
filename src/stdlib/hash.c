@@ -11,19 +11,19 @@
  */
 static gboolean equal_func(gconstpointer a, gconstpointer b) {
     // FIXME: works only with Fixnums
-    return boolean_value(Fixnum__EQ__EQ_(TO_OBJECT(a), TO_OBJECT(b)));
+    return boolean_value(Fixnum__EQ__EQ_(as_object(a), as_object(b)));
 }
 
 static guint hash_func(gconstpointer obj) {
     // FIXME: we need some reasonable hashing mechanism
-    return TO_OBJECT(obj)->type;
+    return as_object(obj)->type;
 }
 
 Object * Hash_new() {
     Hash *self = xmalloc(sizeof(Hash));
     set_type(self, Hash);
     self->hash = g_hash_table_new(hash_func, equal_func);
-    return TO_OBJECT(self);
+    return as_object(self);
 }
 
 Object * Hash__INDEX_(Object *self, Object *key) {

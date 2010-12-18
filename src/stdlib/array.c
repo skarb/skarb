@@ -10,7 +10,7 @@ Object * Array_new() {
     Array *self = xmalloc(sizeof(Array));
     set_type(self, Array);
     self->arr = g_array_new(FALSE, FALSE, sizeof(Object*));
-    return TO_OBJECT(self);
+    return as_object(self);
 }
 
 Object * Array__INDEX_(Object *self, Object *other) {

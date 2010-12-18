@@ -12,7 +12,7 @@ Object * Float_new(double value) {
     Float *self = xmalloc(sizeof(Float));
     set_type(self, Float);
     self->val = value;
-    return TO_OBJECT(self);
+    return as_object(self);
 }
 
 Object * Float__PLUS_(Object *self, Object *other) {

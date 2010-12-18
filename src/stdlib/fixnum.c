@@ -15,11 +15,11 @@ Fixnum cached_fixnums[] = {{{Fixnum_t}, -1}, {{Fixnum_t}, 0}, {{Fixnum_t}, 1}};
 
 Object * Fixnum_new(int value) {
     if (value == -1 || value == 0 || value == 1)
-        return TO_OBJECT(cached_fixnums + 1 + value);
+        return as_object(cached_fixnums + 1 + value);
     Fixnum *self = xmalloc(sizeof(Fixnum));
     set_type(self, Fixnum);
     self->val = value;
-    return TO_OBJECT(self);
+    return as_object(self);
 }
 
 Object * Fixnum__PLUS_(Object *self, Object *other) {
