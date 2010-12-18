@@ -92,3 +92,7 @@ Object * Fixnum_to_s(Object *self) {
   snprintf(buffer, maxlen, "%i", as_fixnum(self)->val);
   return String_new(buffer);
 }
+
+Object * Fixnum_zero_QMARK(Object *self) {
+  return boolean_to_object(as_fixnum(self)->val == 0);
+}

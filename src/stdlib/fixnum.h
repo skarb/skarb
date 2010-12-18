@@ -58,4 +58,9 @@ Object * Fixnum__GT_(Object *self, Object *other);
  */
 Object * Fixnum_to_s(Object *self);
 
+/**
+ * Fixnum#zero
+ */
+Object * Fixnum_zero_QMARK(Object *self);
+
 #endif /* FIXNUM_H_ */

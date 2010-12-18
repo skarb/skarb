@@ -71,6 +71,10 @@ class Fixnum
     defined_as :Fixnum_to_s
     returns String
   end
+
+  def zero?
+    defined_as :Fixnum_zero_QMARK
+  end
 end
 
 class Float
