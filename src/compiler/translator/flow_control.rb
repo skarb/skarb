@@ -16,7 +16,7 @@ class Translator
         cond,
         s(:if, boolean_value(cond.value_sexp),
           filtered_block(if_true, s(:asgn, s(:var, var), if_true.value_sexp)))
-      ).with_value_sexp s(:var, var)
+      ).with_value s(:var, var), if_true.value_type
     end
 
     # TODO: DRY, translate_if is almost identical.
@@ -25,6 +25,7 @@ class Translator
       cond = translate_generic_sexp sexp[1]
       if_true = @symbol_table.in_block { translate_generic_sexp sexp[2] }
       if_false = @symbol_table.in_block { translate_generic_sexp sexp[3] }
+      return_type = determine_if_else_types if_true.value_type, if_false.value_type
       filtered_stmts(
         s(:decl, :'Object*', var),
         cond,
@@ -32,7 +33,7 @@ class Translator
           boolean_value(cond.value_sexp),
           filtered_block(if_true, s(:asgn, s(:var, var), if_true.value_sexp)),
           filtered_block(if_false, s(:asgn, s(:var, var), if_false.value_sexp)))
-      ).with_value_sexp s(:var, var)
+      ).with_value s(:var, var), return_type
     end
   end
 
@@ -85,4 +86,17 @@ class Translator
     end
     translate_if top_if
   end
+
+  private
+
+  # Analyzes return types of both blocks and determines return type of
+  # whole if-else expression. If return types of both branches are identical
+  # or one branch opens recursion, return type of whole if is known.
+  def determine_if_else_types(type1, type2)
+    return type2 if type1 == :recur
+    return type1 if type2 == :recur
+    return type1 if type1 == type2
+    return nil if type1 != type2
+  end
+
 end

@@ -380,14 +380,13 @@ describe Translator do
 
   it 'should remember type within a conditional block -- there should
   be no call_method call' do
-    translate_code("class A
-                        def foo
-                        end
-                        end
-                        if 1
-                        a = A.new
-                        a.foo
-                        end")
+    translate_code_only("class A; def foo; end; end; if 1; a = A.new; a.foo; end")
       .join.should_not include "call_method"
+  end
+
+  it 'should discover return type of recursive call' do
+    translate_code_only("class A; def foo; end; end;
+                        def rec; if 1; rec; else; A.new; end; end;
+                        rec.foo").join.should_not include "call_method"
   end
 end

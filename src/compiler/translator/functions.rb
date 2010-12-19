@@ -58,6 +58,8 @@ class Translator
     def look_up_and_call(sexp)
       class_expr = evaluate_class_expr(sexp[1])
       type = class_expr.value_type.to_s.to_sym
+      # Do not translate recursive calls until their type is determined 
+      return s().with_value_type :recur if type == :recur
       # If the type is unknown we have to perform method search at runtime
       return generate_runtime_call class_expr, sexp if type.empty?
       while type
@@ -109,15 +111,19 @@ class Translator
     # Finds a C function implementing method with a given name in a given class
     # which accepts given evaluated arguments. If the function isn't implemeted
     # yet its AST gets translated.
-    def find_defined_function(class_name, def_name, args_evaluation)
+    def find_defined_function(class_name, def_name, args_types)
       defn = @symbol_table[class_name][:functions_def][def_name]
-      types = args_evaluation.map { |arg| arg.value_type }
-      impl_name = Translator.mangle(def_name, class_name, types.rest)
+      impl_name = Translator.mangle(def_name, class_name, args_types)
+      args_types = [class_name] + args_types
       # Have we got an implementation of this function for given args' types?
       unless function_implemented? impl_name
         @symbol_table.in_class class_name do
-          @functions_implementations[impl_name] = s()
-          implement_function impl_name, defn, types
+          @functions_implementations[impl_name] = s().with_value_type :recur
+          ret_type = process_function_definition(impl_name, defn, args_types).value_type
+          puts impl_name
+          p ret_type
+          @functions_implementations[impl_name] = s().with_value_type ret_type
+          implement_function impl_name, defn, args_types
         end
       end
       impl_name
@@ -127,18 +133,20 @@ class Translator
     # implemented yet implement_function is called.
     def call_defined_function(def_name, class_name, sexp)
       args = evaluate_call_args sexp, class_name
+      args_types = args.rest.map { |arg| arg.value_type }
+      # Do not translate recursive calls until their type is determined 
+      return s().with_value_type :recur if args_types.include? :recur
       # Get the defn sexp in which the function has been defined.
       if @symbol_table.class_defined_in_stdlib? class_name
         defn = @symbol_table[class_name][:functions_def][def_name]
         impl_name = defn[1]
         if defn.value_type.is_a? Hash
-          actual_args_types = args.rest.map { |arg| arg.value_type }
-          ret_type = defn.value_type[actual_args_types.join '_']
+          ret_type = defn.value_type[args_types.join '_']
         else
           ret_type = defn.value_type
         end
       else
-        impl_name = find_defined_function class_name, def_name, args
+        impl_name = find_defined_function class_name, def_name, args_types
         ret_type = return_type impl_name
       end
       var = next_var_name
