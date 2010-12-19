@@ -84,7 +84,7 @@ Object * Array__INDEX__EQ_(Object *self, Object *idx, Object *val) {
     int index = as_fixnum(idx)->val, length = as_array(self)->arr->len;
     // TODO: Negative indices, such as arr[-1]
     if (0 <= index && index < length)
-        g_array_insert_val(as_array(self)->arr, index, val);
+        g_array_index(as_array(self)->arr, Object*, index) = val;
     else if (index == length) {
         Array_push(self, val);
     } else {
