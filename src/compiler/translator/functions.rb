@@ -219,8 +219,9 @@ class Translator
           @symbol_table.set_lvar_kind arg, :param
           defn_args << s(:decl, :'Object*', arg)
         end
+        body = translate_generic_sexp(defn[3][1])
         lvars = lvars_declarations
-        translate_generic_sexp(defn[3][1])
+        body
       end
       body_block = filtered_block(*lvars, body, s(:return, body.value_sexp))
       s(:static, s(:defn, :'Object*', impl_name, defn_args, body_block)
