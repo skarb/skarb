@@ -7,4 +7,9 @@ typedef Object NilClass;
 
 extern NilClass *nil;
 
+/**
+ * Nil#to_s
+ */
+Object *Nil_to_s(Object *self);
+
 #endif /* NIL_H_ */

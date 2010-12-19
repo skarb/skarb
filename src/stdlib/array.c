@@ -17,7 +17,9 @@ Object * Array__INDEX_(Object *self, Object *other) {
     if (!is_a(other, Fixnum))
         die("TypeError");
     int index = as_fixnum(other)->val;
-    // FIXME: Check if 0 <= index < length
+    // TODO: Negative indices, such as arr[-1]
+    if (index < 0 || as_array(self)->arr->len <= index)
+        return nil;
     return g_array_index(as_array(self)->arr, Object*, index);
 }
 
@@ -70,4 +72,26 @@ Object * Array__EQ__EQ_(Object *self, Object *other) {
     }
     /* TODO: An array is 'true', but a real 'true' would be better */
     return self;
+}
+
+Object * Array_length(Object *self) {
+    return Fixnum_new(as_array(self)->arr->len);
+}
+
+Object * Array__INDEX__EQ_(Object *self, Object *idx, Object *val) {
+    if (!is_a(idx, Fixnum))
+        die("TypeError");
+    int index = as_fixnum(idx)->val, length = as_array(self)->arr->len;
+    // TODO: Negative indices, such as arr[-1]
+    if (0 <= index && index < length)
+        g_array_insert_val(as_array(self)->arr, index, val);
+    else if (index == length) {
+        Array_push(self, val);
+    } else {
+        int nils_needed = index - length;
+        while (nils_needed--)
+            Array_push(self, nil);
+        Array_push(self, val);
+    }
+    return val;
 }
