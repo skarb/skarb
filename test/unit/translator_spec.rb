@@ -378,4 +378,16 @@ describe Translator do
               s(:asgn, s(:var, :a), s(:var, :var1)))
   end
 
+  it 'should remember type within a conditional block -- there should
+  be no call_method call' do
+    translate_code("class A
+                        def foo
+                        end
+                        end
+                        if 1
+                        a = A.new
+                        a.foo
+                        end")
+      .join.should_not include "call_method"
+  end
 end

@@ -5,6 +5,11 @@
 #
 # Symbol tables are nested in each other:
 # Classes --> Functions --> Local variables
+#
+# Local variables table is a head of conditional blocks hierarchy.
+# Each block contains all the variables from it descendent.
+# Variables which type is set within block are declared as unknown
+# type in parent block.
 class SymbolTable < Hash
   attr_reader :cclass, :cfunction, :cblock
 
@@ -13,6 +18,7 @@ class SymbolTable < Hash
     class_table[:parent] = nil
     self.cclass = Translator::MainObject
     self.cfunction = :_main
+    @cblock = self[@cclass][:functions][@cfunction]
     @fname2id = {}
   end
 
@@ -57,8 +63,11 @@ class SymbolTable < Hash
     raise 'Block expected' unless block_given?
     prev_function = cfunction
     self.cfunction = name
+    prev_block = @cblock
+    @cblock = self[@cclass][:functions][@cfunction]
     retval = yield
     @cfunction = prev_function
+    @cblock = prev_block
     retval
   end
 
@@ -75,14 +84,15 @@ class SymbolTable < Hash
 
   # Executes a block in a given block context and resets the context
   # to the previous value.
-  # TODO: Shall block be merely an identifier or more complex structure?
-  # Perhabs this method should perform certain action after exiting from
-  # the block.
-  def in_block(name)
+  def in_block
     raise 'Block expected' unless block_given?
     prev_block = @cblock
-    @cblock = name
+    @cblock = { lvars: {}, parent: prev_block }
     retval = yield
+    @cblock[:lvars].each_key do |k|
+      prev_block[:lvars][k] ||= { kind: :local }
+      prev_block[:lvars][k][:type] = nil
+    end
     @cblock = prev_block
     retval
   end
@@ -101,32 +111,32 @@ class SymbolTable < Hash
   # Adds a local variable in the current function context and sets its kind
   # as default (:local)
   def add_lvar(lvar)
-    lvars_table[lvar] ||= {}
-    lvars_table[lvar][:kind] = :local
+    @cblock[:lvars][lvar] ||= { kind: :local }
   end
 
   # Checks whether we've got a given local variable in the current function
   # context.
   def has_lvar?(lvar)
-    lvars_table.has_key? lvar
+    get_lvar(lvar) != nil
   end
 
   # Sets the given type for the given local variable in the current function
   # context.
   def set_lvar_type(lvar, type)
-    lvars_table[lvar][:type] = type
+    @cblock[:lvars][lvar] ||= { kind: :local }
+    @cblock[:lvars][lvar][:type] = type
   end
 
   # Marks the given local variable in the current function context as one
   # of given type (:local or :param)
   def set_lvar_kind(lvar, kind)
-    lvars_table[lvar][:kind] = kind
+    @cblock[:lvars][lvar][:kind] = kind
   end
 
   # Returns the type for the given local variable in the current function
   # context.
   def get_lvar_type(lvar)
-    lvars_table[lvar][:type]
+    get_lvar(lvar)[:type]
   end
 
   # Adds an instance variable in the current class context.
@@ -197,6 +207,16 @@ class SymbolTable < Hash
 
   private
   
+  # Returns hash corresponding to local variable or nil if variable does not
+  # exist.
+  def get_lvar(lvar)
+    block = @cblock
+    begin
+      return block[:lvars][lvar] if block[:lvars].has_key? lvar
+    end while block = block[:parent]
+    nil
+  end
+
   # The hash of methods in the current class context.
   def functions_table
     self[@cclass][:functions]
