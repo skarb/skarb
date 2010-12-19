@@ -11,7 +11,10 @@ module SimpleCov::Configuration
 end
 
 SimpleCov.start do
-  add_filter "/unit/"
+  add_filter "/test/unit/"
+  add_filter "/test/functional/"
+  add_group 'Translator', '/compiler/translator'
+  add_group 'Emitter', '/compiler/emitter'
   coverage_dir ENV['builddir'] + '/coverage'
   root ENV['top_srcdir']
 end
