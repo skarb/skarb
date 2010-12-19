@@ -22,7 +22,8 @@ TESTSCRIPTS = if.rb \
               array.rb \
               hash.rb \
               recur.rb \
-              double-evaluation.rb
+              double-evaluation.rb \
+              var-decls-in-funcs.rb
 
 TESTS_ENVIRONMENT = RUBYC_PATH=$(top_builddir)/src/compiler/rubyc \
                     CFLAGS="-I$(top_builddir)/src/stdlib" \

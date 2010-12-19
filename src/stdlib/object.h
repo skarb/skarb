@@ -31,4 +31,9 @@ Object * Object_puts(Object *obj, Object *what);
  */
 Object * Object_to_s(Object *obj);
 
+/**
+ * Object#==
+ */
+Object * Object__EQ__EQ_(Object *self, Object *other);
+
 #endif /* OBJECTS_H_ */

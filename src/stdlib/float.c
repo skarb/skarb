@@ -9,7 +9,7 @@
 #include "stringclass.h"
 
 Object * Float_new(double value) {
-    Float *self = xmalloc(sizeof(Float));
+    Float *self = xmalloc_atomic(sizeof(Float));
     set_type(self, Float);
     self->val = value;
     return as_object(self);

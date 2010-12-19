@@ -37,3 +37,7 @@ Object * Object_to_s(Object *obj) {
   snprintf(buffer, maxlen, "#<Object:%p>", obj);
   return String_new(buffer);
 }
+
+Object * Object__EQ__EQ_(Object *self, Object *other) {
+  return boolean_to_object(self == other);
+}

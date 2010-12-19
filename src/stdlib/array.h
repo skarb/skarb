@@ -28,6 +28,11 @@ Object * Array_new();
 Object * Array__INDEX_(Object *self, Object *other);
 
 /**
+ * Array#[]=
+ */
+Object * Array__INDEX__EQ_(Object *self, Object *idx, Object *val);
+
+/**
  * Array#push
  */
 Object * Array_push(Object *self, Object *other);
@@ -56,5 +61,10 @@ Object * Array_delete(Object *self, Object *other);
  * Array#==
  */
 Object * Array__EQ__EQ_(Object *self, Object *other);
+
+/**
+ * Array#length
+ */
+Object * Array_length(Object *self);
 
 #endif /* ARRAY_H_ */

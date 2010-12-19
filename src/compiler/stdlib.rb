@@ -26,6 +26,10 @@ class Object
     defined_as :Object_puts
     returns NilClass
   end
+
+  def ==(arg)
+    defined_as :Object__EQ__EQ_
+  end
 end
 
 class Fixnum
@@ -142,11 +146,24 @@ class String
   end
 end
 
+class NilClass
+  defined_in_stdlib
+
+  def to_s
+    defined_as :Nil_to_s
+    returns String
+  end
+end
+
 class Array
   defined_in_stdlib
 
   def [](arg)
     defined_as :Array__INDEX_
+  end
+
+  def []=(idx, val)
+    defined_as :Array__INDEX__EQ_
   end
 
   def pop
@@ -173,6 +190,11 @@ class Array
 
   def ==(arg)
     defined_as :Array__EQ__EQ_
+  end
+
+  def length
+    defined_as :Array_length
+    returns Fixnum
   end
 end
 

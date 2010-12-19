@@ -120,8 +120,6 @@ class Translator
         @symbol_table.in_class class_name do
           @functions_implementations[impl_name] = s().with_value_type :recur
           ret_type = process_function_definition(impl_name, defn, args_types).value_type
-          puts impl_name
-          p ret_type
           @functions_implementations[impl_name] = s().with_value_type ret_type
           implement_function impl_name, defn, args_types
         end
@@ -227,8 +225,9 @@ class Translator
           @symbol_table.set_lvar_kind arg, :param
           defn_args << s(:decl, :'Object*', arg)
         end
+        body = translate_generic_sexp(defn[3][1])
         lvars = lvars_declarations
-        translate_generic_sexp(defn[3][1])
+        body
       end
       body_block = filtered_block(*lvars, body, s(:return, body.value_sexp))
       s(:static, s(:defn, :'Object*', impl_name, defn_args, body_block)
