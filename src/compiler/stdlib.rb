@@ -27,6 +27,12 @@ class Object
     returns NilClass
   end
 
+  # TODO: it should be a static method!
+  def rand
+    defined_as :Object_rand
+    returns Float
+  end
+
   def ==(arg)
     defined_as :Object__EQ__EQ_
   end

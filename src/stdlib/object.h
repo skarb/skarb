@@ -37,4 +37,9 @@ Object * Object_to_s(Object *obj);
  */
 Object * Object__EQ__EQ_(Object *self, Object *other);
 
+/**
+ * Object.rand
+ */
+Object * Object_rand(Object *self);
+
 #endif /* OBJECTS_H_ */

@@ -1,11 +1,13 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "object.h"
 #include "types.h"
 #include "stringclass.h"
 #include "xalloc.h"
 #include "nil.h"
 #include "helpers.h"
+#include "float.h"
 
 sObject vsObject = {{{Class_t},{Object_t}}};
 
@@ -42,4 +44,8 @@ Object * Object_to_s(Object *obj) {
 
 Object * Object__EQ__EQ_(Object *self, Object *other) {
   return boolean_to_object(self == other);
+}
+
+Object * Object_rand(Object *self) {
+  return Float_new(drand48());
 }
