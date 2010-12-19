@@ -13,6 +13,15 @@ void* xmalloc(size_t s) {
     return ptr;
 }
 
+void* xmalloc_atomic(size_t s) {
+    void *ptr = GC_MALLOC(s);
+    if (!ptr) {
+        perror("xmalloc_atomic");
+        exit(1);
+    }
+    return ptr;
+}
+
 void* xcalloc(int n, size_t s) {
     void *ptr = GC_MALLOC(n * s);
     if (!ptr) {
