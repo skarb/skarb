@@ -114,7 +114,7 @@ class Translator
     def find_defined_function(class_name, def_name, args_types)
       defn = @symbol_table[class_name][:functions_def][def_name]
       impl_name = Translator.mangle(def_name, class_name, args_types)
-      args_types = [class_name] + args_types
+      args_types.unshift class_name
       # Have we got an implementation of this function for given args' types?
       unless function_implemented? impl_name
         @symbol_table.in_class class_name do
