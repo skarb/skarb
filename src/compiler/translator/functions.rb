@@ -44,7 +44,9 @@ class Translator
     # an empty statements sexp.
     def translate_defs(sexp)
       class_name = translate_generic_sexp(sexp[1]).value_type
+      sexp = sexp.clone
       sexp.delete_at 1
+      sexp[1] = ('s'+sexp[1].to_s).to_sym
       @symbol_table.in_class class_name do
         @symbol_table.add_function sexp[1], sexp
       end
@@ -73,6 +75,11 @@ class Translator
       return s().with_value_type :recur if type == :recur
       # If the type is unknown we have to perform method search at runtime
       return generate_runtime_call class_expr, sexp if type.empty?
+      if type == :Class
+        sexp = sexp.clone
+        sexp[2] = ('s'+sexp[2].to_s).to_sym
+        type = class_expr.class_type
+      end
       while type
         if function_defined? sexp[2], type
           return call_defined_function sexp[2], type, sexp
@@ -172,7 +179,7 @@ class Translator
     def call_constructor(def_name, sexp)
       var = next_var_name
       class_expr = evaluate_class_expr(sexp[1])
-      class_name = class_expr.value_type
+      class_name = class_expr.class_type
       die "Unknown class: '#{class_name}'" unless @symbol_table[class_name]
       args_evaluation=[]
       impl_name = Translator.mangle(def_name, class_name, [])

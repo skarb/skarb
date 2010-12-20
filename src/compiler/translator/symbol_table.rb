@@ -36,7 +36,7 @@ class SymbolTable < Hash
                            value: s().with_value(
                              s(:cast, :'Object*',
                                s(:var, ('&vs'+class_name.to_s).to_sym)),
-                             class_name) }
+                             :Class).with_class_type(class_name) }
   end
 
   # Setter for cclass -- curent class context

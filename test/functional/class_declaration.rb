@@ -1,8 +1,8 @@
 #1
 #2
 #2
-#1
-#1
+#last
+#
 #2
 class Empty
 end
@@ -27,6 +27,9 @@ class B
   def +(a)
     a + 1
   end
+  def last
+    "last"
+  end
   def self.last
     @@last
   end
@@ -35,7 +38,7 @@ b=B.new
 b.set(2)
 puts b.get
 puts b + 1
-puts b == b.last
+puts b.last
 puts b.last == B.last
 C = 1
 puts C * 2

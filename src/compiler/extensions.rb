@@ -12,7 +12,14 @@ class ::Sexp
   # but this method name is unfortunately already taken by RubyParser.
   # value_type is the type of value_sexp. It can either be an instance of a
   # Class or nil in case we cannot determine the exact type.
-  attr_accessor :value_sexp, :value_type
+  # class_type is only used if value_type is Class
+  attr_accessor :value_sexp, :value_type, :class_type
+
+  # Syntactic sugar. Sets the class_type and returns self.
+  def with_class_type(class_type)
+    @class_type = class_type
+    self
+  end
 
   # Syntactic sugar. Sets the value_sexp and returns self.
   def with_value_sexp(value_sexp)

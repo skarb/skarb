@@ -6,9 +6,10 @@ class Translator
     def translate_const(sexp)
       if @symbol_table.has_key? sexp[1]
         value = @symbol_table[sexp[1]][:value]
-        s().with_value value.value_sexp, value.value_type
+        s().with_value(value.value_sexp, value.value_type).
+          with_class_type value.class_type
       else
-        s().with_value sexp[1], sexp[1]
+        s().with_value(sexp[1], sexp[1]).with_class_type sexp[1]
       end
     end
 
