@@ -148,19 +148,19 @@ class SymbolTable < Hash
   # Checks whether we've got a given instance variable in the current class
   # context.
   def has_ivar?(ivar)
-    ivars_table.has_key? ivar
+    get_ivar_class(ivar) != nil
   end
 
   # Sets the given type for the given instance variable in the current class
   # context.
   def set_ivar_type(ivar, type)
-    ivars_table[ivar][:type] = type
+    self[get_ivar_class(ivar)][:ivars][ivar][:type] = type
   end
 
   # Returns the type for the given instance variable in the current class
   # context.
   def get_ivar_type(ivar)
-    ivars_table[ivar][:type]
+    self[get_ivar_class(ivar)][:ivars][ivar][:type]
   end
 
   # Adds an class variable in the current class context.
@@ -234,12 +234,22 @@ class SymbolTable < Hash
     @fname2id[fname] ||= fnext_id
   end
 
-  # Returns hash corresponding to a class in with class variable is defined
+  # Returns class name if class within class variable is defined
   # or nil if it was not defined.
   def get_cvar_class(cvar)
     cl = @cclass
     begin
       return cl if self[cl][:cvars].has_key? cvar
+    end while cl = self[cl][:parent]
+    nil
+  end
+
+  # Returns class name if class within instance variable is defined
+  # or nil if it was not defined.
+  def get_ivar_class(ivar)
+    cl = @cclass
+    begin
+      return cl if self[cl][:ivars].has_key? ivar
     end while cl = self[cl][:parent]
     nil
   end

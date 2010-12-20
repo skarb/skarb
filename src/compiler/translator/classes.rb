@@ -15,6 +15,7 @@ class Translator
         @symbol_table.in_class class_name do
           set_parent sexp if sexp[2]
           body = translate_generic_sexp(sexp[3])
+          implement_generic_methods
         end
         @user_classes << class_name
       end
@@ -40,8 +41,6 @@ class Translator
     def generate_class_structure(class_name)
       parent_class = @symbol_table.parent class_name
       ivars_table = @symbol_table[class_name][:ivars]
-      parent_ivars = @symbol_table[parent_class][:ivars]
-      ivars_table.merge! parent_ivars unless parent_ivars.nil?
       cvars_table = @symbol_table[class_name][:cvars]
       ifields_declarations =
         ivars_table.keys.map { |key| s(:decl, :'Object*', key.rest) }
@@ -49,7 +48,7 @@ class Translator
         cvars_table.keys.map { |key| s(:decl, :'Object*', key.rest(2)) }
       structure_definition =
         s(:typedef, s(:struct, nil,
-                      s(:block, s(:decl, :Object, :meta),
+                      s(:block, s(:decl, parent_class, :parent),
                         *ifields_declarations)), class_name)
       @structures_definitions[class_name] = structure_definition
       if cfields_declarations.length > 0
@@ -81,6 +80,26 @@ class Translator
       block << s(:return, s(:var, :self))
       s(:static,
         s(:defn, :'Object*', constructor_name, s(:args, *init_args), block))
+    end
+  
+    # Implements all methods for generic (unknown) arguments unless they
+    # are already implemented.
+    def implement_generic_methods
+      cname = @symbol_table.cclass
+      chash = @symbol_table[cname]
+      if chash.has_key?(:functions_def)
+        methods_init = chash[:functions_def].each.map do |fname, fdef|
+          if fdef[0] != :stdlib_defn # Ignore stdlib functions
+            types = fdef[2].rest.map { nil }
+            impl_name = Translator.mangle(fname, cname, types)
+            unless function_implemented? impl_name
+              @symbol_table.in_class cname do
+                implement_function impl_name, fdef, types
+              end
+            end
+          end
+        end
+      end
     end
   end
 end

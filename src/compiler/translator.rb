@@ -35,12 +35,12 @@ class Translator
   # in 4 sections: structs, prototypes, functions, global variables + main
   def translate(sexp)
     main_block = translate_generic_sexp(sexp)
+    implement_generic_methods
     main = main_function CallInitialize, AllocateSelf, *lvars_declarations,
       main_block, ReturnZero
     # If there are any functions other than main they have to be included in
     # the output along with their prototypes.
     @user_classes.each { |x| generate_class_structure x }
-    implement_generic_methods
     protos = generate_prototypes
     [s(:file, *@structures_definitions.values, *@globals.values), s(:file, *protos),
       s(:file, *@functions_implementations.values), s(:file, main)]
@@ -154,23 +154,4 @@ class Translator
     s(:call, :boolean_value, s(:args, value))
   end
 
-  # Implements all methods for generic (unknown) arguments unless they
-  # are already implemented.
-  def implement_generic_methods
-    @symbol_table.each do |cname, chash|
-      if chash.has_key?(:functions_def)
-        methods_init = chash[:functions_def].each.map do |fname, fdef|
-          if fdef[0] != :stdlib_defn # Ignore stdlib functions
-            types = fdef[2].rest.map { nil }
-            impl_name = Translator.mangle(fname, cname, types)
-            unless function_implemented? impl_name
-              @symbol_table.in_class cname do
-                implement_function impl_name, fdef, types
-              end
-            end
-          end
-        end
-      end
-    end
-  end
 end

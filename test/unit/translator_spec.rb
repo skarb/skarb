@@ -39,7 +39,7 @@ describe Translator do
   # A sexp defining the main object with given fields' declarations.
   def struct_M_Object(*fields_declarations)
       s(:typedef, s(:struct, nil,
-        s(:block, s(:decl, :Object, :meta),
+        s(:block, s(:decl, :Object, :parent),
         *fields_declarations)), :'M_Object')
   end
 
@@ -326,17 +326,23 @@ describe Translator do
     [s(:file, struct_M_Object,
         s(:typedef,
           s(:struct, nil,
-            s(:block, s(:decl, :Object, :meta), decl(:a))), :A)),
-      s(:file,      
+            s(:block, s(:decl, :Object, :parent), decl(:a))), :A)),
+      s(:file,
+        s(:static,
+          s(:prototype, :'Object*', :A_initialize_,
+            s(:args, decl(:self), decl(:a)))),
         s(:static,
           s(:prototype, :'Object*', :A_initialize_Fixnum,
             s(:args, decl(:self), decl(:a)))),
         s(:static,
-          s(:prototype, :'Object*', :A_new_Fixnum, s(:args, decl(:a)))),
+          s(:prototype, :'Object*', :A_new_Fixnum, s(:args, decl(:a))))),
+      s(:file,
         s(:static,
-          s(:prototype, :'Object*', :A_initialize_,
-            s(:args, decl(:self), decl(:a))))),
-      s(:file,  
+          s(:defn, :'Object*', :A_initialize_, s(:args, decl(:self), decl(:a)),
+            s(:block,
+              s(:asgn,
+                 s(:binary_oper, :'->', s(:cast, :'A*', s(:var, :self)), s(:var, :a)), s(:var, :a)),
+              s(:return, s(:binary_oper, :'->', s(:cast, :'A*', s(:var, :self)), s(:var, :a)))))),
         s(:static,
           s(:defn, :'Object*', :A_initialize_Fixnum, s(:args, decl(:self), decl(:a)),
             s(:block,
@@ -352,13 +358,7 @@ describe Translator do
               s(:asgn,
                 s(:binary_oper, :'->', s(:var, :self), s(:var, :type)), s(:lit, 2)),
                   s(:call, :A_initialize_Fixnum, s(:args, s(:var, :self), s(:var, :a))),
-              s(:return, s(:var, :self))))),
-        s(:static,
-          s(:defn, :'Object*', :A_initialize_, s(:args, decl(:self), decl(:a)),
-            s(:block,
-              s(:asgn,
-                 s(:binary_oper, :'->', s(:cast, :'A*', s(:var, :self)), s(:var, :a)), s(:var, :a)),
-              s(:return, s(:binary_oper, :'->', s(:cast, :'A*', s(:var, :self)), s(:var, :a))))))),
+              s(:return, s(:var, :self)))))),
       s(:file,
         main(
          decl(:var1),
@@ -380,13 +380,18 @@ describe Translator do
 
   it 'should remember type within a conditional block -- there should
   be no call_method call' do
-    translate_code_only("class A; def foo; end; end; if 1; a = A.new; a.foo; end")
+    translate_code("class A; def foo; end; end; if 1; a = A.new; a.foo; end")
       .join.should_not include "call_method"
   end
 
   it 'should discover return type of recursive call' do
-    translate_code_only("class A; def foo; end; end;
+    translate_code("class A; def foo; end; end;
                         def rec; if 1; rec; else; A.new; end; end;
                         rec.foo").join.should_not include "call_method"
+  end
+
+  it 'should create nested class structure according to inheritance' do
+    translate_code("class A; end; class B < A; end;").
+      join(' ').should include "A parent"
   end
 end
