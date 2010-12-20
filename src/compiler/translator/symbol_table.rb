@@ -8,7 +8,7 @@
 #
 # Local variables table is a head of conditional blocks hierarchy.
 # Each block contains all the variables from it descendent.
-# Variables which type is set within block are declared as unknown
+# Variables which type is set within block are declared as of unknown
 # type in parent block.
 class SymbolTable < Hash
   attr_reader :cclass, :cfunction, :cblock
@@ -22,20 +22,27 @@ class SymbolTable < Hash
     @fname2id = {}
   end
 
-  # Adds a new class and generates id for it
+  # Adds a new constant and generates id for it.
+  def add_constant(name, value)
+    self[name] ||= { id: next_id, value: value }
+  end 
+
+  # Adds a new class, generates id for it and initializes mandatory
+  # keys if default values.
   def add_class(class_name)
-    self[class_name] ||= { id: next_id, parent: :Object }
+    self[class_name] ||= { id: next_id, parent: :Object, functions: {},
+                           functions_def: {}, ivars: {}, cvars: {},
+                           defined_in_stdlib: false,
+                           value: s().with_value(
+                             s(:cast, :'Object*',
+                               s(:var, ('&vs'+class_name.to_s).to_sym)),
+                             class_name) }
   end
 
   # Setter for cclass -- curent class context
   def cclass=(value)
     @cclass = value
-    add_class @cclass
-    self[@cclass][:functions] ||= {}
-    self[@cclass][:functions_def] ||= {}
-    self[@cclass][:ivars] ||= {}
-    self[@cclass][:cvars] ||= {}
-    self[@cclass][:defined_in_stdlib] ||= false
+    add_class @cclass unless self.has_key? @cclass
   end
 
   # Sets the parent class for a given symbol. Both args are symbols.

@@ -9,6 +9,7 @@ class Translator
     # Translates class definition.
     def translate_class(sexp)
       class_name=sexp[1]
+      @symbol_table.add_class sexp[1]
       if declared_as_defined_in_stdlib? sexp
         load_stdlib_class sexp
       else

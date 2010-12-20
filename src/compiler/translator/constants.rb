@@ -3,15 +3,24 @@ class Translator
   # as strings, literals and constant symbols.
   module Constants
     # Returns empty sexp with value of an constants
-    # TODO: Add support for non-class constants
     def translate_const(sexp)
       if @symbol_table.has_key? sexp[1]
-        s().with_value(
-          s(:cast, :'Object*',
-            ('&vs'+sexp[1].to_s).to_sym), sexp[1])
+        value = @symbol_table[sexp[1]][:value]
+        s().with_value value.value_sexp, value.value_type
       else
         s().with_value sexp[1], sexp[1]
       end
+    end
+
+    # Translates constant declaration
+    def translate_cdecl(sexp)
+      var_name = ('vs'+sexp[1].to_s).to_sym
+      var = s(:var, var_name)
+      arg = translate_generic_sexp sexp[2]
+      @symbol_table.add_constant sexp[1], s().with_value(var, arg.value_type)
+      @globals[var_name] = s(:decl, :'Object*', var_name)
+      filtered_stmts(arg,
+        s(:asgn, var, arg.value_sexp)).with_value var, arg.value_type
     end
 
     # Translates a literal numeric to an empty block with a value equal to a

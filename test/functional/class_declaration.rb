@@ -3,6 +3,7 @@
 #2
 #1
 #1
+#2
 class Empty
 end
 class A
@@ -36,3 +37,5 @@ puts b.get
 puts b + 1
 puts b == b.last
 puts b.last == B.last
+C = 1
+puts C * 2
