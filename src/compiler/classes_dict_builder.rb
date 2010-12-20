@@ -40,11 +40,7 @@ class ClassesDictionaryBuilder
         msearch = s(:lit, :NULL)
       end
      
-      if k[1].has_key? :cvars and not k[1][:cvars].empty?
-        cvars = s(:var, ('&s'+k[0].to_s+'v').to_sym)
-      else
-        cvars = s(:lit, :NULL)
-      end
+      cvars = s(:var, ('&vs'+k[0].to_s).to_sym)
 
       s(:init_block, s(:lit, parent_id),
         msearch, cvars)

@@ -4,9 +4,14 @@
 #include "object.h"
 
 typedef struct {
-   Object meta;
+   Object parent;
    int val;
 } Fixnum;
+
+typedef struct {
+   Object meta;
+} sFixnum;
+extern sFixnum vsFixnum;
 
 /**
  * Casts a given Object to Fixnum.

@@ -6,6 +6,8 @@
 #include "fixnum.h"
 #include "nil.h"
 
+sArray vsArray = {{Array_t}};
+
 Object * Array_new() {
     Array *self = xmalloc(sizeof(Array));
     set_type(self, Array);

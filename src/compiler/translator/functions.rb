@@ -35,8 +35,19 @@ class Translator
     # actual call. Meanwhile the defining sexp is saved and we return an empty
     # statements sexp.
     def translate_defn(sexp)
-      class_name = @symbol_table.cclass
       @symbol_table.add_function sexp[1], sexp
+      s(:stmts)
+    end
+
+    # Static functions' definitions don't get translated immediately. We'll wait
+    # for the actual call. Meanwhile the defining sexp is saved and we return
+    # an empty statements sexp.
+    def translate_defs(sexp)
+      class_name = translate_generic_sexp(sexp[1]).value_type
+      sexp.delete_at 1
+      @symbol_table.in_class class_name do
+        @symbol_table.add_function sexp[1], sexp
+      end
       s(:stmts)
     end
 

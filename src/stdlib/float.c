@@ -8,6 +8,8 @@
 #include "fixnum.h"
 #include "stringclass.h"
 
+sFloat vsFloat = {{Float_t}};
+
 Object * Float_new(double value) {
     Float *self = xmalloc_atomic(sizeof(Float));
     set_type(self, Float);

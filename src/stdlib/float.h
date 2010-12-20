@@ -4,9 +4,14 @@
 #include "object.h"
 
 typedef struct {
-   Object meta;
+   Object parent;
    double val;
 } Float;
+
+typedef struct {
+   Object meta;
+} sFloat;
+extern sFloat vsFloat;
 
 /**
  * Casts a given Object to Float.

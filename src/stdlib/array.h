@@ -8,9 +8,14 @@ typedef void GArray;
 #endif /* GLIB_MAJOR_VERSION */
 
 typedef struct {
-   Object meta;
+   Object parent;
    GArray *arr;
 } Array;
+
+typedef struct {
+   Object meta;
+} sArray;
+extern sArray vsArray;
 
 /**
  * Casts a given Object to Array.

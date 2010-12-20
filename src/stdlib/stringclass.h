@@ -16,9 +16,14 @@ typedef void GString;
 #endif /* GString */
 
 typedef struct {
-   Object meta;
+   Object parent;
    GString *val;
 } String;
+
+typedef struct {
+   Object meta;
+} sString;
+extern sString vsString;
 
 /**
  * Casts a given Object to String.

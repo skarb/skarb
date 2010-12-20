@@ -89,7 +89,7 @@ class Translator
     if respond_to? (method_name = "translate_#{sexp[0]}".to_sym), true
       send method_name, sexp
     else
-      die 'Input contains unsupported Ruby instructions. Aborting.'
+      die "Input contains unsupported Ruby instructions. Aborting."
     end
   end
 

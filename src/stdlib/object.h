@@ -7,6 +7,11 @@ typedef struct {
    uint32_t type;
 } Object;
 
+typedef struct {
+   Object meta;
+} sObject;
+extern sObject vsObject;
+
 #define as_object(obj) ((Object *)(obj))
 
 /**

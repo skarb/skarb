@@ -32,7 +32,7 @@ describe Translator do
   # Returns a sexp representing a whole C program with a given body of the
   # 'main' function.
   def program(*body)
-    [s(:file, struct_M_Object),
+    [s(:file, struct_M_Object, struct_sM_Object, struct_sM_Object_decl),
      s(:file), s(:file), s(:file, main(*body))]
   end
 
@@ -41,6 +41,18 @@ describe Translator do
       s(:typedef, s(:struct, nil,
         s(:block, s(:decl, :Object, :parent),
         *fields_declarations)), :'M_Object')
+  end
+
+  # A sexp defining the main object class with given fields' declarations.
+  def struct_sM_Object(*fields_declarations)
+      s(:typedef, s(:struct, nil,
+        s(:block, s(:decl, :Object, :meta))), :'sM_Object')
+  end
+
+  # A sexp defining the main object class structure initialization.
+  def struct_sM_Object_decl(*fields_declarations)
+      s(:asgn, s(:decl, :'sM_Object', :'vsM_Object'),
+        s(:init_block, s(:init_block, s(:lit, 1))))
   end
 
   # Returns a sexp representing a 'main' function with a given body.
@@ -203,10 +215,8 @@ describe Translator do
   end
 
   it 'should translate a function without arguments' do
-    translate_code('def fun; 5; end; fun').should ==
+    translate_code('def fun; 5; end; fun')[1..3].should ==
       [s(:file,
-        struct_M_Object),
-        s(:file,
         s(:static,
           s(:prototype, :'Object*', :"M_Object_fun", s(:args, decl(:self))))),
         s(:file,
@@ -220,10 +230,8 @@ describe Translator do
   end
 
   it 'should translate a function without arguments called twice' do
-    translate_code('def fun; 5; end; fun; fun').should ==
+    translate_code('def fun; 5; end; fun; fun')[1..3].should ==
       [s(:file,
-        struct_M_Object),
-        s(:file,
         s(:static,
           s(:prototype, :'Object*', :"M_Object_fun", s(:args, decl(:self))))),
         s(:file,
@@ -239,10 +247,8 @@ describe Translator do
   end
 
   it 'should translate an assignment to an instance variable' do
-    translate_code('@a=@a').should ==
-      [s(:file,
-        struct_M_Object(decl(:a))),
-       s(:file), s(:file), s(:file,
+    translate_code('@a=@a')[1..3].should ==
+      [s(:file), s(:file), s(:file,
         main(s(:asgn, s(:binary_oper, :'->', s(:cast, :'M_Object*', s(:var, :self)), s(:var, :a)),
                 s(:binary_oper, :'->', s(:cast, :'M_Object*', s(:var, :self)), s(:var, :a)))))]
   end
@@ -299,10 +305,8 @@ describe Translator do
 
   it 'should translate a function with arguments' do
     args = s(:args, decl(:self), decl(:x))
-    translate_code('def fun(x); x; end; fun 3').should ==
+    translate_code('def fun(x); x; end; fun 3')[1..3].should ==
       [s(:file,
-        struct_M_Object),
-       s(:file,
         s(:static,
           s(:prototype, :'Object*', :"M_Object_fun_Fixnum", args)),
         s(:static,
@@ -323,10 +327,15 @@ describe Translator do
 
   it 'should translate class declaration' do
     translate_code('class A; def initialize(a); @a=a; end; end; A.new(1)').should ==
-    [s(:file, struct_M_Object,
+    [s(:file, struct_M_Object, struct_sM_Object,
         s(:typedef,
           s(:struct, nil,
-            s(:block, s(:decl, :Object, :parent), decl(:a))), :A)),
+            s(:block, s(:decl, :Object, :parent), decl(:a))), :A),
+        s(:typedef,
+          s(:struct, nil,
+            s(:block, s(:decl, :Object, :meta))), :sA),
+        struct_sM_Object_decl,
+        s(:asgn, s(:decl, :sA, :vsA), s(:init_block, s(:init_block, s(:lit, 2))))),
       s(:file,
         s(:static,
           s(:prototype, :'Object*', :A_initialize_,

@@ -5,7 +5,13 @@ class Translator
     # Returns empty sexp with value of an constants
     # TODO: Add support for non-class constants
     def translate_const(sexp)
-      s().with_value(sexp[1], sexp[1])
+      if @symbol_table.has_key? sexp[1]
+        s().with_value(
+          s(:cast, :'Object*',
+            ('&vs'+sexp[1].to_s).to_sym), sexp[1])
+      else
+        s().with_value sexp[1], sexp[1]
+      end
     end
 
     # Translates a literal numeric to an empty block with a value equal to a

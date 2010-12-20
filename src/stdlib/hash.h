@@ -8,9 +8,14 @@ typedef void GHashTable;
 #endif /* GLIB_MAJOR_VERSION */
 
 typedef struct {
-   Object meta;
+   Object parent;
    GHashTable *hash;
 } Hash;
+
+typedef struct {
+   Object meta;
+} sHash;
+extern sHash vsHash;
 
 /**
  * Casts a given Object to Hash.

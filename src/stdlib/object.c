@@ -7,6 +7,8 @@
 #include "nil.h"
 #include "helpers.h"
 
+sObject vsObject = {{Object_t}};
+
 /**
  * Outputs a String. It doesn't emit a new line character if the string already
  * ends with one.

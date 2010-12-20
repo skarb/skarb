@@ -51,15 +51,16 @@ class Translator
                       s(:block, s(:decl, parent_class, :parent),
                         *ifields_declarations)), class_name)
       @structures_definitions[class_name] = structure_definition
-      if cfields_declarations.length > 0
-        scname = ('s'+class_name.to_s).to_sym
-        scvar = (scname.to_s + 'v').to_sym
-        cstructure_definition =
-            s(:typedef, s(:struct, nil,
-                        s(:block, *cfields_declarations)), scname)
-        @structures_definitions[scname] = cstructure_definition
-        @globals[scvar] = s(:decl, scname, scvar)
-      end
+      scname = ('s'+ class_name.to_s).to_sym
+      scvar = ('v' + scname.to_s).to_sym
+      cstructure_definition =
+          s(:typedef, s(:struct, nil,
+                        s(:block, s(:decl, :Object, :meta),
+                          *cfields_declarations)), scname)
+      @structures_definitions[scname] = cstructure_definition
+      @globals[scvar] = s(:asgn, s(:decl, scname, scvar),
+                          s(:init_block, s(:init_block, s(:lit,
+                                           @symbol_table[class_name][:id]))))
     end
 
     # Returns C constructor code for given class

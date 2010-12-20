@@ -46,7 +46,7 @@ class Emitter
   # symbol.
   def Emitter.emit_generic_elem(sexp)
     if sexp.is_a? Symbol
-      sexp
+      sexp.to_s
     elsif sexp.is_a? Sexp
       begin
         Emitter.send 'emit_' + sexp[0].to_s, sexp
