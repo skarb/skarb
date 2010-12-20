@@ -36,31 +36,36 @@ class Translator
       @symbol_table.set_parent sexp[1], sexp[2][1]
     end
 
-    # Generates a structure for class, instance fields and class constructor after
+    # Generates a structure for instance fields after
     # all the methods were translated.
     def generate_class_structure(class_name)
       parent_class = @symbol_table.parent class_name
       ivars_table = @symbol_table[class_name][:ivars]
-      cvars_table = @symbol_table[class_name][:cvars]
       ifields_declarations =
         ivars_table.keys.map { |key| s(:decl, :'Object*', key.rest) }
-      cfields_declarations =
-        cvars_table.keys.map { |key| s(:decl, :'Object*', key.rest(2)) }
       structure_definition =
         s(:typedef, s(:struct, nil,
                       s(:block, s(:decl, parent_class, :parent),
                         *ifields_declarations)), class_name)
       @structures_definitions[class_name] = structure_definition
+    end
+
+    # Generates a structure for class fields
+    def generate_class_static_structure(class_name)
+      parent_class = @symbol_table.parent class_name
+      cvars_table = @symbol_table[class_name][:cvars]
+      cfields_declarations =
+        cvars_table.keys.map { |key| s(:decl, :'Object*', key.rest(2)) }
       scname = ('s'+ class_name.to_s).to_sym
       scvar = ('v' + scname.to_s).to_sym
       cstructure_definition =
-          s(:typedef, s(:struct, nil,
-                        s(:block, s(:decl, :Object, :meta),
-                          *cfields_declarations)), scname)
+        s(:typedef, s(:struct, nil,
+                      s(:block, s(:decl, :Object, :meta),
+                        *cfields_declarations)), scname)
       @structures_definitions[scname] = cstructure_definition
       @globals[scvar] = s(:asgn, s(:decl, scname, scvar),
-                          s(:init_block, s(:init_block, s(:lit,
-                                           @symbol_table[class_name][:id]))))
+                          s(:init_block,
+                            s(:init_block, s(:lit, @symbol_table[class_name][:id]))))
     end
 
     # Returns C constructor code for given class

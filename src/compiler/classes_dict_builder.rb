@@ -33,15 +33,12 @@ class ClassesDictionaryBuilder
       else
         parent_id = @symbol_table[k[1][:parent]][:id]
       end
-     
       if k[1].has_key? :functions_def and not k[1][:functions_def].empty?
         msearch = s(:var, ('&'+k[0].to_s+"_method_find").to_sym)
       else
         msearch = s(:lit, :NULL)
       end
-     
       cvars = s(:var, ('&vs'+k[0].to_s).to_sym)
-
       s(:init_block, s(:lit, parent_id),
         msearch, cvars)
     end

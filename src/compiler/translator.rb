@@ -40,7 +40,10 @@ class Translator
       main_block, ReturnZero
     # If there are any functions other than main they have to be included in
     # the output along with their prototypes.
-    @user_classes.each { |x| generate_class_structure x }
+    @user_classes.each do |x|
+      generate_class_structure x
+      generate_class_static_structure x
+    end
     protos = generate_prototypes
     [s(:file, *@structures_definitions.values, *@globals.values), s(:file, *protos),
       s(:file, *@functions_implementations.values), s(:file, main)]
