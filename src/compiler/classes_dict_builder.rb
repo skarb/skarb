@@ -33,14 +33,21 @@ class ClassesDictionaryBuilder
       else
         parent_id = @symbol_table[k[1][:parent]][:id]
       end
+     
       if k[1].has_key? :functions_def and not k[1][:functions_def].empty?
         msearch = s(:var, ('&'+k[0].to_s+"_method_find").to_sym)
       else
         msearch = s(:lit, :NULL)
       end
+     
+      if k[1].has_key? :cvars and not k[1][:cvars].empty?
+        cvars = s(:var, ('&s'+k[0].to_s+'v').to_sym)
+      else
+        cvars = s(:lit, :NULL)
+      end
+
       s(:init_block, s(:lit, parent_id),
-        msearch,
-        s(:lit, :NULL))
+        msearch, cvars)
     end
     elem_inits = @symbol_table.each.sort(&sorter).map(&mapper)
     Emitter.emit(s(:file, s(:asgn, s(:decl, :dict_elem, :'classes_dictionary[]'),

@@ -12,6 +12,7 @@ class Parent
 
   def set_y(value)
     @y = value
+    @@last_y = value
   end
 
   def get_y
@@ -23,6 +24,10 @@ class Child < Parent
   def set_x(value)
     @x = 0
   end
+
+  def last_y
+    @@last_y
+  end
 end
 
 child = Child.new
@@ -32,5 +37,4 @@ parent = Parent.new
 parent.set_x 2
 puts parent.x
 parent.set_y 2
-child.set_y 2
-puts child.get_y
+puts child.last_y

@@ -34,6 +34,7 @@ class SymbolTable < Hash
     self[@cclass][:functions] ||= {}
     self[@cclass][:functions_def] ||= {}
     self[@cclass][:ivars] ||= {}
+    self[@cclass][:cvars] ||= {}
     self[@cclass][:defined_in_stdlib] ||= false
   end
 
@@ -162,6 +163,29 @@ class SymbolTable < Hash
     ivars_table[ivar][:type]
   end
 
+  # Adds an class variable in the current class context.
+  def add_cvar(cvar)
+    cvars_table[cvar] ||= {}
+  end
+
+  # Checks whether we've got a given class variable in the current class
+  # context.
+  def has_cvar?(cvar)
+    get_cvar_class(cvar) != nil
+  end
+
+  # Sets the given type for the given class variable in the current class
+  # context.
+  def set_cvar_type(cvar, type)
+    self[get_cvar_class(cvar)][:cvars][cvar][:type] = type
+  end
+
+  # Returns the type for the given class variable in the current class
+  # context.
+  def get_cvar_type(cvar)
+    self[get_cvar_class(cvar)][:cvars][cvar][:type]
+  end
+
   # Setter for higher class
   def higher_class=(class_name)
     class_table[:higher_class]=class_name
@@ -175,6 +199,11 @@ class SymbolTable < Hash
   # The hash of instance variables in the current class context.
   def ivars_table
     self[@cclass][:ivars]
+  end
+
+  # The hash of class variables in the current class context.
+  def cvars_table
+    self[@cclass][:cvars]
   end
 
   # General hash of current class context.
@@ -203,6 +232,16 @@ class SymbolTable < Hash
   # same names defined in different classes share the same ID.
   def fname_id(fname)
     @fname2id[fname] ||= fnext_id
+  end
+
+  # Returns hash corresponding to a class in with class variable is defined
+  # or nil if it was not defined.
+  def get_cvar_class(cvar)
+    cl = @cclass
+    begin
+      return cl if self[cl][:cvars].has_key? cvar
+    end while cl = self[cl][:parent]
+    nil
   end
 
   private

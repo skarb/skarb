@@ -10,7 +10,7 @@ class Translator
       unless @symbol_table.has_lvar? sexp[1]
         @symbol_table.add_lvar sexp[1]
       end
-      val_type = (@symbol_table.cblock == :cond ? nil : arg.value_type)
+      val_type = arg.value_type
       @symbol_table.set_lvar_type sexp[1], val_type 
       filtered_stmts(arg, s(:asgn, s(:var, sexp[1]), arg.value_sexp))
       .with_value(s(:var, sexp[1]), arg.value_type)

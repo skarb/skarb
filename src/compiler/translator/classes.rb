@@ -22,6 +22,11 @@ class Translator
       s()
     end
 
+    # Translates self reference into empty sexp with value
+    def translate_self(sexp)
+      s().with_value s(:var, :self), @symbol_table.cclass
+    end
+
     private
 
     # Sets the parent-child class relationship in the symbol table.
@@ -30,20 +35,32 @@ class Translator
       @symbol_table.set_parent sexp[1], sexp[2][1]
     end
 
-    # Generates a structure for class fields and class constructor after all
-    # the methods were translated.
+    # Generates a structure for class, instance fields and class constructor after
+    # all the methods were translated.
     def generate_class_structure(class_name)
-      ivars_table = @symbol_table[class_name][:ivars]
       parent_class = @symbol_table.parent class_name
+      ivars_table = @symbol_table[class_name][:ivars]
       parent_ivars = @symbol_table[parent_class][:ivars]
       ivars_table.merge! parent_ivars unless parent_ivars.nil?
-      fields_declarations =
+      cvars_table = @symbol_table[class_name][:cvars]
+      ifields_declarations =
         ivars_table.keys.map { |key| s(:decl, :'Object*', key.rest) }
+      cfields_declarations =
+        cvars_table.keys.map { |key| s(:decl, :'Object*', key.rest(2)) }
       structure_definition =
         s(:typedef, s(:struct, nil,
                       s(:block, s(:decl, :Object, :meta),
-                        *fields_declarations)), class_name)
+                        *ifields_declarations)), class_name)
       @structures_definitions[class_name] = structure_definition
+      if cfields_declarations.length > 0
+        scname = ('s'+class_name.to_s).to_sym
+        scvar = (scname.to_s + 'v').to_sym
+        cstructure_definition =
+            s(:typedef, s(:struct, nil,
+                        s(:block, *cfields_declarations)), scname)
+        @structures_definitions[scname] = cstructure_definition
+        @globals[scvar] = s(:decl, scname, scvar)
+      end
     end
 
     # Returns C constructor code for given class

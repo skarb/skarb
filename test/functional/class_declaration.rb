@@ -1,6 +1,7 @@
 #1
 #2
 #2
+#1
 class Empty
 end
 class A
@@ -11,6 +12,9 @@ class A
 end
 A.new(1)
 class B
+  def initialize
+    @@last = self
+  end
   def set(a)
     @a=a
   end
@@ -21,8 +25,12 @@ class B
   def +(a)
     a + 1
   end
+  def last
+    @@last
+  end
 end
 b=B.new
 b.set(2)
 puts b.get
 puts b + 1
+puts b == b.last

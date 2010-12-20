@@ -17,6 +17,7 @@ module Emitter::Literals
   end
 
   def Emitter.emit_decl(sexp)
+    return emit_generic_elem(sexp[1]) + ' ' +sexp[2].to_s if sexp[1].class == Sexp
     sexp[1,2].join ' '
   end
 end

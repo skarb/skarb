@@ -6,6 +6,7 @@ require 'translator/functions'
 require 'translator/flow_control'
 require 'translator/local_variables'
 require 'translator/instance_variables'
+require 'translator/class_variables'
 require 'translator/type_checks'
 require 'translator/classes'
 require 'translator/constants'
@@ -25,6 +26,7 @@ class Translator
     [:Object, MainObject].each {|x| @symbol_table.add_class x }
     @functions_implementations = {}
     @structures_definitions = {}
+    @globals = {}
     @user_classes = [MainObject]
   end
 
@@ -40,7 +42,7 @@ class Translator
     @user_classes.each { |x| generate_class_structure x }
     implement_generic_methods
     protos = generate_prototypes
-    [s(:file, *@structures_definitions.values), s(:file, *protos),
+    [s(:file, *@structures_definitions.values, *@globals.values), s(:file, *protos),
       s(:file, *@functions_implementations.values), s(:file, main)]
   end
 
@@ -53,6 +55,7 @@ class Translator
   include FlowControl
   include LocalVariables
   include InstanceVariables
+  include ClassVariables
   include TypeChecks
   include Classes
   include Constants
