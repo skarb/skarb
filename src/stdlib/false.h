@@ -2,6 +2,7 @@
 #define FALSE_H_
 
 #include "object.h"
+#include "class.h"
 
 typedef Object FalseClass;
 

@@ -5,7 +5,7 @@
 FalseClass the_false = { FalseClass_t };
 FalseClass *false = &the_false;
 
-sObject vsFalseClass = { {FalseClass_t} };
+sObject vsFalseClass = { {{Class_t}, {FalseClass_t}} };
 
 Object *False_to_s(Object *self) {
   static Object *string = 0;
