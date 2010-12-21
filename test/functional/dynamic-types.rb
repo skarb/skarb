@@ -1,4 +1,4 @@
-#Method "bar" in class with id 10 not found.
+#Method "bar" in class with id 12 not found.
 #a
 #b
 #b
