@@ -130,8 +130,10 @@ class Translator
     # which accepts given evaluated arguments. If the function isn't implemeted
     # yet its AST gets translated.
     def find_defined_function(class_name, def_name, args_types)
-      defn = @symbol_table[class_name][:functions_def][def_name]
-      impl_name = Translator.mangle(def_name, class_name, args_types)
+      defn = @symbol_table[class_name][:functions_def][def_name][:sexp]
+      version = @symbol_table[class_name][:functions_def][def_name][:version]
+      # Here we append version number to function name
+      impl_name = Translator.mangle(def_name, version, class_name, args_types)
       args_types.unshift class_name
       # Have we got an implementation of this function for given args' types?
       unless function_implemented? impl_name
@@ -154,7 +156,7 @@ class Translator
       return s().with_value_type :recur if args_types.include? :recur
       # Get the defn sexp in which the function has been defined.
       if @symbol_table.class_defined_in_stdlib? class_name
-        defn = @symbol_table[class_name][:functions_def][def_name]
+        defn = @symbol_table[class_name][:functions_def][def_name][:sexp]
         impl_name = defn[1]
         if defn.value_type.is_a? Hash
           ret_type = defn.value_type[args_types.join '_']
@@ -182,18 +184,19 @@ class Translator
       class_name = class_expr.class_type
       die "Unknown class: '#{class_name}'" unless @symbol_table[class_name]
       args_evaluation=[]
-      impl_name = Translator.mangle(def_name, class_name, [])
+      impl_name = Translator.mangle(def_name, 0, class_name, [])
       if not @symbol_table.class_defined_in_stdlib? class_name
         if function_defined? :initialize, class_name
           # Evaluate arguments. We need to know what their type is in order to call
           # appropriate overloaded function.
           args_evaluation = sexp[3].rest.map { |arg_sexp| translate_generic_sexp arg_sexp }
           # Get the defn sexp in which the function has been defined.
-          defn = @symbol_table[class_name][:functions_def][:initialize]
+          defn = @symbol_table[class_name][:functions_def][:initialize][:sexp]
+          version = @symbol_table[class_name][:functions_def][:initialize][:version]
           # Get types of arguments.
           types = args_evaluation.map { |arg| arg.value_type }
-          impl_init_name = Translator.mangle(:initialize, class_name, types)
-          impl_name = Translator.mangle(def_name, class_name, types)
+          impl_init_name = Translator.mangle(:initialize, version, class_name, types)
+          impl_name = Translator.mangle(def_name, 0, class_name, types)
           init_fun = unpack_static(@symbol_table.in_class(class_name) do
             implement_function impl_init_name, defn, types
           end)

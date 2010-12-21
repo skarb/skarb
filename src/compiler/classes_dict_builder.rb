@@ -51,7 +51,9 @@ class ClassesDictionaryBuilder
   def emit_methods_arrays
     @symbol_table.map do |cname, chash|
       if chash.has_key? :functions_def
-        id2fun_records = chash[:functions_def].map do |fname,fdef|
+        id2fun_records = chash[:functions_def].map do |fname,fhash|
+          fdef = fhash[:sexp]
+          version = fhash[:version]
           args_number = fdef[2].rest.length
           # We have to count in 'self' argument
           add_wrapper (args_number+1) unless @wrappers.has_key? (args_number+1)
@@ -61,7 +63,7 @@ class ClassesDictionaryBuilder
           else
             # Method defined in user code
             args = args_number.times.map { nil }
-            impl_name = Translator.mangle fname, cname, args
+            impl_name = Translator.mangle fname, version, cname, args
             [fname,
              ('&'+impl_name.to_s).to_sym,
              "&wrapper_#{args_number+1}".to_sym]

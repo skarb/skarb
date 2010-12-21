@@ -124,8 +124,14 @@ class SymbolTable < Hash
 
   # Adds function in the current class context
   def add_function(fun, sexp)
-    self[@cclass][:functions_def][fun] = sexp
-    @fname2id[fun] ||= fnext_id
+    self[@cclass][:functions_def][fun] ||= { version: -1 }
+    self[@cclass][:functions_def][fun][:version] += 1
+    self[@cclass][:functions_def][fun][:sexp] = sexp
+  end
+
+  # Returns function version in the current class context
+  def function_version(fun)
+    self[@cclass][:functions_def][fun][:version]
   end
 
   # Check if function with given name is defined for current class

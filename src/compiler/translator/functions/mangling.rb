@@ -12,12 +12,16 @@ class Translator
 
         # Returns a mangled function name for a given name, class, and
         # an array of arguments' types.
-        def Translator.mangle(name, class_name, args_types)
+        def Translator.mangle(name, version, class_name, args_types)
           sname = name.to_s
           SpecialCharsConversion.each_pair do |char, subst|
             sname.gsub! char, subst
           end
-          [class_name.to_s, sname, *args_types].join('_').to_sym
+          if version == 0
+            [class_name.to_s, sname, *args_types].join('_').to_sym
+          else
+            [class_name.to_s, sname, version, *args_types].join('_').to_sym
+          end
         end
     end
   end

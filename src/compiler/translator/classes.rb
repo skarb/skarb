@@ -101,10 +101,12 @@ class Translator
       cname = @symbol_table.cclass
       chash = @symbol_table[cname]
       if chash.has_key?(:functions_def)
-        methods_init = chash[:functions_def].each.map do |fname, fdef|
+        methods_init = chash[:functions_def].each.map do |fname, fhash|
+          fdef = fhash[:sexp]
+          version = fhash[:version]
           if fdef[0] != :stdlib_defn # Ignore stdlib functions
             types = fdef[2].rest.map { nil }
-            impl_name = Translator.mangle(fname, cname, types)
+            impl_name = Translator.mangle(fname, version, cname, types)
             unless function_implemented? impl_name
               @symbol_table.in_class cname do
                 implement_function impl_name, fdef, types
