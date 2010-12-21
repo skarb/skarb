@@ -2,6 +2,7 @@
 #define HASH_H_
 
 #include "object.h"
+#include "class.h"
 
 #ifndef GLIB_MAJOR_VERSION
 typedef void GHashTable;
@@ -13,7 +14,7 @@ typedef struct {
 } Hash;
 
 typedef struct {
-   Object meta;
+   Class meta;
 } sHash;
 extern sHash vsHash;
 

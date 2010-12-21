@@ -6,7 +6,7 @@
 #include "fixnum.h"
 #include "nil.h"
 
-sArray vsArray = {{Array_t}};
+sArray vsArray = {{{Class_t}, {Array_t}}};
 
 Object * Array_new() {
     Array *self = xmalloc(sizeof(Array));

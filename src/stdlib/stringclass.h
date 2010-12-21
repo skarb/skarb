@@ -7,6 +7,7 @@
 #define STRING_H_
 
 #include "object.h"
+#include "class.h"
 
 /*
  * Was glib.h included? Define a fake GString type if it wasn't.
@@ -21,7 +22,7 @@ typedef struct {
 } String;
 
 typedef struct {
-   Object meta;
+   Class meta;
 } sString;
 extern sString vsString;
 

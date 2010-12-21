@@ -2,6 +2,7 @@
 #define FIXNUM_H_
 
 #include "object.h"
+#include "class.h"
 
 typedef struct {
    Object parent;
@@ -9,7 +10,7 @@ typedef struct {
 } Fixnum;
 
 typedef struct {
-   Object meta;
+   Class meta;
 } sFixnum;
 extern sFixnum vsFixnum;
 

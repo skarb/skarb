@@ -8,7 +8,7 @@
 #include "float.h"
 #include "stringclass.h"
 
-sFixnum vsFixnum = {{Fixnum_t}};
+sFixnum vsFixnum = {{{Class_t}, {Fixnum_t}}};
 
 /**
  * Used to cache fixnums in range [-1,1]

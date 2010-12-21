@@ -6,7 +6,7 @@
 #include "helpers.h"
 #include "fixnum.h"
 
-sHash vsHash = {{Hash_t}};
+sHash vsHash = {{{Class_t}, {Hash_t}}};
 
 /*
  * Implements GEqualFunc, used for comparing keys in the hash.

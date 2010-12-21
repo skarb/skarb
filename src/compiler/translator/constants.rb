@@ -15,7 +15,7 @@ class Translator
 
     # Translates constant declaration
     def translate_cdecl(sexp)
-      var_name = ('vs'+sexp[1].to_s).to_sym
+      var_name = ('c'+sexp[1].to_s).to_sym
       var = s(:var, var_name)
       arg = translate_generic_sexp sexp[2]
       @symbol_table.add_constant sexp[1], s().with_value(var, arg.value_type)

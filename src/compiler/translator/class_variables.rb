@@ -15,11 +15,8 @@ class Translator
       arg = translate_generic_sexp(sexp[2])
       val_type = arg.value_type
       cvar_class = @symbol_table.get_cvar_class sexp[1]
-      field_name =  s(:binary_oper, :'->',
-                              s(:cast, ('s'+cvar_class.to_s+'*').to_sym,
-                                s(:var,
-                                  :"classes_dictionary[
-                                    #{@symbol_table[cvar_class][:id]}].fields")),
+      field_name =  s(:binary_oper, :'.',
+                              s(:var, ('vs'+cvar_class.to_s).to_sym),
                               s(:var, sname))
       filtered_stmts(arg, s(:asgn, field_name, arg.value_sexp))
       .with_value_sexp field_name
@@ -36,11 +33,9 @@ class Translator
       str_name = sexp[1].to_s
       sname = str_name[2, str_name.length-1].to_sym
       cvar_class = @symbol_table.get_cvar_class sexp[1]
-      s(:stmts).with_value_sexp s(:binary_oper, :'->',
-          s(:cast, ('s'+cvar_class.to_s+'*').to_sym,
-            s(:var, :"classes_dictionary[
-              #{@symbol_table[cvar_class][:id]}].fields")),
-          s(:var, sname))
+      s(:stmts).with_value_sexp s(:binary_oper, :'.',
+                                  s(:var, ('vs'+cvar_class.to_s).to_sym),
+                                  s(:var, sname))
     end
   end
 end

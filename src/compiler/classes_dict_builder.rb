@@ -25,24 +25,24 @@ class ClassesDictionaryBuilder
   # Generates definition of class dictionary and initializes it with
   # values from @symbol_table.
   def emit_dict_init
+    selector = lambda { |k,v| v.has_key? :id }
     sorter = lambda { |x,y| x[1][:id] <=> y[1][:id] }
     mapper = lambda do |k|
-      # TODO: replace with real values
       if k[1][:parent].nil?
         parent_id = -1
       else
         parent_id = @symbol_table[k[1][:parent]][:id]
       end
-      if k[1].has_key? :functions_def and not k[1][:functions_def].empty?
-        msearch = s(:var, ('&'+k[0].to_s+"_method_find").to_sym)
-      else
+      if k[1][:functions_def].nil? or k[1][:functions_def].empty?
         msearch = s(:lit, :NULL)
+      else
+        msearch = s(:var, ('&'+k[0].to_s+"_method_find").to_sym)
       end
       cvars = s(:var, ('&vs'+k[0].to_s).to_sym)
       s(:init_block, s(:lit, parent_id),
         msearch, cvars)
     end
-    elem_inits = @symbol_table.each.sort(&sorter).map(&mapper)
+    elem_inits = @symbol_table.select(&selector).each.sort(&sorter).map(&mapper)
     Emitter.emit(s(:file, s(:asgn, s(:decl, :dict_elem, :'classes_dictionary[]'),
                             s(:init_block, *elem_inits))))
   end

@@ -2,6 +2,7 @@
 #define FLOAT_H_
 
 #include "object.h"
+#include "class.h"
 
 typedef struct {
    Object parent;
@@ -9,7 +10,7 @@ typedef struct {
 } Float;
 
 typedef struct {
-   Object meta;
+   Class meta;
 } sFloat;
 extern sFloat vsFloat;
 

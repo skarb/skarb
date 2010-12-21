@@ -43,7 +43,7 @@ class Translator
     # for the actual call. Meanwhile the defining sexp is saved and we return
     # an empty statements sexp.
     def translate_defs(sexp)
-      class_name = translate_generic_sexp(sexp[1]).value_type
+      class_name = translate_generic_sexp(sexp[1]).class_type
       sexp = sexp.clone
       sexp.delete_at 1
       sexp[1] = ('s'+sexp[1].to_s).to_sym

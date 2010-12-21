@@ -5,7 +5,7 @@
 NilClass the_nil = { NilClass_t };
 NilClass *nil = &the_nil;
 
-sObject vsNilClass = { {NilClass_t} };
+sObject vsNilClass = { {{Class_t}, {NilClass_t}} };
 
 
 Object *Nil_to_s(Object *self) {

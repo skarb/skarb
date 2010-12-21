@@ -10,7 +10,7 @@ describe Translator do
   end
 
   # FIXME: Temporal solution
-  StandardClasses = [ :Object, :M_Object ]
+  StandardClasses = [ :Object, :Class, :M_Object ]
 
   # Parses given Ruby code and passes it to the Translator.
   def translate_code(code)
@@ -46,13 +46,16 @@ describe Translator do
   # A sexp defining the main object class with given fields' declarations.
   def struct_sM_Object(*fields_declarations)
       s(:typedef, s(:struct, nil,
-        s(:block, s(:decl, :Object, :meta))), :'sM_Object')
+        s(:block, s(:decl, :Class, :meta))), :'sM_Object')
   end
 
   # A sexp defining the main object class structure initialization.
   def struct_sM_Object_decl(*fields_declarations)
       s(:asgn, s(:decl, :'sM_Object', :'vsM_Object'),
-        s(:init_block, s(:init_block, s(:lit, 1))))
+        s(:init_block,
+          s(:init_block,
+            s(:init_block, s(:lit, 2)),
+            s(:init_block, s(:lit, 1)))))
   end
 
   # Returns a sexp representing a 'main' function with a given body.
@@ -333,9 +336,13 @@ describe Translator do
             s(:block, s(:decl, :Object, :parent), decl(:a))), :A),
         s(:typedef,
           s(:struct, nil,
-            s(:block, s(:decl, :Object, :meta))), :sA),
+            s(:block, s(:decl, :Class, :meta))), :sA),
         struct_sM_Object_decl,
-        s(:asgn, s(:decl, :sA, :vsA), s(:init_block, s(:init_block, s(:lit, 2))))),
+        s(:asgn, s(:decl, :sA, :vsA),
+          s(:init_block,
+          s(:init_block,
+            s(:init_block, s(:lit, 2)),
+            s(:init_block, s(:lit, 3)))))),
       s(:file,
         s(:static,
           s(:prototype, :'Object*', :A_initialize_,
@@ -365,7 +372,7 @@ describe Translator do
                 s(:call, :xmalloc,
                   s(:args, s(:call, :sizeof, s(:args, s(:lit, :A)))))),
               s(:asgn,
-                s(:binary_oper, :'->', s(:var, :self), s(:var, :type)), s(:lit, 2)),
+                s(:binary_oper, :'->', s(:var, :self), s(:var, :type)), s(:lit, 3)),
                   s(:call, :A_initialize_Fixnum, s(:args, s(:var, :self), s(:var, :a))),
               s(:return, s(:var, :self)))))),
       s(:file,

@@ -2,6 +2,7 @@
 #define ARRAY_H_
 
 #include "object.h"
+#include "class.h"
 
 #ifndef GLIB_MAJOR_VERSION
 typedef void GArray;
@@ -13,7 +14,7 @@ typedef struct {
 } Array;
 
 typedef struct {
-   Object meta;
+   Class meta;
 } sArray;
 extern sArray vsArray;
 

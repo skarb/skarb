@@ -32,6 +32,12 @@ class Object
   end
 end
 
+class Class
+  defined_in_stdlib
+
+  puts "abc"
+end
+
 class Fixnum
   defined_in_stdlib
 
@@ -213,3 +219,5 @@ class Hash
     defined_as :Hash_delete
   end
 end
+
+

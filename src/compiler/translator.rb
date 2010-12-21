@@ -23,7 +23,7 @@ require 'translator/constants'
 class Translator
   def initialize
     @symbol_table = SymbolTable.new
-    [:Object, MainObject].each {|x| @symbol_table.add_class x }
+    [:Object, :Class, MainObject].each {|x| @symbol_table.add_class x }
     @functions_implementations = {}
     @structures_definitions = {}
     @globals = {}

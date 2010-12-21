@@ -7,7 +7,7 @@
 #include "helpers.h"
 #include "fixnum.h"
 
-sString vsString = {{String_t}};
+sString vsString = {{{Class_t}, {String_t}}};
 
 Object * String_new(char *value) {
     String *self = xmalloc(sizeof(String));

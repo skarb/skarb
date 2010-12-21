@@ -2,6 +2,7 @@
 #define NIL_H_
 
 #include "object.h"
+#include "class.h"
 
 typedef Object NilClass;
 

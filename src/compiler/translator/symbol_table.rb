@@ -1,3 +1,5 @@
+require 'helpers'
+
 # Symbol table is a dictionary consisting of pairs:
 # "symbol" - "attributes".
 # "attributes" is another dictionary consisting of entries:
@@ -11,6 +13,8 @@
 # Variables which type is set within block are declared as of unknown
 # type in parent block.
 class SymbolTable < Hash
+  include Helpers
+
   attr_reader :cclass, :cfunction, :cblock
 
   def initialize
@@ -24,19 +28,32 @@ class SymbolTable < Hash
 
   # Adds a new constant and generates id for it.
   def add_constant(name, value)
-    self[name] ||= { id: next_id, value: value }
+    self[name] ||= { }
+    self[name][:value] = value
+    self[name][:type] = :const
   end 
 
   # Adds a new class, generates id for it and initializes mandatory
   # keys if default values.
   def add_class(class_name)
-    self[class_name] ||= { id: next_id, parent: :Object, functions: {},
-                           functions_def: {}, ivars: {}, cvars: {},
-                           defined_in_stdlib: false,
-                           value: s().with_value(
+    self[class_name] ||= { }
+    if self[class_name][:type] == :const
+      die "#{class_name} is not a class"
+    end
+    if self[class_name][:id].nil?
+      self[class_name][:id] = next_id
+      self[class_name][:parent] = :Object
+      self[class_name][:functions] = { }
+      self[class_name][:functions_def] = { }
+      self[class_name][:ivars] = {  }
+      self[class_name][:cvars] = {  }
+      self[class_name][:defined_in_stdlib] = false
+    end
+    self[class_name][:value] = s().with_value(
                              s(:cast, :'Object*',
                                s(:var, ('&vs'+class_name.to_s).to_sym)),
-                             :Class).with_class_type(class_name) }
+                             :Class).with_class_type(class_name)
+    self[class_name][:type] = :class
   end
 
   # Setter for cclass -- curent class context

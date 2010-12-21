@@ -2,6 +2,7 @@
 #define HELPERS_H_
 
 #include "object.h"
+#include "class.h"
 
 /**
  * Structures used in static class dictionary.

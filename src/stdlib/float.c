@@ -8,7 +8,7 @@
 #include "fixnum.h"
 #include "stringclass.h"
 
-sFloat vsFloat = {{Float_t}};
+sFloat vsFloat = {{{Class_t}, {Float_t}}};
 
 Object * Float_new(double value) {
     Float *self = xmalloc_atomic(sizeof(Float));

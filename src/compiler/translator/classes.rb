@@ -26,7 +26,9 @@ class Translator
 
     # Translates self reference into empty sexp with value
     def translate_self(sexp)
-      s().with_value s(:var, :self), @symbol_table.cclass
+      cclass = @symbol_table.cclass
+      return @symbol_table[cclass][:value] if @symbol_table.cfunction == :_main
+      s().with_value s(:var, :self), cclass
     end
 
     private
@@ -61,12 +63,16 @@ class Translator
       scvar = ('v' + scname.to_s).to_sym
       cstructure_definition =
         s(:typedef, s(:struct, nil,
-                      s(:block, s(:decl, :Object, :meta),
+                      s(:block, s(:decl, :Class, :meta),
                         *cfields_declarations)), scname)
       @structures_definitions[scname] = cstructure_definition
       @globals[scvar] = s(:asgn, s(:decl, scname, scvar),
                           s(:init_block,
-                            s(:init_block, s(:lit, @symbol_table[class_name][:id]))))
+                            s(:init_block,
+                              s(:init_block,
+                                s(:lit, @symbol_table[:Class][:id])),
+                              s(:init_block,
+                                s(:lit, @symbol_table[class_name][:id])))))
     end
 
     # Returns C constructor code for given class

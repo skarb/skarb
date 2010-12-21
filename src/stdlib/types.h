@@ -6,6 +6,7 @@
  */
 enum {
   Object_t = 0,
+  Class_t,
   M_Object_t,
   Fixnum_t,
   Float_t,
