@@ -1,5 +1,6 @@
+<<<<<<< HEAD
 public_headers=object.h class.h helpers.h fixnum.h float.h types.h xalloc.h \
-               stringclass.h nil.h array.h hash.h
+               stringclass.h nil.h array.h hash.h true.h
 nodist_rubycinclude_HEADERS=rubyc.h
 lib_LTLIBRARIES=librubyc.la
 librubyc_la_SOURCES=$(public_headers) fixnum.c xalloc.c helpers.c \

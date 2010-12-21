@@ -6,11 +6,13 @@
 #include "helpers.h"
 #include "object.h"
 #include "nil.h"
+#include "true.h"
+#include "false.h"
 #include "fixnum.h"
 #include "xalloc.h"
 
 int boolean_value(Object *object) {
-  return object != nil;
+  return object != nil && object != false;
 }
 
 Object * not(Object *object) {
@@ -18,8 +20,7 @@ Object * not(Object *object) {
 }
 
 Object * boolean_to_object(int value) {
-  // TODO: replace with FalseClass and TrueClass objects.
-  return value ? Fixnum_new(1) : nil;
+  return value ? true : false;
 }
 
 void die(const char *format, ...) {

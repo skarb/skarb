@@ -220,4 +220,20 @@ class Hash
   end
 end
 
+class TrueClass
+  defined_in_stdlib
 
+  def to_s
+    defined_as :True_to_s
+    returns String
+  end
+end
+
+class FalseClass
+  defined_in_stdlib
+
+  def to_s
+    defined_as :False_to_s
+    returns String
+  end
+end

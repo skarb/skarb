@@ -5,6 +5,8 @@
 #include "helpers.h"
 #include "fixnum.h"
 #include "nil.h"
+#include "true.h"
+#include "false.h"
 
 sArray vsArray = {{{Class_t}, {Array_t}}};
 
@@ -63,17 +65,16 @@ Object * Array_delete(Object *self, Object *other) {
 Object * Array__EQ__EQ_(Object *self, Object *other) {
     int length = as_array(self)->arr->len;
     if (length != as_array(other)->arr->len)
-        return nil;
+        return false;
     for (int index = 0; index < length; ++index) {
         // FIXME: Fixnum#== won't compare other types
         Object *cmp = Fixnum__EQ__EQ_(
                 g_array_index(as_array(self)->arr, Object*, index),
                 g_array_index(as_array(other)->arr, Object*, index));
         if (boolean_value(not(cmp)))
-            return nil;
+            return false;
     }
-    /* TODO: An array is 'true', but a real 'true' would be better */
-    return self;
+    return true;
 }
 
 Object * Array_length(Object *self) {

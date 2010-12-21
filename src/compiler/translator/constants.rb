@@ -86,4 +86,14 @@ class Translator
       end
     end
   end
+
+  # Translates a 'false'.
+  def translate_false(sexp)
+    s(:stmts).with_value s(:var, :false), :FalseClass
+  end
+
+  # Translates a 'true'.
+  def translate_true(sexp)
+    s(:stmts).with_value s(:var, :true), :TrueClass
+  end
 end

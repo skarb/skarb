@@ -14,6 +14,8 @@ enum {
   NilClass_t,
   Array_t,
   Hash_t,
+  TrueClass_t,
+  FalseClass_t,
   /**
    * The following identifier is the first value which can be used for
    * user-defined types.
