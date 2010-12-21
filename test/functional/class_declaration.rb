@@ -1,4 +1,5 @@
 #1
+#foo
 #2
 #2
 #last
@@ -13,6 +14,10 @@ class A
   end
 end
 A.new(1)
+def A.foo
+  puts "foo"
+end
+A.foo
 class B
   def initialize
     @@last = self
