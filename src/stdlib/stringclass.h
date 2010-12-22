@@ -61,4 +61,24 @@ const char * String_to_char_array(Object *self);
  */
 Object * String_to_s(Object *self);
 
+/**
+ * String#to_i
+ */
+Object * String_to_i(Object *self);
+
+/**
+ * String#to_f
+ */
+Object * String_to_f(Object *self);
+
+/**
+ * String#[]
+ */
+Object * String__INDEX_(Object *self, Object *index);
+
+/**
+ * String#empty?
+ */
+Object * String_empty__QMARK__(Object *self);
+
 #endif /* STRING_H_ */

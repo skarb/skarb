@@ -6,6 +6,7 @@
 #include "types.h"
 #include "helpers.h"
 #include "fixnum.h"
+#include "nil.h"
 
 sString vsString = {{{Class_t}, {String_t}}};
 
@@ -58,4 +59,38 @@ const char * String_to_char_array(Object *self) {
 
 Object * String_to_s(Object *self) {
     return self;
+}
+
+Object * String_to_i(Object *self) {
+    return Fixnum_new(atoi(as_string(self)->val->str));
+}
+
+Object * String_to_f(Object *self) {
+    return Float_new(atof(as_string(self)->val->str));
+}
+
+Object * String__INDEX_(Object *self, Object *index) {
+    if (!is_a(index, Fixnum))
+        die("TypeError");
+    static const int MAX_UTF8_BYTES_PER_CHAR = 5;
+    char *arr = as_string(self)->val->str, buf[MAX_UTF8_BYTES_PER_CHAR];
+    int chars = 0, byte = 0, buf_index = 0;
+    while (1) {
+        if ((arr[byte] & 0xc0) != 0x80) {
+            if (chars == as_fixnum(index)->val + 1) {
+                buf[buf_index] = '\0';
+                return String_new(buf);
+            }
+            chars++;
+            buf_index = 0;
+        }
+        if (!arr[byte])
+            break;
+        buf[buf_index++] = arr[byte++];
+    }
+    return nil;
+}
+
+Object * String_empty__QMARK__(Object *self) {
+    return boolean_to_object(!*as_string(self)->val->str);
 }

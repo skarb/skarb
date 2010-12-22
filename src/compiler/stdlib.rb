@@ -154,6 +154,24 @@ class String
     defined_as :String_to_s
     returns String
   end
+
+  def to_i
+    defined_as :String_to_i
+    returns Fixnum
+  end
+
+  def to_f
+    defined_as :String_to_f
+    returns Float
+  end
+
+  def [](index)
+    defined_as :String__INDEX_
+  end
+
+  def empty?
+    defined_as :String_empty__QMARK__
+  end
 end
 
 class NilClass
