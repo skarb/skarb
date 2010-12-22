@@ -1,3 +1,4 @@
+#first
 #1
 #foo
 #2
@@ -12,6 +13,7 @@ class A
     @a=a
     puts @a
   end
+  puts "first"
 end
 A.new(1)
 def A.foo

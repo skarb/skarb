@@ -12,15 +12,16 @@ class Translator
       @symbol_table.add_class sexp[1]
       if declared_as_defined_in_stdlib? sexp
         load_stdlib_class sexp
+        s()
       else
+        body = s() 
         @symbol_table.in_class class_name do
           set_parent sexp if sexp[2]
           body = translate_generic_sexp(sexp[3])
         end
         @user_classes << class_name
+        build_main_function(class_name, body)
       end
-      # TODO: Build main function for class
-      s()
     end
 
     # Translates self reference into empty sexp with value
@@ -92,6 +93,25 @@ class Translator
       block << s(:return, s(:var, :self))
       s(:static,
         s(:defn, :'Object*', constructor_name, s(:args, *init_args), block))
+    end
+  
+    # Puts main function for class in @functions_implementations and returns
+    # sexp calling it.
+    def build_main_function(class_name, body)
+      return s() if body.nil? or body.length < 2
+      fname = ([class_name, "main"].join '_').to_sym
+      body_block =
+        filtered_block(
+          *lvars_declarations,
+          s(:decl, class_name, :self_s),
+          s(:asgn,
+            s(:decl, :'Object*', :self),
+            s(:cast, :'Object*', s(:var, :'&self_s'))), body,
+          s(:return, body.value_sexp))
+      @functions_implementations[fname] =
+        s(:static, s(:defn, :'Object*', fname, s(:args), body_block)).
+        with_value_type body.value_type
+      s(:call, fname, s(:args))
     end
   end
 end
