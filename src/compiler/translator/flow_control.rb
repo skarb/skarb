@@ -69,20 +69,14 @@ class Translator
   # behaviour. Ruby's case can make nontrivial comparisons (such as strings
   # comparisons). As a result case has to be translated to a if-elsif-else block
   # with equality comparisons.
-  # FIXME: we can't call methods yet so it's pretty useless at the moment.
-  # Once we'll have objects and Object#== instead of completely incorrect
-  #   s(:if, when_sexp, ...
-  # we'll have here something like
-  #   s(:if, s(:call, value, :==, s(:args, when_sexp)), ...
   def translate_case(sexp)
-    value = translate_generic_sexp sexp[1]
     when_sexps = sexp.drop(1).find_all { |s| s.first == :when }
     top_if = sexp.last unless sexp.last.first == :when
     while when_sexps.any?
       when_sexp = when_sexps.last[1][1]
       then_sexp = when_sexps.pop[2]
-      # FIXME: it's not the way 'case' works.
-      top_if = s(:if, when_sexp, then_sexp, top_if)
+      top_if = s(:if, s(:call, sexp[1], :==, s(:args, when_sexp)),
+                 then_sexp, top_if)
     end
     translate_if top_if
   end

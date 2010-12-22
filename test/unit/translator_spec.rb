@@ -166,24 +166,6 @@ describe Translator do
                    ), s(:asgn, s(:var, :var1), s(:var, :var2)))))
   end
 
-  # NOTE: a temporary solution. We need to have Object#== to do it right.
-  it 'should translate case with integers only' do
-    translate_code('case 4; when 1; 2; when 3; 5; else 6; end').should ==
-      program(decl(:var1),
-           s(:if,
-             #s(:binary_oper, :==, s(:lit, 4), s(:lit, 1)),
-             boolean_value(fixnum_new(1)),
-             s(:block, s(:asgn, s(:var, :var1), fixnum_new(2))),
-             s(:block,
-               decl(:var2),
-               s(:if,
-                 #s(:binary_oper, :==, s(:lit, 4), s(:lit, 3)),
-                 boolean_value(fixnum_new(3)),
-                 s(:block, s(:asgn, s(:var, :var2), fixnum_new(5))),
-                 s(:block, s(:asgn, s(:var, :var2), fixnum_new(6))),
-                ), s(:asgn, s(:var, :var1), s(:var, :var2)))))
-  end
-
   it 'should translate while' do
     translate_code('while 1; 2 end').should ==
       program(s(:while, s(:lit, 1),
