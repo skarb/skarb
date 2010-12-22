@@ -126,6 +126,10 @@ class Float
     defined_as :Float_to_s
     returns String
   end
+
+  def zero?
+    defined_as :Float_zero_QMARK
+  end
 end
 
 class String

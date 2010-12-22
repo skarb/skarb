@@ -10,6 +10,7 @@
 #10.25
 #2.25
 #5.5
+#true
 a = 3.25
 b = 2.125
 puts a + b
@@ -37,3 +38,4 @@ a = 4.0
 puts '== fail' unless a == 4
 
 puts 2.5 + 1 + 2
+puts (1.5 - 2 + 0.5).zero?

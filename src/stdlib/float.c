@@ -87,3 +87,7 @@ Object * Float_to_s(Object *self) {
   snprintf(buffer, maxlen, "%g", as_float(self)->val);
   return String_new(buffer);
 }
+
+Object * Float_zero_QMARK(Object *self) {
+  return boolean_to_object(as_float(self)->val == 0);
+}

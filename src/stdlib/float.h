@@ -64,4 +64,9 @@ Object * Float__GT_(Object *self, Object *other);
  */
 Object * Float_to_s(Object *self);
 
+/**
+ * Float#zero?
+ */
+Object * Float_zero_QMARK(Object *self);
+
 #endif /* FLOAT_H_ */
