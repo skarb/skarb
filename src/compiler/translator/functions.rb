@@ -36,6 +36,7 @@ class Translator
     # statements sexp.
     def translate_defn(sexp)
       @symbol_table.add_function sexp[1], sexp
+      implement_generic_function sexp[1], @symbol_table.cclass
       s(:stmts)
     end
 
@@ -50,6 +51,7 @@ class Translator
       @symbol_table.in_class class_name do
         @symbol_table.add_function sexp[1], sexp
       end
+      implement_generic_function sexp[1], class_name
       s(:stmts)
     end
 
@@ -130,8 +132,8 @@ class Translator
     # which accepts given evaluated arguments. If the function isn't implemeted
     # yet its AST gets translated.
     def find_defined_function(class_name, def_name, args_types)
-      defn = @symbol_table[class_name][:functions_def][def_name][:sexp]
-      version = @symbol_table[class_name][:functions_def][def_name][:version]
+      defn = @symbol_table[class_name][:functions_def][def_name].last
+      version = @symbol_table[class_name][:functions_def][def_name].length - 1
       # Here we append version number to function name
       impl_name = Translator.mangle(def_name, version, class_name, args_types)
       args_types.unshift class_name
@@ -156,7 +158,7 @@ class Translator
       return s().with_value_type :recur if args_types.include? :recur
       # Get the defn sexp in which the function has been defined.
       if @symbol_table.class_defined_in_stdlib? class_name
-        defn = @symbol_table[class_name][:functions_def][def_name][:sexp]
+        defn = @symbol_table[class_name][:functions_def][def_name].last
         impl_name = defn[1]
         if defn.value_type.is_a? Hash
           ret_type = defn.value_type[args_types.join '_']
@@ -191,8 +193,8 @@ class Translator
           # appropriate overloaded function.
           args_evaluation = sexp[3].rest.map { |arg_sexp| translate_generic_sexp arg_sexp }
           # Get the defn sexp in which the function has been defined.
-          defn = @symbol_table[class_name][:functions_def][:initialize][:sexp]
-          version = @symbol_table[class_name][:functions_def][:initialize][:version]
+          defn = @symbol_table[class_name][:functions_def][:initialize].last
+          version = @symbol_table[class_name][:functions_def][:initialize].length - 1
           # Get types of arguments.
           types = args_evaluation.map { |arg| arg.value_type }
           impl_init_name = Translator.mangle(:initialize, version, class_name, types)
@@ -273,6 +275,22 @@ class Translator
           s(:static, s(:prototype, *fun[1][1,3]))
         else
           s(:prototype, *fun[1,3])
+        end
+      end
+    end
+
+    # Implements function with generic arguments. It always implements
+    # last version found on the stack.
+    def implement_generic_function(fname, cname)
+      if function_defined? fname, cname 
+        fdef = @symbol_table[cname][:functions_def][fname].last
+        version = @symbol_table[cname][:functions_def][fname].length - 1
+        types = fdef[2].rest.map { nil }
+        impl_name = Translator.mangle(fname, version, cname, types)
+        unless function_implemented? impl_name
+          @symbol_table.in_class cname do
+            implement_function impl_name, fdef, types
+          end
         end
       end
     end

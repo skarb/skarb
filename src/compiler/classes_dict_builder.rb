@@ -51,9 +51,9 @@ class ClassesDictionaryBuilder
   def emit_methods_arrays
     @symbol_table.map do |cname, chash|
       if chash.has_key? :functions_def
-        id2fun_records = chash[:functions_def].map do |fname,fhash|
-          fdef = fhash[:sexp]
-          version = fhash[:version]
+        id2fun_records = chash[:functions_def].map do |fname,farray|
+          fdef = farray.first
+          version = 0
           args_number = fdef[2].rest.length
           # We have to count in 'self' argument
           add_wrapper (args_number+1) unless @wrappers.has_key? (args_number+1)

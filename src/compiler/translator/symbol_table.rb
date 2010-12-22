@@ -124,9 +124,8 @@ class SymbolTable < Hash
 
   # Adds function in the current class context
   def add_function(fun, sexp)
-    self[@cclass][:functions_def][fun] ||= { version: -1 }
-    self[@cclass][:functions_def][fun][:version] += 1
-    self[@cclass][:functions_def][fun][:sexp] = sexp
+    self[@cclass][:functions_def][fun] ||= []
+    self[@cclass][:functions_def][fun].push sexp
   end
 
   # Returns function version in the current class context

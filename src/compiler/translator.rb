@@ -36,7 +36,6 @@ class Translator
   # in 4 sections: structs, prototypes, functions, global variables + main
   def translate(sexp)
     main_block = translate_generic_sexp(sexp)
-    implement_generic_methods
     main = main_function CallInitialize, AllocateSelf, *lvars_declarations,
       main_block, ReturnZero
     # If there are any functions other than main they have to be included in

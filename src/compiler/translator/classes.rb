@@ -16,7 +16,6 @@ class Translator
         @symbol_table.in_class class_name do
           set_parent sexp if sexp[2]
           body = translate_generic_sexp(sexp[3])
-          implement_generic_methods
         end
         @user_classes << class_name
       end
@@ -93,28 +92,6 @@ class Translator
       block << s(:return, s(:var, :self))
       s(:static,
         s(:defn, :'Object*', constructor_name, s(:args, *init_args), block))
-    end
-  
-    # Implements all methods for generic (unknown) arguments unless they
-    # are already implemented.
-    def implement_generic_methods
-      cname = @symbol_table.cclass
-      chash = @symbol_table[cname]
-      if chash.has_key?(:functions_def)
-        methods_init = chash[:functions_def].each.map do |fname, fhash|
-          fdef = fhash[:sexp]
-          version = fhash[:version]
-          if fdef[0] != :stdlib_defn # Ignore stdlib functions
-            types = fdef[2].rest.map { nil }
-            impl_name = Translator.mangle(fname, version, cname, types)
-            unless function_implemented? impl_name
-              @symbol_table.in_class cname do
-                implement_function impl_name, fdef, types
-              end
-            end
-          end
-        end
-      end
     end
   end
 end
