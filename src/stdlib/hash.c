@@ -5,6 +5,7 @@
 #include "types.h"
 #include "helpers.h"
 #include "fixnum.h"
+#include "stringclass.h"
 
 sHash vsHash = {{{Class_t}, {Hash_t}}};
 
@@ -12,8 +13,10 @@ sHash vsHash = {{{Class_t}, {Hash_t}}};
  * Implements GEqualFunc, used for comparing keys in the hash.
  */
 static gboolean equal_func(gconstpointer a, gconstpointer b) {
-    // FIXME: works only with Fixnums
-    return boolean_value(Fixnum__EQ__EQ_(as_object(a), as_object(b)));
+    static const char method[] = { 2, '=', '=', '\0' };
+    Object *args[] = { as_object(a), as_object(b) };
+    return boolean_value(call_method(as_object(a)->type, classes_dictionary,
+                (char*) method, args));
 }
 
 static guint hash_func(gconstpointer obj) {
