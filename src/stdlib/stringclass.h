@@ -81,4 +81,9 @@ Object * String__INDEX_(Object *self, Object *index);
  */
 Object * String_empty__QMARK__(Object *self);
 
+/**
+ * String#==
+ */
+Object * String__EQ__EQ_(Object *self, Object *other);
+
 #endif /* STRING_H_ */

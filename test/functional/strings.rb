@@ -30,3 +30,5 @@ puts ''.empty?
 
 puts '5'.to_i - 2
 puts '9.25'.to_f - 8.5
+
+puts 'fail' unless 'zaż' + 'ółć' == 'zażółć'

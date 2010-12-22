@@ -172,6 +172,10 @@ class String
   def empty?
     defined_as :String_empty__QMARK__
   end
+
+  def ==(other)
+    defined_as :String__EQ__EQ_
+  end
 end
 
 class NilClass

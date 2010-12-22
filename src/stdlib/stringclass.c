@@ -7,6 +7,7 @@
 #include "helpers.h"
 #include "fixnum.h"
 #include "nil.h"
+#include "false.h"
 
 sString vsString = {{{Class_t}, {String_t}}};
 
@@ -93,4 +94,12 @@ Object * String__INDEX_(Object *self, Object *index) {
 
 Object * String_empty__QMARK__(Object *self) {
     return boolean_to_object(!*as_string(self)->val->str);
+}
+
+Object * String__EQ__EQ_(Object *self, Object *other) {
+    if (!is_a(other, String))
+        return false;
+    return boolean_to_object(!g_strcmp0(
+                as_string(self)->val->str,
+                as_string(other)->val->str));
 }
