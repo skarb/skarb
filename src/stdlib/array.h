@@ -73,4 +73,9 @@ Object * Array__EQ__EQ_(Object *self, Object *other);
  */
 Object * Array_length(Object *self);
 
+/**
+ * Array#join
+ */
+Object * Array_join(Object *self, Object *separator);
+
 #endif /* ARRAY_H_ */

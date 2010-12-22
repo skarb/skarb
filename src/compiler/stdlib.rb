@@ -224,6 +224,11 @@ class Array
     defined_as :Array_length
     returns Fixnum
   end
+
+  def join(sep)
+    defined_as :Array_join
+    returns String
+  end
 end
 
 class Hash

@@ -7,6 +7,7 @@
 #include "nil.h"
 #include "true.h"
 #include "false.h"
+#include "stringclass.h"
 
 sArray vsArray = {{{Class_t}, {Array_t}}};
 
@@ -97,4 +98,24 @@ Object * Array__INDEX__EQ_(Object *self, Object *idx, Object *val) {
         Array_push(self, val);
     }
     return val;
+}
+
+Object * Array_join(Object *self, Object *sep) {
+    if (!is_a(sep, String))
+        die("TypeError");
+    int length = as_array(self)->arr->len;
+    if (length == 0)
+        return Nil_to_s(nil);
+    Object *buf = String_new("");
+    for (int index = 0; index < length; ++index) {
+        if (index != 0)
+            g_string_append(as_string(buf)->val, as_string(sep)->val->str);
+        static const char method[] = { 4, 't', 'o', '_', 's', '\0' };
+        Object *item = g_array_index(as_array(self)->arr, Object*, index);
+        Object *args[] = { item };
+        Object *str = call_method(item->type, classes_dictionary,
+                (char*) method, args);
+        g_string_append(as_string(buf)->val, as_string(str)->val->str);
+    }
+    return buf;
 }
