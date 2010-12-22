@@ -37,7 +37,6 @@ class Translator
     def translate_defn(sexp)
       @symbol_table.add_function sexp[1], sexp
       implement_generic_function sexp[1], @symbol_table.cclass
-      s(:stmts)
     end
 
     # Static functions' definitions don't get translated immediately. We'll wait
@@ -52,7 +51,6 @@ class Translator
         @symbol_table.add_function sexp[1], sexp
       end
       implement_generic_function sexp[1], class_name
-      s(:stmts)
     end
 
     # Translates a call to the []= method. It's treated exactly as a call sexp.
@@ -280,7 +278,8 @@ class Translator
     end
 
     # Implements function with generic arguments. It always implements
-    # last version found on the stack.
+    # last version found on the stack and puts it in class function
+    # dictionary.
     def implement_generic_function(fname, cname)
       if function_defined? fname, cname 
         fdef = @symbol_table[cname][:functions_def][fname].last
@@ -291,6 +290,7 @@ class Translator
           @symbol_table.in_class cname do
             implement_function impl_name, fdef, types
           end
+          assign_function_to_class_dict(fname, impl_name, cname, types.length+1)
         end
       end
     end
@@ -303,6 +303,30 @@ class Translator
       else
         sexp
       end
+    end
+   
+    # Returns sexp containing assignment of function and wrapper pointers to
+    # proper fields in class functions dictionary. 
+    def assign_function_to_class_dict(fname, impl_name, class_name, args_count)
+      var = next_var_name
+      s(:stmts,
+        s(:asgn,
+          s(:decl, :int, var),
+          s(:call, (class_name.to_s + "_hash").to_sym,
+            s(:args, s(:str, fname.to_s), s(:lit, fname.length)))),
+        s(:asgn,
+          s(:binary_oper, :'.',
+            s(:indexer,
+              s(:var, (class_name.to_s + "_words").to_sym), s(:var, var)),
+            s(:var, :function)),
+          s(:l_unary_oper, :'&', s(:var, impl_name))),
+        s(:asgn,
+          s(:binary_oper, :'.',
+            s(:indexer,
+              s(:var, (class_name.to_s + "_words").to_sym), s(:var, var)),
+            s(:var, :wrapper)),
+          s(:l_unary_oper, :'&', s(:var, :"wrapper_#{args_count}")))).
+          with_value_sexp(s(:var, :nil))
     end
   end
 end

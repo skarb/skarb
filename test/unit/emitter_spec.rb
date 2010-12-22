@@ -196,8 +196,13 @@ describe Emitter do
     emit(s(:init_block, s(:lit, 1))).should ==
       '{1}'
   end
+
   it 'should emit empty array initialization block' do
     emit(s(:init_block)).should == '{}'
+  end
+
+  it 'should emit indexer' do
+    emit(s(:indexer, s(:var, :tab), s(:lit, 1))).should == 'tab[1]'
   end
 
   it 'should not accept a sexp with an unexpected type' do

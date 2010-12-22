@@ -53,6 +53,8 @@ Object* call_method(int class_id, dict_elem* classes_dictionary,
       die("Method \"%s\" in class with id %d not found.\n", fname, class_id);
     id = d_elem.parent;
   }
+  if(h_elem->wrapper == NULL)
+    die("Method \"%s\" in class with id %d not found.\n", fname, class_id);
   return h_elem->wrapper(args, h_elem->function);
 }
 
