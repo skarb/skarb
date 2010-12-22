@@ -99,7 +99,13 @@ class Translator
     # sexp calling it.
     def build_main_function(class_name, body)
       return s() if body.nil? or body.length < 2
-      fname = ([class_name, "main"].join '_').to_sym
+      v = 0
+      fname = ([class_name, v, "main"].join '_').to_sym
+      #TODO: Find a more elegant way to do it
+      while @functions_implementations.has_key? fname
+        v += 1
+        fname = ([class_name, v, "main"].join '_').to_sym
+      end
       body_block =
         filtered_block(
           *lvars_declarations,

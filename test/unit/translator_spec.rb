@@ -388,7 +388,7 @@ describe Translator do
         s(:static,
           s(:prototype, :'Object*', :A_initialize_,
             s(:args, decl(:self), decl(:a)))),
-        s(:static, s(:prototype, :"Object*", :A_main, s(:args))),
+        s(:static, s(:prototype, :"Object*", :A_0_main, s(:args))),
         s(:static,
           s(:prototype, :'Object*', :A_initialize_Fixnum,
             s(:args, decl(:self), decl(:a)))),
@@ -404,7 +404,7 @@ describe Translator do
         s(:static,
         s(:defn,
           :"Object*",
-         :A_main,
+         :A_0_main,
          s(:args),
          s(:block,
           s(:decl, :A, :self_s),
@@ -445,7 +445,7 @@ describe Translator do
               s(:return, s(:var, :self)))))),
       s(:file,
         main(
-         s(:call, :A_main, s(:args)),
+         s(:call, :A_0_main, s(:args)),
          decl(:var2),
          s(:asgn, s(:var, :var2),
          s(:call, :'A_new_Fixnum', s(:args, fixnum_new(1))))))]
