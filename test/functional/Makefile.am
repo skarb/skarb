@@ -18,15 +18,15 @@ TESTSCRIPTS = if.rb \
               nil.rb \
               fixnum.rb \
               float.rb \
-	      dynamic-types.rb\
+              dynamic-types.rb\
               array.rb \
               hash.rb \
               recur.rb \
               double-evaluation.rb \
               var-decls-in-funcs.rb \
-	      constants-overriding.rb \
+              constants-overriding.rb \
               true-false.rb \
-	      global-vars.rb
+              global-vars.rb
 
 TESTS_ENVIRONMENT = RUBYC_PATH=$(top_builddir)/src/compiler/rubyc \
                     CFLAGS="-I$(top_builddir)/src/stdlib" \
