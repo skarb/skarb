@@ -26,7 +26,8 @@ TESTSCRIPTS = if.rb \
               var-decls-in-funcs.rb \
               constants-overriding.rb \
               true-false.rb \
-              global-vars.rb
+              global-vars.rb \
+              empty-argv.rb
 
 TESTS_ENVIRONMENT = RUBYC_PATH=$(top_builddir)/src/compiler/rubyc \
                     CFLAGS="-I$(top_builddir)/src/stdlib" \
