@@ -32,7 +32,7 @@ describe Translator do
   # Returns a sexp representing a whole C program with a given body of the
   # 'main' function.
   def program(*body)
-    [s(:file, struct_M_Object, struct_sM_Object, struct_sM_Object_decl),
+    [s(:file, struct_M_Object, struct_sM_Object, cARGV, struct_sM_Object_decl),
      s(:file), s(:file), s(:file, main(*body))]
   end
 
@@ -47,6 +47,11 @@ describe Translator do
   def struct_sM_Object(*fields_declarations)
       s(:typedef, s(:struct, nil,
         s(:block, s(:decl, :Class, :meta))), :'sM_Object')
+  end
+
+  # A sexp defining the cARGV constant.
+  def cARGV
+    s(:decl, :"Object*", :cARGV)
   end
 
   # A sexp defining the main object class structure initialization.
@@ -69,6 +74,11 @@ describe Translator do
        s(:decl, :'M_Object', :self_s),
        s(:asgn, s(:decl, :'Object*', :self),
          s(:cast, :'Object*', s(:var, :'&self_s'))),
+       s(:call, :prepare_argv,
+         s(:args,
+           s(:l_unary_oper, :&, s(:var, :cARGV)),
+           s(:var, :argc),
+           s(:var, :args))),
        *body, s(:return, s(:lit, 0))))
   end
 
@@ -337,6 +347,7 @@ describe Translator do
         s(:typedef,
           s(:struct, nil,
             s(:block, s(:decl, :Class, :meta))), :sA),
+        cARGV,
         struct_sM_Object_decl,
         s(:asgn, s(:decl, :sA, :vsA),
           s(:init_block,

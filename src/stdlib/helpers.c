@@ -10,6 +10,8 @@
 #include "false.h"
 #include "fixnum.h"
 #include "xalloc.h"
+#include "array.h"
+#include "stringclass.h"
 
 int boolean_value(Object *object) {
   return object != nil && object != false;
@@ -52,4 +54,11 @@ Object* call_method(int class_id, dict_elem* classes_dictionary,
     id = d_elem.parent;
   }
   return h_elem->wrapper(args, h_elem->function);
+}
+
+void prepare_argv(Object **ARGV, int argc, char **args) {
+  *ARGV = Array_new();
+  /* Starting from one, skipping the command name */
+  for (int i = 1; i < argc; ++i)
+    Array_push(*ARGV, String_new(args[i]));
 }

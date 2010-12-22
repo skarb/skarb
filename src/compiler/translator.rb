@@ -11,6 +11,7 @@ require 'translator/global_variables'
 require 'translator/type_checks'
 require 'translator/classes'
 require 'translator/constants'
+require 'translator/argv'
 
 # Responsible for transforming a Ruby AST to its C equivalent.
 # It performs tree traversal by recursive execution of functions
@@ -29,6 +30,7 @@ class Translator
     @structures_definitions = {}
     @globals = {}
     @user_classes = [MainObject]
+    prepare_argv
   end
 
   # Analyses a given Ruby AST tree and returns a C AST. Both the argument and
@@ -36,8 +38,8 @@ class Translator
   # in 4 sections: structs, prototypes, functions, global variables + main
   def translate(sexp)
     main_block = translate_generic_sexp(sexp)
-    main = main_function CallInitialize, AllocateSelf, *lvars_declarations,
-      main_block, ReturnZero
+    main = main_function CallInitialize, AllocateSelf, ARGVInitialization,
+        *lvars_declarations, main_block, ReturnZero
     # If there are any functions other than main they have to be included in
     # the output along with their prototypes.
     @user_classes.each do |x|
@@ -63,6 +65,7 @@ class Translator
   include TypeChecks
   include Classes
   include Constants
+  include ARGV
 
   # Name of modified instance of Object class containing main program
   MainObject = :M_Object

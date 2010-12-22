@@ -54,4 +54,11 @@ void initialize();
  */
 Object* call_method(int, dict_elem*, char*, Object**);
 
+/**
+ * Initializes the ARGV constants. It assignes a new array to the memory
+ * location pointed by the first argument and pushes all but the first element
+ * of main's argv table.
+ */
+void prepare_argv(Object **ARGV, int argc, char **args);
+
 #endif /* HELPERS_H_ */
