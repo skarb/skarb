@@ -6,6 +6,7 @@
 #include "helpers.h"
 #include "fixnum.h"
 #include "stringclass.h"
+#include "array.h"
 
 sHash vsHash = {{{Class_t}, {Hash_t}}};
 
@@ -48,4 +49,14 @@ Object * Hash_delete(Object *self, Object *key) {
         return value;
     }
     return nil;
+}
+
+Object * Hash_keys(Object *self) {
+    GList *keys_list = g_hash_table_get_keys(as_hash(self)->hash);
+    Object *keys = Array_new();
+    while (keys_list) {
+        Array_push(keys, as_object(keys_list->data));
+        keys_list = keys_list->next;
+    }
+    return keys;
 }

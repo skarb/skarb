@@ -43,4 +43,9 @@ Object * Hash__INDEX__EQ_(Object *self, Object *key, Object *value);
  */
 Object * Hash_delete(Object *self, Object *key);
 
+/**
+ * Hash#keys
+ */
+Object * Hash_keys(Object *self);
+
 #endif /* HASH_H_ */

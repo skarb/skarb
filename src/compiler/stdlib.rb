@@ -249,6 +249,11 @@ class Hash
   def delete(arg)
     defined_as :Hash_delete
   end
+
+  def keys
+    defined_as :Hash_keys
+    returns Array
+  end
 end
 
 class TrueClass
