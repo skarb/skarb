@@ -21,14 +21,6 @@ describe Translator do
     @translator.send :translate_generic_sexp, @rp.parse(code)
   end
 
-  def simple_type_check(var, type, code)
-    @translator.send :add_simple_type_check, var, type, code
-  end
-
-  def complex_type_check(var, type2code_hash)
-    @translator.send :add_complex_type_check, var, type2code_hash
-  end
-
   # Returns a sexp representing a whole C program with a given body of the
   # 'main' function.
   def program(*body)
@@ -278,30 +270,6 @@ describe Translator do
       [s(:file), s(:file), s(:file,
         main(s(:asgn, s(:binary_oper, :'->', s(:cast, :'M_Object*', s(:var, :self)), s(:var, :a)),
                 s(:binary_oper, :'->', s(:cast, :'M_Object*', s(:var, :self)), s(:var, :a)))))]
-  end
-
-  it 'should add simple type check in the output code' do
-    simple_type_check(:b, :Object, s(:lit, 1)).should ==
-      s(:stmts,
-        s(:decl, :int, :var1),
-        s(:if,
-           s(:binary_oper, :==, s(:binary_oper, :'->', s(:var, :b), s(:var, :type)),
-             s(:lit, 0)),
-           s(:block, s(:asgn, s(:var, :var1), fixnum_new(1)))))
-  end
-
-  it 'should add complex type check in the output code' do
-    complex_type_check(:b, {M_Object: s(:lit, 1), Object: s(:lit, 2)}).should ==
-      s(:stmts,
-        s(:decl, :int, :var1),
-        s(:switch, s(:binary_oper, :'->', s(:var, :b), s(:var, :type)),
-          s(:block,
-           s(:case, s(:lit, 1)),
-           s(:asgn, s(:var, :var1), fixnum_new(1)),
-           s(:break),
-           s(:case, s(:lit, 0)),
-           s(:asgn, s(:var, :var1), fixnum_new(2)),
-           s(:break))))
   end
 
   it 'should not translate an unsupported construction' do

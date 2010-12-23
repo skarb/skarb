@@ -8,7 +8,6 @@ require 'translator/local_variables'
 require 'translator/instance_variables'
 require 'translator/class_variables'
 require 'translator/global_variables'
-require 'translator/type_checks'
 require 'translator/classes'
 require 'translator/constants'
 require 'translator/argv'
@@ -62,7 +61,6 @@ class Translator
   include InstanceVariables
   include ClassVariables
   include GlobalVariables
-  include TypeChecks
   include Classes
   include Constants
   include ARGV
