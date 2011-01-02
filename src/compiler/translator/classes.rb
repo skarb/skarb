@@ -99,6 +99,7 @@ class Translator
     # sexp calling it.
     def build_main_function(class_name, body)
       return s() if body.nil? or body.length < 2
+      var = next_var_name
       v = 0
       fname = ([class_name, v, "main"].join '_').to_sym
       #TODO: Find a more elegant way to do it
@@ -117,7 +118,10 @@ class Translator
       @functions_implementations[fname] =
         s(:static, s(:defn, :'Object*', fname, s(:args), body_block)).
         with_value_type body.value_type
-      s(:call, fname, s(:args))
+      filtered_stmts(
+        s(:decl, :'Object*', var),
+        s(:asgn, s(:var, var), s(:call, fname, s(:args))
+       )).with_value s(:var, var), body.value_type
     end
   end
 end

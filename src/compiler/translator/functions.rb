@@ -17,9 +17,21 @@ class Translator
     # Translates a method call. Constructors are treated in special way.
     def translate_call(sexp)
       if sexp[2] == :new
-        call_constructor sexp[2], sexp
+        if sexp[1].nil? 
+          msexp = sexp.clone
+          msexp[1] = s(:const, @symbol_table.cclass)
+          call_constructor msexp
+        else
+          call_constructor sexp
+        end
       else
-        ret_val = look_up_and_call sexp
+        # Class is not explicit
+        if sexp[1].nil?
+          msexp = sexp.clone
+          msexp[1] = s(:const, @symbol_table.cclass)
+          ret_val = look_up_and_call msexp
+        end
+        ret_val = look_up_and_call sexp if ret_val.nil?
         die "Unknown function or method: #{sexp[2]}" if ret_val.nil?
         ret_val
       end
@@ -72,7 +84,6 @@ class Translator
     # Tries to find a method in the inheritance chain and call it.
     def look_up_and_call(sexp)
       class_expr = evaluate_class_expr(sexp[1])
-      #class_expr = translate_generic_sexp(sexp[1])
       type = class_expr.value_type.to_s.to_sym
       # Do not translate recursive calls until their type is determined 
       return s().with_value_type :recur if type == :recur
@@ -180,8 +191,9 @@ class Translator
 
     # Returns a sexp calling a constructor. If the constructor hasn't been
     # implemented yet implement_constructor is called.
-    def call_constructor(def_name, sexp)
+    def call_constructor(sexp)
       var = next_var_name
+      def_name = sexp[2]
       class_expr = evaluate_class_expr(sexp[1])
       class_name = class_expr.class_type
       die "Unknown class: '#{class_name}'" unless @symbol_table[class_name]

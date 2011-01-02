@@ -413,9 +413,10 @@ describe Translator do
               s(:return, s(:var, :self)))))),
       s(:file,
         main(
-         s(:call, :A_0_main, s(:args)),
          decl(:'_var2'),
-         s(:asgn, s(:var, :'_var2'),
+         s(:asgn, s(:var, :'_var2'), s(:call, :A_0_main, s(:args))),
+         decl(:'_var3'),
+         s(:asgn, s(:var, :'_var3'),
          s(:call, :'A_new_Fixnum', s(:args, fixnum_new(1))))))]
   end
 
