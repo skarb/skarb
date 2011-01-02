@@ -1,8 +1,11 @@
 SUBDIRS = src doc test
-.PHONY: coverage rdoc
+.PHONY: coverage rdoc benchmark
 
 coverage: all
 	make coverage -C test
+
+benchmark: all
+	make benchmark -C test
 
 rdoc:
 	make rdoc -C doc

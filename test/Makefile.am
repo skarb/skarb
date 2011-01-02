@@ -1,5 +1,5 @@
-SUBDIRS = unit functional
-.PHONY: coverage
+SUBDIRS = unit functional performance
+.PHONY: coverage benchmark
 dist_noinst_DATA = coverage.rb
 
 coverage:
@@ -10,6 +10,9 @@ coverage:
 		RUBYC_PATH=$(top_builddir)/src/compiler/rubyc \
 		$(RUBY) -I $(top_srcdir)/src/compiler $(srcdir)/coverage.rb
 	@echo See the report: file://$(abs_builddir)/coverage/index.html
+
+benchmark:
+	make benchmark -C performance
 
 clean-local:
 	-rm -rf coverage
