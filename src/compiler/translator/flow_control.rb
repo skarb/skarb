@@ -93,4 +93,11 @@ class Translator
     return nil if type1 != type2
   end
 
+  def translate_return(sexp)
+    if sexp.count == 1
+      s(:return, s(:var, :nil)).with_value s(:var, :nil), NilClass
+    else
+      raise sexp.inspect
+    end
+  end
 end
