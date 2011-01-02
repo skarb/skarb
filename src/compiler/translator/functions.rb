@@ -19,7 +19,9 @@ class Translator
       if sexp[2] == :new
         call_constructor sexp[2], sexp
       else
-        look_up_and_call sexp
+        ret_val = look_up_and_call sexp
+        die "Unknown function or method: #{sexp[2]}" if ret_val.nil?
+        ret_val
       end
     end
 
@@ -46,7 +48,7 @@ class Translator
       class_name = translate_generic_sexp(sexp[1]).class_type
       sexp = sexp.clone
       sexp.delete_at 1
-      sexp[1] = ('s'+sexp[1].to_s).to_sym
+      sexp[1] = ('s_'+sexp[1].to_s).to_sym
       @symbol_table.in_class class_name do
         @symbol_table.add_function sexp[1], sexp
       end
@@ -70,6 +72,7 @@ class Translator
     # Tries to find a method in the inheritance chain and call it.
     def look_up_and_call(sexp)
       class_expr = evaluate_class_expr(sexp[1])
+      #class_expr = translate_generic_sexp(sexp[1])
       type = class_expr.value_type.to_s.to_sym
       # Do not translate recursive calls until their type is determined 
       return s().with_value_type :recur if type == :recur
@@ -77,7 +80,7 @@ class Translator
       return generate_runtime_call class_expr, sexp if type.empty?
       if type == :Class
         sexp = sexp.clone
-        sexp[2] = ('s'+sexp[2].to_s).to_sym
+        sexp[2] = ('s_'+sexp[2].to_s).to_sym
         type = class_expr.class_type
       end
       while type
@@ -86,7 +89,6 @@ class Translator
         end
         type = @symbol_table.parent type
       end
-      die "Unknown function or method: #{sexp[2]}"
     end
 
     # Generate AST representing args evaluation and call_method call.
