@@ -15,7 +15,7 @@ class HashBuilder
       input += record.join(',') + "\n"
     end
     output = ""
-    cmd = "gperf -G -t -E -T -H #{name}_hash -N #{name}_method_find -W #{name}_words"
+    cmd = "gperf -G -t -E -T -H #{name}_hash -N #{name}_method_find -W #{name}_words -I"
     Open3.popen3(cmd) do |stdin, stdout, stderr, wait_thread|
       stdin.write input
       stdin.close
