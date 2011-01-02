@@ -9,7 +9,7 @@
 #include "nil.h"
 #include "false.h"
 
-sString vsString = {{{Class_t}, {String_t}}};
+s_String vs_String = {{{Class_t}, {String_t}}};
 
 Object * String_new(char *value) {
     String *self = xmalloc(sizeof(String));

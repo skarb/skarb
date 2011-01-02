@@ -15,8 +15,8 @@ typedef struct {
 
 typedef struct {
    Class meta;
-} sHash;
-extern sHash vsHash;
+} s_Hash;
+extern s_Hash vs_Hash;
 
 /**
  * Casts a given Object to Hash.

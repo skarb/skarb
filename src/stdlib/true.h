@@ -7,7 +7,7 @@
 typedef Object TrueClass;
 
 extern TrueClass *true;
-extern sObject vsTrueClass;
+extern s_Object vs_TrueClass;
 
 /**
  * True#to_s

@@ -23,8 +23,8 @@ typedef struct {
 
 typedef struct {
    Class meta;
-} sString;
-extern sString vsString;
+} s_String;
+extern s_String vs_String;
 
 /**
  * Casts a given Object to String.

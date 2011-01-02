@@ -1,4 +1,4 @@
 #include "class.h"
 #include "types.h"
 
-sClass vsClass = {{{Class_t}, {Class_t}}};
+s_Class vs_Class = {{{Class_t}, {Class_t}}};

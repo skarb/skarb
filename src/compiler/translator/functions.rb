@@ -27,7 +27,7 @@ class Translator
     # parameters since they are already defined)
     def lvars_declarations
       selector = lambda { |k,v| v[:kind] == :local }
-      mapper = lambda { |k| s(:decl, :'Object*', k.first) }
+      mapper = lambda { |k| s(:decl, :'Object*', escape_name(k.first)) }
       @symbol_table.lvars_table.select(&selector).map(&mapper)
     end
 

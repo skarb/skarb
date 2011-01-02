@@ -28,7 +28,8 @@ TESTSCRIPTS = if.rb \
               true-false.rb \
               global-vars.rb \
               empty-argv.rb \
-              case.rb
+              case.rb \
+	      names_mangling.rb
 
 TESTS_ENVIRONMENT = RUBYC_PATH=$(top_builddir)/src/compiler/rubyc \
                     CFLAGS="-I$(top_builddir)/src/stdlib" \

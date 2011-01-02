@@ -51,7 +51,7 @@ class SymbolTable < Hash
     end
     self[class_name][:value] = s().with_value(
                              s(:cast, :'Object*',
-                               s(:var, ('&vs'+class_name.to_s).to_sym)),
+                               s(:var, ('&vs_'+class_name.to_s).to_sym)),
                              :Class).with_class_type(class_name)
     self[class_name][:type] = :class
   end

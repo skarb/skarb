@@ -38,7 +38,7 @@ class ClassesDictionaryBuilder
       else
         msearch = s(:var, ('&'+k[0].to_s+"_method_find").to_sym)
       end
-      cvars = s(:var, ('&vs'+k[0].to_s).to_sym)
+      cvars = s(:var, ('&vs_'+k[0].to_s).to_sym)
       s(:init_block, s(:lit, parent_id),
         msearch, cvars)
     end

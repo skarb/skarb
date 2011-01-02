@@ -8,7 +8,7 @@
 #include "stringclass.h"
 #include "array.h"
 
-sHash vsHash = {{{Class_t}, {Hash_t}}};
+s_Hash vs_Hash = {{{Class_t}, {Hash_t}}};
 
 /*
  * Implements GEqualFunc, used for comparing keys in the hash.

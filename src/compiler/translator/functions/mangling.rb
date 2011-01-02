@@ -2,6 +2,7 @@ class Translator
   module Functions
     module Mangling
       SpecialCharsConversion = {
+        '_'  => '__',
         '+'  => '__PLUS__',
         '-'  => '__MINUS__',
         '*'  => '__MUL__',

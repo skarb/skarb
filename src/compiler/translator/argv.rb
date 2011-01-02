@@ -7,7 +7,7 @@ class Translator
     # Build ARGV
     ARGVInitialization = s(:call, :prepare_argv,
                            s(:args,
-                             s(:l_unary_oper, :&, s(:var, :cARGV)),
+                             s(:l_unary_oper, :&, s(:var, :'c_ARGV')),
                              s(:var, :argc),
                              s(:var, :args)))
   end

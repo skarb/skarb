@@ -5,7 +5,7 @@
 TrueClass the_true = { TrueClass_t };
 TrueClass *true = &the_true;
 
-sObject vsTrueClass = { {{Class_t},{TrueClass_t}} };
+s_Object vs_TrueClass = { {{Class_t},{TrueClass_t}} };
 
 Object *True_to_s(Object *self) {
   static Object *string = 0;

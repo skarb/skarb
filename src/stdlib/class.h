@@ -10,13 +10,13 @@ typedef struct {
 
 typedef struct {
    Class meta;
-} sClass;
-extern sClass vsClass;
+} s_Class;
+extern s_Class vs_Class;
 
 typedef struct {
    Class meta;
-} sObject;
-extern sObject vsObject;
+} s_Object;
+extern s_Object vs_Object;
 
 #define as_class(obj) ((Class *)(obj))
 

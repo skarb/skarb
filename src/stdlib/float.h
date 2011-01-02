@@ -11,8 +11,8 @@ typedef struct {
 
 typedef struct {
    Class meta;
-} sFloat;
-extern sFloat vsFloat;
+} s_Float;
+extern s_Float vs_Float;
 
 /**
  * Casts a given Object to Float.

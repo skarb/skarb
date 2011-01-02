@@ -9,7 +9,7 @@
 #include "false.h"
 #include "stringclass.h"
 
-sArray vsArray = {{{Class_t}, {Array_t}}};
+s_Array vs_Array = {{{Class_t}, {Array_t}}};
 
 Object * Array_new() {
     Array *self = xmalloc(sizeof(Array));

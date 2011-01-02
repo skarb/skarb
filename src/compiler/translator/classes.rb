@@ -59,7 +59,7 @@ class Translator
       cvars_table = @symbol_table[class_name][:cvars]
       cfields_declarations =
         cvars_table.keys.map { |key| s(:decl, :'Object*', key.rest(2)) }
-      scname = ('s'+ class_name.to_s).to_sym
+      scname = ('s_'+ class_name.to_s).to_sym
       scvar = ('v' + scname.to_s).to_sym
       cstructure_definition =
         s(:typedef, s(:struct, nil,

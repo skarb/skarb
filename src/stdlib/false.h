@@ -7,7 +7,7 @@
 typedef Object FalseClass;
 
 extern FalseClass *false;
-extern sObject vsFalseClass;
+extern s_Object vs_FalseClass;
 
 /**
  * False#to_s

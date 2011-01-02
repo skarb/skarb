@@ -15,8 +15,8 @@ typedef struct {
 
 typedef struct {
    Class meta;
-} sArray;
-extern sArray vsArray;
+} s_Array;
+extern s_Array vs_Array;
 
 /**
  * Casts a given Object to Array.

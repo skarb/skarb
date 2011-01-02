@@ -9,7 +9,7 @@
 #include "helpers.h"
 #include "float.h"
 
-sObject vsObject = {{{Class_t},{Object_t}}};
+s_Object vs_Object = {{{Class_t},{Object_t}}};
 
 /**
  * Outputs a String. It doesn't emit a new line character if the string already

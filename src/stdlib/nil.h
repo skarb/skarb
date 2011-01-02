@@ -7,7 +7,7 @@
 typedef Object NilClass;
 
 extern NilClass *nil;
-extern sObject vsNilClass;
+extern s_Object vs_NilClass;
 
 /**
  * Nil#to_s

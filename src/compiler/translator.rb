@@ -52,6 +52,7 @@ class Translator
 
   attr_accessor :symbol_table
 
+
   private
 
   include Helpers
@@ -134,11 +135,10 @@ class Translator
     # This array of sexps will be the content of the returned block.
     expanded_sexps = []
     sexps.each do |sexp|
+      next if sexp.nil? or sexp.empty? # Do nothing
       if sexp.first == :stmts
         # If it's a stmts take all its children and add them to the output
         expanded_sexps += sexp.drop 1
-      elsif sexp.empty?
-        # Do nothing
       else
         # Otherwise add the whole sexp to the output
         expanded_sexps << sexp
@@ -150,13 +150,18 @@ class Translator
   # Each call to this method returns a new, unique var name.
   def next_var_name
     @next_id ||= 0
-    "var#{@next_id += 1}".to_sym
+    "_var#{@next_id += 1}".to_sym
   end
 
   # Returns a sexp representing a call to the boolean_value function with a
   # given value.
   def boolean_value(value)
     s(:call, :boolean_value, s(:args, value))
+  end
+
+  # Returns given name with underscores escaped.
+  def escape_name(name)
+    name.to_s.gsub('_', '__').to_sym 
   end
 
 end

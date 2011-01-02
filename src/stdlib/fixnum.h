@@ -11,8 +11,8 @@ typedef struct {
 
 typedef struct {
    Class meta;
-} sFixnum;
-extern sFixnum vsFixnum;
+} s_Fixnum;
+extern s_Fixnum vs_Fixnum;
 
 /**
  * Casts a given Object to Fixnum.
