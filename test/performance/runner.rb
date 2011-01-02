@@ -8,8 +8,8 @@ SRCDIR = ENV['srcdir']
 TESTS = ENV['TESTS'].split.map { |f| SRCDIR + '/' + f }
 CFLAGS = "CFLAGS='-O3 -funroll-loops #{ENV['CFLAGS']}'"
 
-def benchmark(&block)
-  Benchmark.measure { 3.times { block.call } } .real
+def benchmark
+  Benchmark.measure { 3.times { yield } } .real
 end
 
 describe 'Compiler' do
