@@ -9,7 +9,7 @@ TESTS = ENV['TESTS'].split.map { |f| SRCDIR + '/' + f }
 CFLAGS = "CFLAGS='-O3 -funroll-loops #{ENV['CFLAGS']}'"
 
 def benchmark(&block)
-  Benchmark.measure(&block).real
+  Benchmark.measure { 3.times { block.call } } .real
 end
 
 describe 'Compiler' do
