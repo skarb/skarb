@@ -17,7 +17,7 @@ describe 'Compiler' do
     it "should pass #{file}" do
       # Compile the test file, run it in MRI, run the compiled version and
       # compare the results.
-      `#{CFLAGS} #{RUBY} #{RUBYC_PATH} #{file}`
+      `#{CFLAGS} #{RUBY} -I#{SRCDIR}/../../src/compiler #{RUBYC_PATH} #{file}`
       mri = benchmark { `#{RUBY} #{file}` }
       rubyc = benchmark { `./a.out` }
       mri.should > rubyc
