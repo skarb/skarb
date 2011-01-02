@@ -1,0 +1,28 @@
+rubyc -- README
+==============
+
+Installation
+------------
+
+Run following commands in order to configure and install rubyc.
+
+  ./configure
+  make
+  sudo make install
+
+In order to learn more about the installation procedure run
+
+  ./configure --help
+
+Running
+-------
+
+Assuming that the installation path is in your PATH environment variable run the
+following command in order to learn details.
+
+  rubyc -h
+
+Copyrights
+----------
+
+(C) 2010, 2011 Jan Stępień, Julian Zubek
