@@ -1,4 +1,4 @@
-TESTSCRIPTS = ackermann.rb
+TESTSCRIPTS = ackermann.rb heapsort.rb
 BENCHMARK = RUBYC_PATH=$(top_builddir)/src/compiler/rubyc \
             CFLAGS="-I$(top_builddir)/src/stdlib" \
             LD_LIBRARY_PATH="$(top_builddir)/src/stdlib/.libs" \
