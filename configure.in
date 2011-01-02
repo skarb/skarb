@@ -1,6 +1,7 @@
 AC_PREREQ([2.65])
 AC_INIT([inzynierka], [snapshot])
 AM_INIT_AUTOMAKE([1.10 foreign color-tests])
+AC_DISABLE_STATIC
 
 # Tests related to Ruby
 AC_CHECK_PROGS(RUBY, [ruby])
