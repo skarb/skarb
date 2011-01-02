@@ -34,6 +34,9 @@ void die(const char *format, ...) {
 
 void initialize() {
   GC_INIT();
+  // FIXME: it's a workaround for what seems to be a libgc's bug occurring on a
+  // lot of frequent reallocs. Get rid of it as soon it's not necessary.
+  GC_expand_hp(1024L * 1024L * 1024L);
   GMemVTable vtable = { &xmalloc, &xrealloc, &xfree, NULL, NULL, NULL };
   g_mem_set_vtable(&vtable);
 }
