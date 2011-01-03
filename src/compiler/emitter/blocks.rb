@@ -9,6 +9,10 @@ module Emitter::Blocks
   end
 
   def Emitter.emit_block(sexp)
+    # Don't emit anything after a return statement.
+    if indx = sexp.index { |child| child.is_a? Sexp and child.first == :return }
+      sexp = sexp[0..indx]
+    end
     '{' + sexp.rest.map { |elem| emit_generic_elem(elem) + ';' }.join + '}'
   end
 

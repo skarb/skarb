@@ -95,9 +95,10 @@ class Translator
 
   def translate_return(sexp)
     if sexp.count == 1
-      s(:return, s(:var, :nil)).with_value s(:var, :nil), NilClass
+      ret = s().with_value_sexp s(:var, :nil)
     else
-      raise sexp.inspect
+      ret = translate_generic_sexp sexp[1]
     end
+    filtered_stmts ret, s(:return, ret.value_sexp)
   end
 end
