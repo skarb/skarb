@@ -46,9 +46,7 @@ class Translator
       ivars_table = @symbol_table.ivars_table class_name
       iclass = class_name
       while (iclass = @symbol_table.parent(iclass)) != nil
-        @symbol_table.in_class iclass do
-          ivars_table = ivars_table.merge @symbol_table.ivars_table
-        end
+        ivars_table = ivars_table.merge @symbol_table.ivars_table(iclass)
       end
       ifields_declarations =
         ivars_table.keys.map { |key| s(:decl, :'Object*', key.rest) }
