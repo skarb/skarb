@@ -31,7 +31,8 @@ TESTSCRIPTS = if.rb \
               case.rb \
 	      names_mangling.rb \
 	      methods-search.rb \
-          return.rb
+	      return.rb \
+	      inheritance2.rb
 
 TESTS_ENVIRONMENT = RUBYC_PATH=$(top_builddir)/src/compiler/rubyc \
                     CFLAGS="-I$(top_builddir)/src/stdlib" \
