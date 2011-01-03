@@ -49,7 +49,7 @@ class Translator
         ivars_table = ivars_table.merge @symbol_table.ivars_table(iclass)
       end
       ifields_declarations =
-        ivars_table.keys.map { |key| s(:decl, :'Object*', key.rest) }
+        ivars_table.keys.map { |key| s(:decl, :'Object*', mangle_ivar_name(key)) }
       structure_definition =
         s(:typedef, s(:struct, nil,
                       s(:block, s(:decl, :Object, :parent),                        
@@ -62,7 +62,7 @@ class Translator
       parent_class = @symbol_table.parent class_name
       cvars_table = @symbol_table.cvars_table class_name
       cfields_declarations =
-        cvars_table.keys.map { |key| s(:decl, :'Object*', key.rest(2)) }
+        cvars_table.keys.map { |key| s(:decl, :'Object*', mangle_cvar_name(key)) }
       scname = mangle_cvars_struct_name class_name
       scvar = mangle_cvars_struct_var_name class_name
       cstructure_definition =
