@@ -31,9 +31,8 @@ class Translator
           msexp[1] = s(:const, @symbol_table.cclass)
           ret_val = look_up_and_call msexp
         end
-        ret_val = look_up_and_call sexp if ret_val.nil?
-        die "Unknown function or method: #{sexp[2]}" if ret_val.nil?
-        ret_val
+        ret_val or look_up_and_call sexp or \
+          die "Unknown function or method: #{sexp[2]}"
       end
     end
 
