@@ -29,8 +29,7 @@ class SymbolTable < Hash
   # Adds a new constant and generates id for it.
   def add_constant(name, value)
     self[name] ||= { }
-    self[name][:value] = value
-    self[name][:type] = :const
+    self[name].merge!({:value => value, :type => :const})
   end 
 
   # Adds a new class, generates id for it and initializes mandatory
@@ -41,13 +40,15 @@ class SymbolTable < Hash
       die "#{class_name} is not a class"
     end
     if self[class_name][:id].nil?
-      self[class_name][:id] = next_id
-      self[class_name][:parent] = :Object
-      self[class_name][:functions] = { }
-      self[class_name][:functions_def] = { }
-      self[class_name][:ivars] = {  }
-      self[class_name][:cvars] = {  }
-      self[class_name][:defined_in_stdlib] = false
+      self[class_name] = {
+        :id => next_id,
+        :parent => :Object,
+        :functions => {},
+        :functions_def => {},
+        :ivars => {},
+        :cvars => {},
+        :defined_in_stdlib => false
+      }
     end
     self[class_name][:value] = s().with_value(
                              s(:cast, :'Object*',
@@ -180,18 +181,6 @@ class SymbolTable < Hash
     get_ivar_class(ivar) != nil
   end
 
-  # Sets the given type for the given instance variable in the current class
-  # context.
-  def set_ivar_type(ivar, type)
-    self[get_ivar_class(ivar)][:ivars][ivar][:type] = type
-  end
-
-  # Returns the type for the given instance variable in the current class
-  # context.
-  def get_ivar_type(ivar)
-    self[get_ivar_class(ivar)][:ivars][ivar][:type]
-  end
-
   # Adds an class variable in the current class context.
   def add_cvar(cvar)
     cvars_table[cvar] ||= {}
@@ -201,28 +190,6 @@ class SymbolTable < Hash
   # context.
   def has_cvar?(cvar)
     get_cvar_class(cvar) != nil
-  end
-
-  # Sets the given type for the given class variable in the current class
-  # context.
-  def set_cvar_type(cvar, type)
-    self[get_cvar_class(cvar)][:cvars][cvar][:type] = type
-  end
-
-  # Returns the type for the given class variable in the current class
-  # context.
-  def get_cvar_type(cvar)
-    self[get_cvar_class(cvar)][:cvars][cvar][:type]
-  end
-
-  # Setter for higher class
-  def higher_class=(class_name)
-    class_table[:higher_class]=class_name
-  end
-
-  # Getter for higher class
-  def higher_class
-    class_table[:higher_class]
   end
 
   # The hash of instance variables in the current class context.
