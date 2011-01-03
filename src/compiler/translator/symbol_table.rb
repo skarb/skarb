@@ -129,14 +129,20 @@ class SymbolTable < Hash
     self[@cclass][:functions_def][fun].push sexp
   end
 
-  # Returns function version in the current class context
-  def function_version(fun)
-    self[@cclass][:functions_def][fun][:version]
+  # Returns function version in a given class context
+  def function_version(cls, fun)
+    #self[cls][:functions_def][fun][:version]
+    self[cls][:functions_def][fun].length - 1
   end
 
-  # Check if function with given name is defined for current class
-  def has_function?(name)
-    self[@cclass][:functions_def].has_key? name 
+  # Returns the most recent function definition in a given class context
+  def function_def(cls, fun)
+    self[cls][:functions_def][fun].last
+  end
+
+  # Check if function with given name is defined for a given class
+  def has_function?(cls, name)
+    self[cls][:functions_def].has_key? name
   end
 
   # Adds a local variable in the current function context and sets its kind
@@ -192,14 +198,16 @@ class SymbolTable < Hash
     get_cvar_class(cvar) != nil
   end
 
-  # The hash of instance variables in the current class context.
-  def ivars_table
-    self[@cclass][:ivars]
+  # The hash of instance variables in a given (or current by default) class
+  # context.
+  def ivars_table(cls=@cclass)
+    self[cls][:ivars]
   end
 
-  # The hash of class variables in the current class context.
-  def cvars_table
-    self[@cclass][:cvars]
+  # The hash of class variables in a given (or current by default) class
+  # context.
+  def cvars_table(cls=@cclass)
+    self[cls][:cvars]
   end
 
   # General hash of current class context.
@@ -280,6 +288,16 @@ class SymbolTable < Hash
     function_table[:rettype] = nil
   end
 
+  # Returns the id of a class.
+  def id_of(cls)
+    self[cls][:id]
+  end
+
+  # Returns the id of a class.
+  def value_of(cls)
+    self[cls][:value]
+  end
+
   private
   
   # Returns hash corresponding to local variable or nil if variable does not
@@ -307,5 +325,17 @@ class SymbolTable < Hash
   def fnext_id
     @fnext_id ||= -1
     @fnext_id += 1
+  end
+
+  protected
+
+  # Indexing from outside is forbidden.
+  def [](x)
+    super x
+  end
+
+  # Indexing from outside is forbidden.
+  def []=(x, y)
+    super x, y
   end
 end

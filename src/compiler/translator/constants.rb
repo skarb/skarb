@@ -5,7 +5,7 @@ class Translator
     # Returns empty sexp with value of an constants
     def translate_const(sexp)
       if @symbol_table.has_key? sexp[1]
-        value = @symbol_table[sexp[1]][:value]
+        value = @symbol_table.value_of sexp[1]
         s().with_value(value.value_sexp, value.value_type).
           with_class_type value.class_type
       else

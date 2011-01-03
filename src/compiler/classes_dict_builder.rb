@@ -31,7 +31,7 @@ class ClassesDictionaryBuilder
       if k[1][:parent].nil?
         parent_id = -1
       else
-        parent_id = @symbol_table[k[1][:parent]][:id]
+        parent_id = @symbol_table.id_of k[1][:parent]
       end
       if k[1][:functions_def].nil? or k[1][:functions_def].empty?
         msearch = s(:lit, :NULL)
