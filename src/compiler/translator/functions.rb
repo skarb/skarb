@@ -1,5 +1,4 @@
 require 'helpers'
-require 'translator/functions/mangling'
 
 class Translator
   # A module consisting of functions which handle translation of nodes related
@@ -12,7 +11,6 @@ class Translator
   # See Functions#mangle for an implementation.
   module Functions
     include Helpers
-    include Mangling
 
     # Translates a method call. Constructors are treated in special way.
     def translate_call(sexp)
@@ -62,7 +60,7 @@ class Translator
       class_name = translate_generic_sexp(sexp[1]).class_type
       sexp = sexp.clone
       sexp.delete_at 1
-      sexp[1] = ('s_'+escape_name(sexp[1]).to_s).to_sym
+      sexp[1] = mangle_defs_name escape_name(sexp[1])
       @symbol_table.in_class class_name do
         @symbol_table.add_function sexp[1], sexp
       end
@@ -94,7 +92,7 @@ class Translator
       # If the type is unknown we have to perform method search at runtime
       return generate_runtime_call class_expr, sexp if type.empty?
       if type == :Class
-        sexp[2] = ('s_'+sexp[2].to_s).to_sym
+        sexp[2] = mangle_defs_name sexp[2]
         type = class_expr.class_type
       end
       while type
@@ -149,7 +147,7 @@ class Translator
       defn = @symbol_table.function_def class_name, def_name
       version = @symbol_table.function_version class_name, def_name
       # Here we append version number to function name
-      impl_name = Translator.mangle(def_name, version, class_name, args_types)
+      impl_name = mangle_function_name(def_name, version, class_name, args_types)
       args_types.unshift class_name
       # Have we got an implementation of this function for given args' types?
       unless function_implemented? impl_name
@@ -203,7 +201,7 @@ class Translator
         die "Unknown class: '#{class_name}'"
       end
       args_evaluation=[]
-      impl_name = Translator.mangle(def_name, 0, class_name, [])
+      impl_name = mangle_function_name(def_name, 0, class_name, [])
       if not @symbol_table.class_defined_in_stdlib? class_name
         if function_defined? :initialize, class_name
           # Evaluate arguments. We need to know what their type is in order to call
@@ -214,8 +212,8 @@ class Translator
           version = @symbol_table.function_version class_name, :initialize
           # Get types of arguments.
           types = args_evaluation.map { |arg| arg.value_type }
-          impl_init_name = Translator.mangle(:initialize, version, class_name, types)
-          impl_name = Translator.mangle(def_name, 0, class_name, types)
+          impl_init_name = mangle_function_name(:initialize, version, class_name, types)
+          impl_name = mangle_function_name(def_name, 0, class_name, types)
           init_fun = unpack_static(@symbol_table.in_class(class_name) do
             implement_function impl_init_name, defn, types
           end)
@@ -307,7 +305,7 @@ class Translator
         fdef = @symbol_table.function_def cname, fname
         version = @symbol_table.function_version cname, fname
         types = fdef[2].rest.map { nil }
-        impl_name = Translator.mangle(fname, version, cname, types)
+        impl_name = mangle_function_name(fname, version, cname, types)
         assign_function_to_class_dict(fname, impl_name, cname, types.length+1)
       end
     end

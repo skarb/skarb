@@ -7,8 +7,7 @@ class Translator
     # Translate assignment to an instance variable. The variable is declared
     # unless it already was. As a value of expression the variable is returned.
     def translate_iasgn(sexp)
-      str_name = sexp[1].to_s
-      sname = str_name[1, str_name.length-1].to_sym
+      sname = mangle_ivar_name sexp[1]
       unless @symbol_table.has_ivar? sexp[1]
         @symbol_table.add_ivar sexp[1]
       end
@@ -28,8 +27,7 @@ class Translator
       unless @symbol_table.has_ivar? sexp[1]
         @symbol_table.add_ivar sexp[1]
       end
-      str_name = sexp[1].to_s
-      sname = str_name[1, str_name.length-1].to_sym
+      sname = mangle_ivar_name sexp[1]
       ivar_class = @symbol_table.get_ivar_class sexp[1]
       s(:stmts).with_value_sexp s(:binary_oper, :'->',
                                   s(:cast, ivar_class.star, s(:var, :self)),

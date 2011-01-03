@@ -65,8 +65,8 @@ class Translator
       cvars_table = @symbol_table.cvars_table class_name
       cfields_declarations =
         cvars_table.keys.map { |key| s(:decl, :'Object*', key.rest(2)) }
-      scname = ('s_'+ class_name.to_s).to_sym
-      scvar = ('v' + scname.to_s).to_sym
+      scname = mangle_cvars_struct_name class_name
+      scvar = mangle_cvars_struct_var_name class_name
       cstructure_definition =
         s(:typedef, s(:struct, nil,
                       s(:block, s(:decl, :Class, :meta),
@@ -100,7 +100,7 @@ class Translator
     # Implements function with generic arguments 
     def implement_generic_function(fname, fdef, version, cname)
       types = fdef[2].rest.map { nil }
-      impl_name = Translator.mangle(fname, version, cname, types)
+      impl_name = mangle_function_name(fname, version, cname, types)
       unless function_implemented? impl_name
         implement_function impl_name, fdef, types
       end

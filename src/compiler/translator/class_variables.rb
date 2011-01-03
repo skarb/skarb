@@ -7,16 +7,16 @@ class Translator
     # Translate assignment to a class variable. The variable is declared
     # unless it already was. As a value of expression the variable is returned.
     def translate_cvasgn(sexp)
-      str_name = sexp[1].to_s
-      sname = str_name[2, str_name.length-1].to_sym
+      sname = mangle_cvar_name sexp[1]
       unless @symbol_table.has_cvar? sexp[1]
         @symbol_table.add_cvar sexp[1]
       end
       arg = translate_generic_sexp(sexp[2])
       val_type = arg.value_type
       cvar_class = @symbol_table.get_cvar_class sexp[1]
+      cvars_struct_var = mangle_cvars_struct_var_name cvar_class
       field_name =  s(:binary_oper, :'.',
-                              s(:var, ('vs_'+cvar_class.to_s).to_sym),
+                              s(:var, cvars_struct_var),
                               s(:var, sname))
       filtered_stmts(arg, s(:asgn, field_name, arg.value_sexp))
       .with_value_sexp field_name
@@ -30,11 +30,11 @@ class Translator
       unless @symbol_table.has_cvar? sexp[1]
         @symbol_table.add_cvar sexp[1]
       end
-      str_name = sexp[1].to_s
-      sname = str_name[2, str_name.length-1].to_sym
+      sname = mangle_cvar_name sexp[1]
       cvar_class = @symbol_table.get_cvar_class sexp[1]
+      cvars_struct_var = mangle_cvars_struct_var_name cvar_class
       s(:stmts).with_value_sexp s(:binary_oper, :'.',
-                                  s(:var, ('vs_'+cvar_class.to_s).to_sym),
+                                  s(:var, cvars_struct_var),
                                   s(:var, sname))
     end
   end

@@ -11,6 +11,7 @@ require 'translator/global_variables'
 require 'translator/classes'
 require 'translator/constants'
 require 'translator/argv'
+require 'translator/mangling'
 
 # Responsible for transforming a Ruby AST to its C equivalent.
 # It performs tree traversal by recursive execution of functions
@@ -65,6 +66,7 @@ class Translator
   include Classes
   include Constants
   include ARGV
+  include Mangling
 
   # Name of modified instance of Object class containing main program
   MainObject = :M_Object
@@ -159,9 +161,5 @@ class Translator
     s(:call, :boolean_value, s(:args, value))
   end
 
-  # Returns given name with underscores escaped.
-  def escape_name(name)
-    name.to_s.gsub('_', '__').to_sym 
-  end
 
 end

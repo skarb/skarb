@@ -7,8 +7,7 @@ class Translator
     # Translate assignment to a global variable. The variable is declared
     # unless it already was. As a value of expression the variable is returned.
     def translate_gasgn(sexp)
-      sname = sexp[1].to_s
-      var_name = ('g_'+sname[1..sname.length-1]).to_sym
+      var_name = mangle_gvar_name sexp[1]
       var_sexp = s(:var, var_name)
       @globals[var_name] = s(:decl, :'Object*', var_name)
       arg = translate_generic_sexp sexp[2]
@@ -19,8 +18,7 @@ class Translator
     # Translate a referenced global variable to empty block with value of this
     # variable.
     def translate_gvar(sexp)
-      sname = sexp[1].to_s
-      var_name = ('g_'+sname[1..sname.length-1]).to_sym
+      var_name = mangle_gvar_name sexp[1]
       s().with_value_sexp s(:var, var_name)
     end
   end
