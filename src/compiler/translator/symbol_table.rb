@@ -131,7 +131,6 @@ class SymbolTable < Hash
 
   # Returns function version in a given class context
   def function_version(cls, fun)
-    #self[cls][:functions_def][fun][:version]
     self[cls][:functions_def][fun].length - 1
   end
 
