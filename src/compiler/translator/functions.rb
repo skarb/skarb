@@ -265,9 +265,9 @@ class Translator
         end
         body = translate_generic_sexp(defn[3][1])
         lvars = lvars_declarations
-        if @symbol_table.returned_type
-          body.value_type = @symbol_table.returned_type
-        end
+        @symbol_table.returned_type = body.value_type
+        body.value_type = @symbol_table.returned_type
+        @symbol_table.forget_returned_type
         body
       end
       body_block = filtered_block(*lvars, body, s(:return, body.value_sexp))

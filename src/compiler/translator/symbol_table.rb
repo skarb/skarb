@@ -307,6 +307,12 @@ class SymbolTable < Hash
     end
   end
 
+  # Sets the returned_type to nil. Using returned_type= won't work as it would
+  # set it to :any.
+  def forget_returned_type
+    function_table[:rettype] = nil
+  end
+
   private
   
   # Returns hash corresponding to local variable or nil if variable does not
