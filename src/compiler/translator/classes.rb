@@ -27,7 +27,7 @@ class Translator
     # Translates self reference into empty sexp with value
     def translate_self(sexp)
       cclass = @symbol_table.cclass
-      return @symbol_table[cclass][:value] if @symbol_table.cfunction == :_main
+      return @symbol_table.value_of cclass if @symbol_table.cfunction == :_main
       s().with_value s(:var, :self), cclass
     end
 
@@ -43,7 +43,7 @@ class Translator
     # all the methods were translated.
     def generate_class_structure(class_name)
       parent_class = @symbol_table.parent class_name
-      ivars_table = @symbol_table[class_name][:ivars]
+      ivars_table = @symbol_table.ivars_table class_name
       iclass = @symbol_table[class_name]
       while iclass[:parent]!=nil
         iclass = @symbol_table[iclass[:parent]]
@@ -61,7 +61,7 @@ class Translator
     # Generates a structure for class fields
     def generate_class_static_structure(class_name)
       parent_class = @symbol_table.parent class_name
-      cvars_table = @symbol_table[class_name][:cvars]
+      cvars_table = @symbol_table.cvars_table class_name
       cfields_declarations =
         cvars_table.keys.map { |key| s(:decl, :'Object*', key.rest(2)) }
       scname = ('s_'+ class_name.to_s).to_sym
@@ -75,9 +75,9 @@ class Translator
                           s(:init_block,
                             s(:init_block,
                               s(:init_block,
-                                s(:lit, @symbol_table[:Class][:id])),
+                                s(:lit, @symbol_table.id_of(:Class))),
                               s(:init_block,
-                                s(:lit, @symbol_table[class_name][:id])))))
+                                s(:lit, @symbol_table.id_of(class_name))))))
     end
 
     # Generates generic versions of class methods
@@ -114,7 +114,7 @@ class Translator
               s(:args, s(:call, :sizeof, s(:args, s(:lit, class_name)))))),
           s(:asgn,
             s(:binary_oper, :'->', s(:var, :self), s(:var, :type)),
-            s(:lit, @symbol_table[class_name][:id])))
+            s(:lit, @symbol_table.id_of(class_name))))
       unless init_name.nil?
         block << s(:call, init_name,
                    s(:args, s(:var, :self),

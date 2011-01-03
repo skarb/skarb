@@ -29,8 +29,7 @@ class SymbolTable < Hash
   # Adds a new constant and generates id for it.
   def add_constant(name, value)
     self[name] ||= { }
-    self[name][:value] = value
-    self[name][:type] = :const
+    self[name].merge!({:value => value, :type => :const})
   end 
 
   # Adds a new class, generates id for it and initializes mandatory
@@ -41,13 +40,15 @@ class SymbolTable < Hash
       die "#{class_name} is not a class"
     end
     if self[class_name][:id].nil?
-      self[class_name][:id] = next_id
-      self[class_name][:parent] = :Object
-      self[class_name][:functions] = { }
-      self[class_name][:functions_def] = { }
-      self[class_name][:ivars] = {  }
-      self[class_name][:cvars] = {  }
-      self[class_name][:defined_in_stdlib] = false
+      self[class_name] = {
+        :id => next_id,
+        :parent => :Object,
+        :functions => {},
+        :functions_def => {},
+        :ivars => {},
+        :cvars => {},
+        :defined_in_stdlib => false
+      }
     end
     self[class_name][:value] = s().with_value(
                              s(:cast, :'Object*',
@@ -128,14 +129,20 @@ class SymbolTable < Hash
     self[@cclass][:functions_def][fun].push sexp
   end
 
-  # Returns function version in the current class context
-  def function_version(fun)
-    self[@cclass][:functions_def][fun][:version]
+  # Returns function version in a given class context
+  def function_version(cls, fun)
+    #self[cls][:functions_def][fun][:version]
+    self[cls][:functions_def][fun].length - 1
   end
 
-  # Check if function with given name is defined for current class
-  def has_function?(name)
-    self[@cclass][:functions_def].has_key? name 
+  # Returns the most recent function definition in a given class context
+  def function_def(cls, fun)
+    self[cls][:functions_def][fun].last
+  end
+
+  # Check if function with given name is defined for a given class
+  def has_function?(cls, name)
+    self[cls][:functions_def].has_key? name
   end
 
   # Adds a local variable in the current function context and sets its kind
@@ -180,18 +187,6 @@ class SymbolTable < Hash
     get_ivar_class(ivar) != nil
   end
 
-  # Sets the given type for the given instance variable in the current class
-  # context.
-  def set_ivar_type(ivar, type)
-    self[get_ivar_class(ivar)][:ivars][ivar][:type] = type
-  end
-
-  # Returns the type for the given instance variable in the current class
-  # context.
-  def get_ivar_type(ivar)
-    self[get_ivar_class(ivar)][:ivars][ivar][:type]
-  end
-
   # Adds an class variable in the current class context.
   def add_cvar(cvar)
     cvars_table[cvar] ||= {}
@@ -203,36 +198,16 @@ class SymbolTable < Hash
     get_cvar_class(cvar) != nil
   end
 
-  # Sets the given type for the given class variable in the current class
+  # The hash of instance variables in a given (or current by default) class
   # context.
-  def set_cvar_type(cvar, type)
-    self[get_cvar_class(cvar)][:cvars][cvar][:type] = type
+  def ivars_table(cls=@cclass)
+    self[cls][:ivars]
   end
 
-  # Returns the type for the given class variable in the current class
+  # The hash of class variables in a given (or current by default) class
   # context.
-  def get_cvar_type(cvar)
-    self[get_cvar_class(cvar)][:cvars][cvar][:type]
-  end
-
-  # Setter for higher class
-  def higher_class=(class_name)
-    class_table[:higher_class]=class_name
-  end
-
-  # Getter for higher class
-  def higher_class
-    class_table[:higher_class]
-  end
-
-  # The hash of instance variables in the current class context.
-  def ivars_table
-    self[@cclass][:ivars]
-  end
-
-  # The hash of class variables in the current class context.
-  def cvars_table
-    self[@cclass][:cvars]
+  def cvars_table(cls=@cclass)
+    self[cls][:cvars]
   end
 
   # General hash of current class context.
@@ -260,12 +235,6 @@ class SymbolTable < Hash
   # name is given the current class is taken as a default.
   def class_defined_in_stdlib?(class_name=@cclass)
     self[class_name][:defined_in_stdlib]
-  end
-
-  # Returns ID of function name. IDs are guaranted to be unique. Methods with
-  # same names defined in different classes share the same ID.
-  def fname_id(fname)
-    @fname2id[fname] ||= fnext_id
   end
 
   # Returns class name if class within class variable is defined
@@ -313,6 +282,16 @@ class SymbolTable < Hash
     function_table[:rettype] = nil
   end
 
+  # Returns the id of a class.
+  def id_of(cls)
+    self[cls][:id]
+  end
+
+  # Returns the id of a class.
+  def value_of(cls)
+    self[cls][:value]
+  end
+
   private
   
   # Returns hash corresponding to local variable or nil if variable does not
@@ -324,11 +303,6 @@ class SymbolTable < Hash
     end while block = block[:parent]
     nil
   end
-
-  # The hash of methods in the current class context.
-  def functions_table
-    self[@cclass][:functions]
-  end
   
   # Each call to this method returns a new, unique id.
   def next_id
@@ -336,9 +310,15 @@ class SymbolTable < Hash
     @next_id += 1
   end
 
-  # Each call to this method returns a new, unique id.
-  def fnext_id
-    @fnext_id ||= -1
-    @fnext_id += 1
+  protected
+
+  # Indexing from outside is forbidden.
+  def [](x)
+    super x
+  end
+
+  # Indexing from outside is forbidden.
+  def []=(x, y)
+    super x, y
   end
 end

@@ -80,7 +80,7 @@ class Translator
 
     # Returns true if a given function (method) has been already defined.
     def function_defined?(name, type = @symbol_table.cclass)
-      @symbol_table[type][:functions_def].has_key? name
+      @symbol_table.has_function? type, name
     end
 
     # Tries to find a method in the inheritance chain and call it.
@@ -146,8 +146,8 @@ class Translator
     # which accepts given evaluated arguments. If the function isn't implemeted
     # yet its AST gets translated.
     def find_defined_function(class_name, def_name, args_types)
-      defn = @symbol_table[class_name][:functions_def][def_name].last
-      version = @symbol_table[class_name][:functions_def][def_name].length - 1
+      defn = @symbol_table.function_def class_name, def_name
+      version = @symbol_table.function_version class_name, def_name
       # Here we append version number to function name
       impl_name = Translator.mangle(def_name, version, class_name, args_types)
       args_types.unshift class_name
@@ -172,7 +172,7 @@ class Translator
       return s().with_value_type :recur if args_types.include? :recur
       # Get the defn sexp in which the function has been defined.
       if @symbol_table.class_defined_in_stdlib? class_name
-        defn = @symbol_table[class_name][:functions_def][def_name].last
+        defn = @symbol_table.function_def class_name, def_name
         impl_name = defn[1]
         if defn.value_type.is_a? Hash
           ret_type = defn.value_type[args_types.join '_']
@@ -199,7 +199,9 @@ class Translator
       def_name = sexp[2]
       class_expr = evaluate_class_expr(sexp[1])
       class_name = class_expr.class_type
-      die "Unknown class: '#{class_name}'" unless @symbol_table[class_name]
+      unless @symbol_table.has_key? class_name
+        die "Unknown class: '#{class_name}'"
+      end
       args_evaluation=[]
       impl_name = Translator.mangle(def_name, 0, class_name, [])
       if not @symbol_table.class_defined_in_stdlib? class_name
@@ -208,8 +210,8 @@ class Translator
           # appropriate overloaded function.
           args_evaluation = sexp[3].rest.map { |arg_sexp| translate_generic_sexp arg_sexp }
           # Get the defn sexp in which the function has been defined.
-          defn = @symbol_table[class_name][:functions_def][:initialize].last
-          version = @symbol_table[class_name][:functions_def][:initialize].length - 1
+          defn = @symbol_table.function_def class_name, :initialize
+          version = @symbol_table.function_version class_name, :initialize
           # Get types of arguments.
           types = args_evaluation.map { |arg| arg.value_type }
           impl_init_name = Translator.mangle(:initialize, version, class_name, types)
@@ -302,8 +304,8 @@ class Translator
     # dictionary.
     def declare_generic_function(fname, cname)
       if function_defined? fname, cname 
-        fdef = @symbol_table[cname][:functions_def][fname].last
-        version = @symbol_table[cname][:functions_def][fname].length - 1
+        fdef = @symbol_table.function_def cname, fname
+        version = @symbol_table.function_version cname, fname
         types = fdef[2].rest.map { nil }
         impl_name = Translator.mangle(fname, version, cname, types)
         assign_function_to_class_dict(fname, impl_name, cname, types.length+1)
