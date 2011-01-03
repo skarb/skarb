@@ -3,6 +3,7 @@
 #0
 #var2
 #ok
+#1
 _var2 = "var2"
 
 def fun
@@ -27,8 +28,12 @@ class A
     puts "ok"
   end
 
-  def sfun
+  def s_fun
     puts "error"
   end
 end
 A.fun
+
+$a = 1
+g_a = 2
+puts $a

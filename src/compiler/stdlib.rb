@@ -17,7 +17,7 @@ class Object
   defined_in_stdlib
 
   def to_s
-    defined_as :Object_to_s
+    defined_as :Object_to__s
     returns String
   end
 
@@ -84,7 +84,7 @@ class Fixnum
   end
 
   def to_s
-    defined_as :Fixnum_to_s
+    defined_as :Fixnum_to__s
     returns String
   end
 
@@ -129,7 +129,7 @@ class Float
   end
 
   def to_s
-    defined_as :Float_to_s
+    defined_as :Float_to__s
     returns String
   end
 
@@ -157,17 +157,17 @@ class String
   end
 
   def to_s
-    defined_as :String_to_s
+    defined_as :String_to__s
     returns String
   end
 
   def to_i
-    defined_as :String_to_i
+    defined_as :String_to__i
     returns Fixnum
   end
 
   def to_f
-    defined_as :String_to_f
+    defined_as :String_to__f
     returns Float
   end
 
@@ -188,7 +188,7 @@ class NilClass
   defined_in_stdlib
 
   def to_s
-    defined_as :Nil_to_s
+    defined_as :Nil_to__s
     returns String
   end
 end
@@ -266,7 +266,7 @@ class TrueClass
   defined_in_stdlib
 
   def to_s
-    defined_as :True_to_s
+    defined_as :True_to__s
     returns String
   end
 end
@@ -275,7 +275,7 @@ class FalseClass
   defined_in_stdlib
 
   def to_s
-    defined_as :False_to_s
+    defined_as :False_to__s
     returns String
   end
 end

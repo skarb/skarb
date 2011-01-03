@@ -88,7 +88,7 @@ Object * Fixnum__GT_(Object *self, Object *other) {
     return 0;
 }
 
-Object * Fixnum_to_s(Object *self) {
+Object * Fixnum_to__s(Object *self) {
   static const int maxlen = sizeof("1234567890");
   char *buffer = g_alloca(maxlen + 1);
   snprintf(buffer, maxlen, "%i", as_fixnum(self)->val);

@@ -25,12 +25,13 @@ class Translator
           call_constructor sexp
         end
       else
-        # Class is not explicit
         if sexp[1].nil?
+          # Class is not explicit -- look for class method first
           msexp = sexp.clone
           msexp[1] = s(:const, @symbol_table.cclass)
           ret_val = look_up_and_call msexp
         end
+        # Look for instance method
         ret_val = look_up_and_call sexp if ret_val.nil?
         die "Unknown function or method: #{sexp[2]}" if ret_val.nil?
         ret_val
@@ -49,6 +50,8 @@ class Translator
     # actual call. Meanwhile the defining sexp is saved and we return an empty
     # statements sexp.
     def translate_defn(sexp)
+      sexp = sexp.clone
+      sexp[1] = escape_name sexp[1]
       @symbol_table.add_function sexp[1], sexp
       implement_generic_function sexp[1], @symbol_table.cclass
     end
@@ -60,7 +63,7 @@ class Translator
       class_name = translate_generic_sexp(sexp[1]).class_type
       sexp = sexp.clone
       sexp.delete_at 1
-      sexp[1] = ('s_'+sexp[1].to_s).to_sym
+      sexp[1] = ('s_'+escape_name(sexp[1]).to_s).to_sym
       @symbol_table.in_class class_name do
         @symbol_table.add_function sexp[1], sexp
       end
@@ -85,12 +88,13 @@ class Translator
     def look_up_and_call(sexp)
       class_expr = evaluate_class_expr(sexp[1])
       type = class_expr.value_type.to_s.to_sym
+      sexp = sexp.clone
+      sexp[2] = escape_name sexp[2]
       # Do not translate recursive calls until their type is determined 
       return s().with_value_type :recur if type == :recur
       # If the type is unknown we have to perform method search at runtime
       return generate_runtime_call class_expr, sexp if type.empty?
       if type == :Class
-        sexp = sexp.clone
         sexp[2] = ('s_'+sexp[2].to_s).to_sym
         type = class_expr.class_type
       end

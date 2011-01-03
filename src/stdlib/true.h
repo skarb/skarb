@@ -12,6 +12,6 @@ extern s_Object vs_TrueClass;
 /**
  * True#to_s
  */
-Object *True_to_s(Object *self);
+Object *True_to__s(Object *self);
 
 #endif /* TRUE_H_ */

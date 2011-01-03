@@ -12,6 +12,6 @@ extern s_Object vs_FalseClass;
 /**
  * False#to_s
  */
-Object *False_to_s(Object *self);
+Object *False_to__s(Object *self);
 
 #endif /* FALSE_H_ */

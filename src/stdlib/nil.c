@@ -8,7 +8,7 @@ NilClass *nil = &the_nil;
 s_Object vs_NilClass = { {{Class_t}, {NilClass_t}} };
 
 
-Object *Nil_to_s(Object *self) {
+Object *Nil_to__s(Object *self) {
   static Object *string = 0;
   if (string)
     return string;

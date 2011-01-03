@@ -54,22 +54,22 @@ Object * String_length(Object *self);
 /**
  * Returns a char array which stores the string.
  */
-const char * String_to_char_array(Object *self);
+const char * String_to__char__array(Object *self);
 
 /**
  * String#to_s
  */
-Object * String_to_s(Object *self);
+Object * String_to__s(Object *self);
 
 /**
  * String#to_i
  */
-Object * String_to_i(Object *self);
+Object * String_to__i(Object *self);
 
 /**
  * String#to_f
  */
-Object * String_to_f(Object *self);
+Object * String_to__f(Object *self);
 
 /**
  * String#[]

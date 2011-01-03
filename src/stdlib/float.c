@@ -81,7 +81,7 @@ Object * Float__GT_(Object *self, Object *other) {
     return 0;
 }
 
-Object * Float_to_s(Object *self) {
+Object * Float_to__s(Object *self) {
   static const int maxlen = sizeof("1234567890.1234567890");
   char *buffer = g_alloca(maxlen + 1);
   snprintf(buffer, maxlen, "%g", as_float(self)->val);

@@ -12,6 +12,6 @@ extern s_Object vs_NilClass;
 /**
  * Nil#to_s
  */
-Object *Nil_to_s(Object *self);
+Object *Nil_to__s(Object *self);
 
 #endif /* NIL_H_ */

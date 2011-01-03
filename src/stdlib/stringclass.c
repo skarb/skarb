@@ -54,19 +54,19 @@ Object * String_length(Object *self) {
     return Fixnum_new(chars);
 }
 
-const char * String_to_char_array(Object *self) {
+const char * String_to__char__array(Object *self) {
     return as_string(self)->val->str;
 }
 
-Object * String_to_s(Object *self) {
+Object * String_to__s(Object *self) {
     return self;
 }
 
-Object * String_to_i(Object *self) {
+Object * String_to__i(Object *self) {
     return Fixnum_new(atoi(as_string(self)->val->str));
 }
 
-Object * String_to_f(Object *self) {
+Object * String_to__f(Object *self) {
     return Float_new(atof(as_string(self)->val->str));
 }
 

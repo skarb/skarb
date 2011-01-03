@@ -30,7 +30,7 @@ Object * Object_puts(Object *obj, Object *what);
 /**
  * Object#to_s
  */
-Object * Object_to_s(Object *obj);
+Object * Object_to__s(Object *obj);
 
 /**
  * Object#==

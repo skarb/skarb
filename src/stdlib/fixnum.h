@@ -62,7 +62,7 @@ Object * Fixnum__GT_(Object *self, Object *other);
 /**
  * Fixnum#to_s
  */
-Object * Fixnum_to_s(Object *self);
+Object * Fixnum_to__s(Object *self);
 
 /**
  * Fixnum#zero

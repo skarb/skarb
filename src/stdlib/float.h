@@ -62,7 +62,7 @@ Object * Float__GT_(Object *self, Object *other);
 /**
  * Float#to_s
  */
-Object * Float_to_s(Object *self);
+Object * Float_to__s(Object *self);
 
 /**
  * Float#zero?

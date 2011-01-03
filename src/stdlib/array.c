@@ -105,12 +105,12 @@ Object * Array_join(Object *self, Object *sep) {
         die("TypeError");
     int length = as_array(self)->arr->len;
     if (length == 0)
-        return Nil_to_s(nil);
+        return Nil_to__s(nil);
     Object *buf = String_new("");
     for (int index = 0; index < length; ++index) {
         if (index != 0)
             g_string_append(as_string(buf)->val, as_string(sep)->val->str);
-        static const char method[] = { 4, 't', 'o', '_', 's', '\0' };
+        static const char method[] = { 5, 't', 'o', '_', '_', 's', '\0' };
         Object *item = g_array_index(as_array(self)->arr, Object*, index);
         Object *args[] = { item };
         Object *str = call_method(item->type, classes_dictionary,

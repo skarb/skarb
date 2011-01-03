@@ -7,7 +7,7 @@ FalseClass *false = &the_false;
 
 s_Object vs_FalseClass = { {{Class_t}, {FalseClass_t}} };
 
-Object *False_to_s(Object *self) {
+Object *False_to__s(Object *self) {
   static Object *string = 0;
   if (string)
     return string;
