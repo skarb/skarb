@@ -237,12 +237,6 @@ class SymbolTable < Hash
     self[class_name][:defined_in_stdlib]
   end
 
-  # Returns ID of function name. IDs are guaranted to be unique. Methods with
-  # same names defined in different classes share the same ID.
-  def fname_id(fname)
-    @fname2id[fname] ||= fnext_id
-  end
-
   # Returns class name if class within class variable is defined
   # or nil if it was not defined.
   def get_cvar_class(cvar)
@@ -309,22 +303,11 @@ class SymbolTable < Hash
     end while block = block[:parent]
     nil
   end
-
-  # The hash of methods in the current class context.
-  def functions_table
-    self[@cclass][:functions]
-  end
   
   # Each call to this method returns a new, unique id.
   def next_id
     @next_id ||= -1
     @next_id += 1
-  end
-
-  # Each call to this method returns a new, unique id.
-  def fnext_id
-    @fnext_id ||= -1
-    @fnext_id += 1
   end
 
   protected
