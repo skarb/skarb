@@ -44,11 +44,16 @@ class Translator
     def generate_class_structure(class_name)
       parent_class = @symbol_table.parent class_name
       ivars_table = @symbol_table[class_name][:ivars]
+      iclass = @symbol_table[class_name]
+      while iclass[:parent]!=nil
+        iclass = @symbol_table[iclass[:parent]]
+        ivars_table = ivars_table.merge iclass[:ivars]
+      end
       ifields_declarations =
         ivars_table.keys.map { |key| s(:decl, :'Object*', key.rest) }
       structure_definition =
         s(:typedef, s(:struct, nil,
-                      s(:block, s(:decl, parent_class, :parent),
+                      s(:block, s(:decl, :Object, :parent),                        
                         *ifields_declarations)), class_name)
       @structures_definitions[class_name] = structure_definition
     end

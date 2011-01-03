@@ -41,7 +41,7 @@ end
 class Class
   defined_in_stdlib
 
-  puts "abc"
+  @bogus_field  
 end
 
 class Fixnum

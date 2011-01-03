@@ -445,8 +445,4 @@ describe Translator do
                         rec.foo").join.should_not include "call_method"
   end
 
-  it 'should create nested class structure according to inheritance' do
-    translate_code("class A; end; class B < A; end;").
-      join(' ').should include "A parent"
-  end
 end

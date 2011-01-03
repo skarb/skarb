@@ -24,11 +24,19 @@ class Translator
       @symbol_table.in_class sexp[1] do
         @symbol_table.class_defined_in_stdlib
         set_parent sexp if sexp[2]
+        load_instance_variables sexp
         load_methods sexp
       end
     end
 
     private
+
+    # Puts all referenced instance variables in the symbol_table.
+    def load_instance_variables(sexp)
+      sexp[3][1].rest.select { |child| child.first == :ivar } .each do |ivar|
+        translate_generic_sexp ivar
+      end
+    end
 
     # Loads all methods declared in a stdlib class declaration and puts them in
     # the symbol table.sugin load_methods.
