@@ -240,6 +240,11 @@ class SymbolTable < Hash
     self[@cclass]
   end
 
+  # General hash of current function context.
+  def function_table
+    self[@cclass][:functions][@cfunction]
+  end
+
   # The hash of local variables in the current function context.
   def lvars_table
     self[@cclass][:functions][@cfunction][:lvars]
@@ -281,6 +286,25 @@ class SymbolTable < Hash
       return cl if self[cl][:ivars].has_key? ivar
     end while cl = self[cl][:parent]
     nil
+  end
+
+  # Type returned by the current function
+  def returned_type
+    type = function_table[:rettype]
+    type == :any ? nil : type
+  end
+
+  # Sets the returned_type. If it has been already set to a different value it's
+  # set to :any, which means that the returned type cannot be determined.
+  def returned_type=(type)
+    current = function_table[:rettype]
+    if type.nil?
+      function_table[:rettype] = :any
+    elsif current.nil?
+      function_table[:rettype] = type
+    elsif current != type
+      function_table[:rettype] = :any
+    end
   end
 
   private

@@ -96,8 +96,10 @@ class Translator
   def translate_return(sexp)
     if sexp.count == 1
       ret = s().with_value_sexp s(:var, :nil)
+      @symbol_table.returned_type = nil
     else
       ret = translate_generic_sexp sexp[1]
+      @symbol_table.returned_type = ret.value_type
     end
     filtered_stmts ret, s(:return, ret.value_sexp)
   end
