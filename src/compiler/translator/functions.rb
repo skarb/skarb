@@ -52,7 +52,7 @@ class Translator
       sexp = sexp.clone
       sexp[1] = escape_name sexp[1]
       @symbol_table.add_function sexp[1], sexp
-      implement_generic_function sexp[1], @symbol_table.cclass
+      declare_generic_function sexp[1], @symbol_table.cclass
     end
 
     # Static functions' definitions don't get translated immediately. We'll wait
@@ -66,7 +66,7 @@ class Translator
       @symbol_table.in_class class_name do
         @symbol_table.add_function sexp[1], sexp
       end
-      implement_generic_function sexp[1], class_name
+      declare_generic_function sexp[1], class_name
     end
 
     # Translates a call to the []= method. It's treated exactly as a call sexp.
@@ -297,21 +297,16 @@ class Translator
       end
     end
 
-    # Implements function with generic arguments. It always implements
+    # Declars function with generic arguments. It processes
     # last version found on the stack and puts it in class function
     # dictionary.
-    def implement_generic_function(fname, cname)
+    def declare_generic_function(fname, cname)
       if function_defined? fname, cname 
         fdef = @symbol_table[cname][:functions_def][fname].last
         version = @symbol_table[cname][:functions_def][fname].length - 1
         types = fdef[2].rest.map { nil }
         impl_name = Translator.mangle(fname, version, cname, types)
-        unless function_implemented? impl_name
-          @symbol_table.in_class cname do
-            implement_function impl_name, fdef, types
-          end
-          assign_function_to_class_dict(fname, impl_name, cname, types.length+1)
-        end
+        assign_function_to_class_dict(fname, impl_name, cname, types.length+1)
       end
     end
 

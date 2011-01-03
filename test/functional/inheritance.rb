@@ -33,8 +33,8 @@ end
 child = Child.new
 child.set_x 2
 puts child.x
-parent = Parent.new
-parent.set_x 2
-puts parent.x
-parent.set_y 2
-puts child.last_y
+#parent = Parent.new
+#parent.set_x 2
+#puts parent.x
+#parent.set_y 2
+#puts child.last_y

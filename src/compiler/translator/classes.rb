@@ -75,6 +75,31 @@ class Translator
                                 s(:lit, @symbol_table[class_name][:id])))))
     end
 
+    # Generates generic versions of class methods
+    def generate_class_generic_methods(cname)
+      chash = @symbol_table[cname]
+      if chash.has_key? :functions_def
+        chash[:functions_def].each do |fname,farray|
+          farray.each_index do |version|
+            args_number = farray[version][2].rest.length
+            # We have to count in 'self' argument
+            implement_generic_function(fname, farray[version], version, cname) 
+          end
+        end
+      end
+    end
+
+    # Implements function with generic arguments 
+    def implement_generic_function(fname, fdef, version, cname)
+      types = fdef[2].rest.map { nil }
+      impl_name = Translator.mangle(fname, version, cname, types)
+      unless function_implemented? impl_name
+        @symbol_table.in_class cname do
+          implement_function impl_name, fdef, types
+        end
+      end
+    end
+
     # Returns C constructor code for given class
     def class_constructor(class_name, constructor_name, init_name=nil, init_args=[])
       block = s(:block,

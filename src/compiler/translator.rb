@@ -39,19 +39,19 @@ class Translator
     main_block = translate_generic_sexp(sexp)
     main = main_function CallInitialize, AllocateSelf, ARGVInitialization,
         *lvars_declarations, main_block, ReturnZero
-    # If there are any functions other than main they have to be included in
-    # the output along with their prototypes.
     @user_classes.each do |x|
+      generate_class_generic_methods x
       generate_class_structure x
       generate_class_static_structure x
     end
+    # If there are any functions other than main they have to be included in
+    # the output along with their prototypes.
     protos = generate_prototypes
     [s(:file, *@structures_definitions.values, *@globals.values), s(:file, *protos),
       s(:file, *@functions_implementations.values), s(:file, main)]
   end
 
   attr_accessor :symbol_table
-
 
   private
 

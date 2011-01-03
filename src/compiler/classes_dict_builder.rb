@@ -52,8 +52,8 @@ class ClassesDictionaryBuilder
     @symbol_table.map do |cname, chash|
       if chash.has_key? :functions_def
         id2fun_records = chash[:functions_def].map do |fname,farray|
-          farray.each do |fdef|
-            args_number = fdef[2].rest.length
+          farray.each_index do |version|
+            args_number = farray[version][2].rest.length
             # We have to count in 'self' argument
             add_wrapper (args_number+1) unless @wrappers.has_key? (args_number+1)
           end
@@ -64,11 +64,7 @@ class ClassesDictionaryBuilder
             [fname, ('&'+fdef[1].to_s).to_sym, "&wrapper_#{args_number+1}".to_sym]
           else
             # Method defined in user code
-            #args = args_number.times.map { nil }
-            #impl_name = Translator.mangle fname, version, cname, args
             [fname, :NULL, :NULL]
-             #('&'+impl_name.to_s).to_sym,
-             #"&wrapper_#{args_number+1}".to_sym]
           end 
         end
         HashBuilder.emit_table(cname, HashElemStruct, id2fun_records)
@@ -104,4 +100,6 @@ class ClassesDictionaryBuilder
   def emit_wrappers
     Emitter.emit(s(:file, *@wrappers.values))
   end
+ 
+ 
 end
