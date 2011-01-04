@@ -7,6 +7,8 @@
 #include "helpers.h"
 #include "float.h"
 #include "stringclass.h"
+#include "nil.h"
+#include "blocks.h"
 
 s_Fixnum vs_Fixnum = {{{Class_t}, {Fixnum_t}}};
 
@@ -97,4 +99,10 @@ Object * Fixnum_to__s(Object *self) {
 
 Object * Fixnum_zero_QMARK(Object *self) {
   return boolean_to_object(as_fixnum(self)->val == 0);
+}
+
+Object * Fixnum_times(Object *self) {
+  for (int i = 0; i < as_fixnum(self)->val; ++i)
+    get_block()(self);
+  return nil;
 }

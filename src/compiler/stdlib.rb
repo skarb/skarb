@@ -91,6 +91,10 @@ class Fixnum
   def zero?
     defined_as :Fixnum_zero_QMARK
   end
+
+  def times
+    defined_as :Fixnum_times
+  end
 end
 
 class Float

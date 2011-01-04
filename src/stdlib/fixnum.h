@@ -69,4 +69,9 @@ Object * Fixnum_to__s(Object *self);
  */
 Object * Fixnum_zero_QMARK(Object *self);
 
+/**
+ * Fixnum#times
+ */
+Object * Fixnum_times(Object *self);
+
 #endif /* FIXNUM_H_ */
