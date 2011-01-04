@@ -64,7 +64,6 @@ AC_CONFIG_FILES([
 				src/Makefile
 				src/compiler/emitter/Makefile
 				src/compiler/translator/Makefile
-				src/compiler/translator/functions/Makefile
 				src/compiler/Makefile
 				src/stdlib/Makefile
 				doc/Makefile
