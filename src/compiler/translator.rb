@@ -82,6 +82,9 @@ class Translator
   # A call to the initialize function
   CallInitialize = s(:call, :initialize, s(:args))
 
+  # Number of lines in stdlib.rb
+  StdlibLineNumber = File.readlines(File.dirname(__FILE__) + '/stdlib.rb').length
+ 
   # Wraps a given body with a 'main' function. The body is expected to be a
   # collection of Sexp instances.
   def main_function(*body)
@@ -97,7 +100,8 @@ class Translator
     if respond_to? (method_name = "translate_#{sexp[0]}".to_sym), true
       send method_name, sexp
     else
-      die "Input contains unsupported Ruby instructions. Aborting."
+      line = sexp.line - StdlibLineNumber
+      die "Input contains unsupported Ruby instruction in line #{line}. Aborting."
     end
   end
 
