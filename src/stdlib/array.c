@@ -109,13 +109,13 @@ Object * Array_join(Object *self, Object *sep) {
     Object *buf = String_new("");
     for (int index = 0; index < length; ++index) {
         if (index != 0)
-            g_string_append(as_string(buf)->val, as_string(sep)->val->str);
+            buf = String__PLUS_(buf, sep);
         static const char method[] = { 5, 't', 'o', '_', '_', 's', '\0' };
         Object *item = g_array_index(as_array(self)->arr, Object*, index);
         Object *args[] = { item };
         Object *str = call_method(item->type, classes_dictionary,
                 (char*) method, args);
-        g_string_append(as_string(buf)->val, as_string(str)->val->str);
+        buf = String__PLUS_(buf, str);
     }
     return buf;
 }
