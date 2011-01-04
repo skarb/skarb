@@ -14,7 +14,7 @@ void* xmalloc(size_t s) {
 }
 
 void* xmalloc_atomic(size_t s) {
-    void *ptr = GC_MALLOC(s);
+    void *ptr = GC_MALLOC_ATOMIC(s);
     if (!ptr) {
         perror("xmalloc_atomic");
         exit(1);
