@@ -45,7 +45,7 @@ class Translator
       parent_class = @symbol_table.parent class_name
       ivars_table = @symbol_table.ivars_table class_name
       iclass = class_name
-      while (iclass = @symbol_table.parent(iclass)) != nil
+      while iclass = @symbol_table.parent(iclass)
         ivars_table = ivars_table.merge @symbol_table.ivars_table(iclass)
       end
       ifields_declarations =
