@@ -11,10 +11,45 @@
 
 s_String vs_String = {{{Class_t}, {String_t}}};
 
+/*
+ * Stolen from GLib's gstring.c, adapted for GC_MALLOC_ATOMIC.
+ */
+static GString* g_string_sized_new_atomic(gsize dfl_size) {
+  GString *string = g_slice_new(GString);
+
+  string->allocated_len = dfl_size;
+  string->len = 0;
+  string->str = xmalloc_atomic(dfl_size);
+
+  string->str[0] = 0;
+
+  return string;
+}
+
+/*
+ * Stolen from GLib's gstring.c, adapted for GC_MALLOC_ATOMIC.
+ */
+static GString* g_string_new_atomic(const gchar *init) {
+  GString *string;
+
+  if (init == NULL || *init == '\0')
+      string = g_string_sized_new_atomic(2);
+  else {
+      gint len;
+
+      len = strlen(init);
+      string = g_string_sized_new_atomic(len + 2);
+
+      g_string_append_len(string, init, len);
+  }
+
+  return string;
+}
+
 Object * String_new(char *value) {
     String *self = xmalloc(sizeof(String));
     set_type(self, String);
-    self->val = g_string_new(value);
+    self->val = g_string_new_atomic(value);
     return as_object(self);
 }
 
