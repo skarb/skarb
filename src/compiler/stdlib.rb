@@ -247,6 +247,11 @@ class Array
     defined_as :Array_join
     returns String
   end
+
+  def map
+    defined_as :Array_map
+    returns Array
+  end
 end
 
 class Hash

@@ -11,16 +11,27 @@ class Translator
     # Translates the iter sexp which represents Ruby blocks. Currently no
     # arguments can be passed.
     def translate_iter(sexp)
-      raise 'Blocks cannot accept arguments' if sexp[2]
+      raise 'Blocks cannot accept more than 1 argument' if count_args(sexp) > 1
       name = next_block_name
       implement_function name, make_defn(sexp), []
+      call = translate_call sexp[1]
       filtered_stmts(
         s(:call, :set_block, s(:args, s(:var, name))),
-        translate_call(sexp[1]),
-        s(:call, :unset_block, s(:args)))
+        call,
+        s(:call, :unset_block, s(:args))).with_value_of call
     end
 
     private
+
+    def count_args(sexp)
+      if sexp[2].nil?
+        0
+      elsif sexp[2][0] == :lasgn
+        1
+      else
+        2
+      end
+    end
 
     # Each call to this method returns a new, unique block name.
     def next_block_name
@@ -30,7 +41,9 @@ class Translator
 
     # Returns a Ruby defn sexp which defines the block as if it was a function.
     def make_defn(sexp)
-      s(:defn, :block, s(:args),
+      args = s(:args)
+      args << sexp[2][1] if sexp[2]
+      s(:defn, :block, args,
         s(:scope,
           s(:block,
             sexp[3])))
