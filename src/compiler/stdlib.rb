@@ -136,6 +136,10 @@ class Float
   def zero?
     defined_as :Float_zero_QMARK
   end
+
+  def floor
+    defined_as :Float_floor
+  end
 end
 
 class String

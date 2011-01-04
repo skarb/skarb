@@ -20,6 +20,9 @@ describe 'Compiler' do
       `#{CFLAGS} #{RUBY} -I#{SRCDIR}/../../src/compiler #{RUBYC_PATH} #{file}`
       mri = benchmark { `#{RUBY} #{file}` }
       rubyc = benchmark { `./a.out` }
+      puts file
+      puts "mri: #{mri}"
+      puts "rubyc: #{rubyc}"
       mri.should > rubyc
     end
   end

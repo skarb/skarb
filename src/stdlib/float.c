@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <math.h>
 #include <glib.h>
 #include "float.h"
 #include "xalloc.h"
@@ -90,4 +91,8 @@ Object * Float_to__s(Object *self) {
 
 Object * Float_zero_QMARK(Object *self) {
   return boolean_to_object(as_float(self)->val == 0);
+}
+
+Object * Float_floor(Object *self) {
+  return Fixnum_new(floor(as_float(self)->val));
 }

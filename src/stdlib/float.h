@@ -69,4 +69,9 @@ Object * Float_to__s(Object *self);
  */
 Object * Float_zero_QMARK(Object *self);
 
+/**
+ * Float#floor
+ */
+Object * Float_floor(Object *self);
+
 #endif /* FLOAT_H_ */
