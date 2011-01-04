@@ -43,15 +43,7 @@ Object * String__MUL_(Object *self, Object *other) {
 }
 
 Object * String_length(Object *self) {
-    // Works only with UTF-8.
-    char *arr = as_string(self)->val->str;
-    int chars = 0, byte = 0;
-    while (arr[byte]) {
-        if ((arr[byte] & 0xc0) != 0x80)
-            ++chars;
-        ++byte;
-    }
-    return Fixnum_new(chars);
+    return Fixnum_new(g_utf8_strlen(as_string(self)->val->str, -1));
 }
 
 const char * String_to__char__array(Object *self) {
@@ -73,23 +65,17 @@ Object * String_to__f(Object *self) {
 Object * String__INDEX_(Object *self, Object *index) {
     if (!is_a(index, Fixnum))
         die("TypeError");
-    static const int MAX_UTF8_BYTES_PER_CHAR = 5;
-    char *arr = as_string(self)->val->str, buf[MAX_UTF8_BYTES_PER_CHAR];
-    int chars = 0, byte = 0, buf_index = 0;
-    while (1) {
-        if ((arr[byte] & 0xc0) != 0x80) {
-            if (chars == as_fixnum(index)->val + 1) {
-                buf[buf_index] = '\0';
-                return String_new(buf);
-            }
-            chars++;
-            buf_index = 0;
-        }
-        if (!arr[byte])
-            break;
-        buf[buf_index++] = arr[byte++];
-    }
-    return nil;
+    if (g_utf8_strlen(as_string(self)->val->str, -1) < as_fixnum(index)->val)
+        return nil;
+    /*
+     * Reserving 6 characters, as required in
+     * http://library.gnome.org/devel/glib/stable/glib-Unicode-Manipulation.html
+     */
+    char buf[6] = {0};
+    g_unichar_to_utf8(g_utf8_get_char(
+                g_utf8_offset_to_pointer(as_string(self)->val->str,
+                    as_fixnum(index)->val)), buf);
+    return String_new(buf);
 }
 
 Object * String_empty__QMARK__(Object *self) {
