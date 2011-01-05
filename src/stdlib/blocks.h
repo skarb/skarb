@@ -4,21 +4,21 @@
 #include "object.h"
 
 /**
- * Sets the current block. It is used before calling a function which expects a
- * block. It's extremely thread-unsafe, as the rest of the current blocks
- * implementation.
+ * Sets the current block by putting it on top of the blocks' stack. It is
+ * used before calling a function which expects a block. It's extremely
+ * thread-unsafe, as the rest of the current blocks implementation.
  */
-void set_block(Object* (*block)(Object*));
+void push_block(Object* (*block)(Object*));
 
 /**
- * Unsets the current block by setting it to NULL. It should be called after a
- * function call preceded by a call to set_block.
+ * Removes the topmost block from the blocks' stack. It should be called after a
+ * function call preceded by a call to push_block.
  */
-void unset_block();
+void pop_block();
 
 /**
- * Returns the current block set by set_block. It should be used inside a
- * function which expects a block.
+ * Returns the topmost block set by push_block. It should be used inside a
+ * function which expects a block. If no block has been set NULL is returned.
  */
 Object* (*get_block())(Object*);
 

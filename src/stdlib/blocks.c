@@ -1,21 +1,26 @@
 #include <stdlib.h>
+#include <glib.h>
 #include "blocks.h"
 
 typedef Object* (*block_t)(Object*);
 
 /**
- * The current block.
+ * The blocks' stack.
  */
-static block_t current_block;
+static GList *blocks = NULL;
 
-void set_block(block_t block) {
-    current_block = block;
+void push_block(block_t block) {
+    blocks = g_list_prepend(blocks, block);
 }
 
-void unset_block() {
-    current_block = NULL;
+void pop_block() {
+    blocks = blocks->next;
+    if (blocks)
+        blocks->prev = NULL;
 }
 
 block_t get_block() {
-    return current_block;
+    if (!blocks)
+        return NULL;
+    return blocks->data;
 }

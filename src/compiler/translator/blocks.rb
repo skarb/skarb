@@ -16,9 +16,9 @@ class Translator
       implement_function name, make_defn(sexp), []
       call = translate_call sexp[1]
       filtered_stmts(
-        s(:call, :set_block, s(:args, s(:var, name))),
+        s(:call, :push_block, s(:args, s(:var, name))),
         call,
-        s(:call, :unset_block, s(:args))).with_value_of call
+        s(:call, :pop_block, s(:args))).with_value_of call
     end
 
     private
