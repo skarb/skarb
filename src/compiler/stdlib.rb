@@ -95,6 +95,10 @@ class Fixnum
   def times
     defined_as :Fixnum_times
   end
+
+  def upto(arg)
+    defined_as :Fixnum_upto
+  end
 end
 
 class Float

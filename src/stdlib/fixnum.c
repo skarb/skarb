@@ -106,3 +106,13 @@ Object * Fixnum_times(Object *self) {
     get_block()(self);
   return nil;
 }
+
+Object * Fixnum_upto(Object *self, Object *limit) {
+  if (!is_a(limit, Fixnum))
+    die("TypeError");
+  // FIXME: The problem with blocks' arity should be solved somehow.
+  typedef Object* (*block2_t)(Object*, Object*);
+  for (int i = as_fixnum(self)->val; i <= as_fixnum(limit)->val; ++i)
+    ((block2_t) get_block())(self, Fixnum_new(i));
+  return nil;
+}
