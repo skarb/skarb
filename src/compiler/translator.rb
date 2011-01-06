@@ -13,6 +13,7 @@ require 'translator/constants'
 require 'translator/argv'
 require 'translator/blocks'
 require 'translator/mangling'
+require 'translator/math_inliner'
 
 # Responsible for transforming a Ruby AST to its C equivalent.
 # It performs tree traversal by recursive execution of functions
@@ -26,6 +27,7 @@ require 'translator/mangling'
 class Translator
   def initialize
     @symbol_table = SymbolTable.new
+    @math_inliner = MathInliner.new @symbol_table
     [:Object, :Class, MainObject].each {|x| @symbol_table.add_class x }
     @functions_implementations = {}
     @structures_definitions = {}

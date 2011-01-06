@@ -23,6 +23,11 @@ class Translator
           call_constructor sexp
         end
       else
+        if [:+, :-, :*, :/].include? sexp[2]
+          # Attempt to inline arithmetical expression
+          res = @math_inliner.translate sexp
+          return res unless res.nil?
+        end
         if sexp[1].nil?
           # Class is not explicit -- look for class method first
           msexp = sexp.clone
