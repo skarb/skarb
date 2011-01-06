@@ -14,13 +14,11 @@ class Translator
     # Attempts to translate sexp as an arithmetic expression containing operators,
     # local variables and literals.
     def translate(sexp)
-      begin
-        t = translate_generic_sexp sexp
-        ctor = (t.value_type.to_s+'_new').to_sym
-        s(:stmts).with_value s(:call, ctor, s(:args, t.value_sexp)), t.value_type
-      rescue NotInlineableError
-        nil
-      end
+      t = translate_generic_sexp sexp
+      ctor = (t.value_type.to_s+'_new').to_sym
+      s(:stmts).with_value s(:call, ctor, s(:args, t.value_sexp)), t.value_type
+    rescue NotInlineableError
+      nil
     end
 
     # Returns true if MathInliner can inline a given call sexp.
