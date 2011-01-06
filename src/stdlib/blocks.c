@@ -2,8 +2,6 @@
 #include <glib.h>
 #include "blocks.h"
 
-typedef Object* (*block_t)(Object*);
-
 /**
  * The blocks' stack.
  */

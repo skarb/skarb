@@ -123,10 +123,8 @@ Object * Array_join(Object *self, Object *sep) {
 
 Object * Array_map(Object *self) {
     Object *arr = Array_new();
-    // FIXME: The problem with blocks' arity should be solved somehow.
-    typedef Object* (*block2_t)(Object*, Object*);
     for (int i = 0; i < as_array(self)->arr->len; ++i) {
-        Object *obj = ((block2_t) get_block())(self,
+        Object *obj = get_block()(self,
                 g_array_index(as_array(self)->arr, Object*, i));
         Array_push(arr, obj);
     }
