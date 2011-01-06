@@ -1,25 +1,29 @@
 class Translator
-
-  class NotInlineableError < Exception
-  end
-
-  # Class responsible for inlining arithmetical expressions.
+  # Class responsible for inlining arithmetic expressions.
   class MathInliner 
+
+    class NotInlineableError < Exception
+    end
+
     include Mangling
-    
+
     def initialize(symbol_table)
       @symbol_table = symbol_table
     end
 
-    # Attempts to translate sexp as an arithmetical expression containing operators,
+    # Attempts to translate sexp as an arithmetic expression containing operators,
     # local variables and literals.
     def translate(sexp)
-      t = translate_generic_sexp sexp
-      ctor = (t.value_type.to_s+'_new').to_sym
-      s().with_value s(:call, ctor, s(:args, t)), t.value_type
+      begin
+        t = translate_generic_sexp sexp
+        ctor = (t.value_type.to_s+'_new').to_sym
+        s(:stmts).with_value s(:call, ctor, s(:args, t.value_sexp)), t.value_type
+      rescue NotInlineableError
+        nil
+      end
     end
 
-    private
+    protected
 
     # Calls one of translate_* methods depending on the given sexp's type.
     def translate_generic_sexp(sexp)
@@ -39,9 +43,10 @@ class Translator
       raise NotInlineableError unless [Fixnum, Float].include? var_type 
       var_name = mangle_lvar_name sexp[1]
       s().with_value s(:binary_oper,
-                       :'->', s(:var, var_name), s(:var, :val)), var_type
+                       :'->', s(:cast, var_type.to_s.to_sym.star,
+                                s(:var, var_name)), s(:var, :val)), var_type
     end
-    
+
     # Returns literal value if it is a number.
     # Throws NotInlineableError otherwise.
     def translate_lit(sexp)
@@ -50,14 +55,15 @@ class Translator
       s().with_value s(:lit, sexp[1]), var_type
     end
 
-    # Translates calls corresponding to arithmetical operators.
+    # Translates calls corresponding to arithmetic operators.
     def translate_call(sexp)
       oper = sexp[2]
       raise NotInlineableError unless [:+, :-, :*, :/].include? oper
-      arg1 = translate_generic_sexp sexp[3][1]
-      arg2 = translate_generic_sexp sexp[3][2]
-      res_type = ([arg1, arg2].include? Float ? Float : Fixnum)
-      s().with_value s(:binary_oper, oper, arg1, arg2), res_type
+      arg1 = translate_generic_sexp sexp[1]
+      arg2 = translate_generic_sexp sexp[3][1]
+      res_type = ([arg1.value_type, arg2.value_type].include? Float) ? Float : Fixnum
+      s().with_value s(:binary_oper,
+                       oper, arg1.value_sexp, arg2.value_sexp), res_type
     end
   end
 end

@@ -445,4 +445,8 @@ describe Translator do
                         rec.foo").join.should_not include "call_method"
   end
 
+  it 'should inline math expressions' do
+    translate_code("a=2*2+1").join.should include \
+      "binary_oper+binary_oper*lit2lit2lit1"
+  end
 end
