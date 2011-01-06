@@ -12,7 +12,7 @@ $(top_builddir)/gc-7.1/libgc.la:
 	make libgc.la -C $(top_builddir)/gc-7.1
 
 rubyc.h: $(public_headers)
-	cat $^ |grep -v '#include "class.h"'|grep -v '#include "object.h"'> $@
+	cat $^ | grep -v '#include ".*"' > $@
 
 clean-local:
 	-rm -f rubyc.h
