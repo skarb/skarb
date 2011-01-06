@@ -41,12 +41,22 @@ class Translator
   # not set the value_sexp attribute.
   def translate_while(sexp)
     cond = translate_generic_sexp sexp[1]
-    body = @symbol_table.in_block { translate_generic_sexp sexp[2] }
-    s(:while, s(:lit, 1),
-      filtered_block(
-        cond,
-        s(:if, s(:l_unary_oper, :!, boolean_value(cond.value_sexp)), s(:break)),
-        body))
+    body1 = body2 = s()
+    @symbol_table.in_block do
+      body1 = translate_generic_sexp sexp[2]
+      body2 = @symbol_table.in_block { translate_generic_sexp sexp[2] }
+    end
+    filtered_stmts(
+      cond,
+      s(:while, boolean_value(cond.value_sexp),
+        filtered_block(
+          body1,
+          s(:while, s(:lit, 1),
+             filtered_block(
+             cond,
+             s(:if, s(:l_unary_oper, :!, boolean_value(cond.value_sexp)), s(:break)),
+             body2)),
+          s(:break))))
   end
 
   # Translates an until loop. Such loop in Ruby doesn't return a value so we do
