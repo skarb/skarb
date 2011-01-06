@@ -8,6 +8,7 @@
 #include "true.h"
 #include "false.h"
 #include "stringclass.h"
+#include "blocks.h"
 
 s_Array vs_Array = {{{Class_t}, {Array_t}}};
 
@@ -118,4 +119,16 @@ Object * Array_join(Object *self, Object *sep) {
         buf = String__PLUS_(buf, str);
     }
     return buf;
+}
+
+Object * Array_map(Object *self) {
+    Object *arr = Array_new();
+    // FIXME: The problem with blocks' arity should be solved somehow.
+    typedef Object* (*block2_t)(Object*, Object*);
+    for (int i = 0; i < as_array(self)->arr->len; ++i) {
+        Object *obj = ((block2_t) get_block())(self,
+                g_array_index(as_array(self)->arr, Object*, i));
+        Array_push(arr, obj);
+    }
+    return arr;
 }

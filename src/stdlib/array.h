@@ -78,4 +78,9 @@ Object * Array_length(Object *self);
  */
 Object * Array_join(Object *self, Object *separator);
 
+/**
+ * Array#map
+ */
+Object * Array_map(Object *self);
+
 #endif /* ARRAY_H_ */

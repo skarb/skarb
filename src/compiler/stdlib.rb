@@ -91,6 +91,14 @@ class Fixnum
   def zero?
     defined_as :Fixnum_zero_QMARK
   end
+
+  def times
+    defined_as :Fixnum_times
+  end
+
+  def upto(arg)
+    defined_as :Fixnum_upto
+  end
 end
 
 class Float
@@ -242,6 +250,11 @@ class Array
   def join(sep)
     defined_as :Array_join
     returns String
+  end
+
+  def map
+    defined_as :Array_map
+    returns Array
   end
 end
 

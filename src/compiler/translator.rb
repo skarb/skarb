@@ -11,6 +11,7 @@ require 'translator/global_variables'
 require 'translator/classes'
 require 'translator/constants'
 require 'translator/argv'
+require 'translator/blocks'
 require 'translator/mangling'
 
 # Responsible for transforming a Ruby AST to its C equivalent.
@@ -66,6 +67,7 @@ class Translator
   include Classes
   include Constants
   include ARGV
+  include Blocks
   include Mangling
 
   # Name of modified instance of Object class containing main program

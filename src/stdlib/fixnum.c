@@ -7,6 +7,8 @@
 #include "helpers.h"
 #include "float.h"
 #include "stringclass.h"
+#include "nil.h"
+#include "blocks.h"
 
 s_Fixnum vs_Fixnum = {{{Class_t}, {Fixnum_t}}};
 
@@ -97,4 +99,20 @@ Object * Fixnum_to__s(Object *self) {
 
 Object * Fixnum_zero_QMARK(Object *self) {
   return boolean_to_object(as_fixnum(self)->val == 0);
+}
+
+Object * Fixnum_times(Object *self) {
+  for (int i = 0; i < as_fixnum(self)->val; ++i)
+    get_block()(self);
+  return nil;
+}
+
+Object * Fixnum_upto(Object *self, Object *limit) {
+  if (!is_a(limit, Fixnum))
+    die("TypeError");
+  // FIXME: The problem with blocks' arity should be solved somehow.
+  typedef Object* (*block2_t)(Object*, Object*);
+  for (int i = as_fixnum(self)->val; i <= as_fixnum(limit)->val; ++i)
+    ((block2_t) get_block())(self, Fixnum_new(i));
+  return nil;
 }
