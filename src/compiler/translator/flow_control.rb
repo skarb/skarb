@@ -38,7 +38,11 @@ class Translator
   end
 
   # Translates a while loop. Such loop in Ruby doesn't return a value so we do
-  # not set the value_sexp attribute.
+  # not set the value_sexp attribute. It is translated as two nested while loops:
+  # the outer loop contains translated body, inner loop and break statement, the
+  # inner loop translated body. This way translated loop is immune to type of
+  # variable changing during the first execution of the body and it is possible
+  # to exit with a single break statement. 
   def translate_while(sexp)
     cond = translate_generic_sexp sexp[1]
     body1 = body2 = s()
@@ -54,20 +58,35 @@ class Translator
           s(:while, s(:lit, 1),
              filtered_block(
              cond,
-             s(:if, s(:l_unary_oper, :!, boolean_value(cond.value_sexp)), s(:break)),
+             s(:if, s(:l_unary_oper, :'!', boolean_value(cond.value_sexp)), s(:break)),
              body2)),
           s(:break))))
   end
 
   # Translates an until loop. Such loop in Ruby doesn't return a value so we do
-  # not set the value_sexp attribute.
+  # not set the value_sexp attribute. It is translated as two nested while loops:
+  # the outer loop contains translated body, inner loop and break statement, the
+  # inner loop translated body. This way translated loop is immune to type of
+  # variable changing during the first execution of the body and it is possible
+  # to exit with a single break statement. 
   def translate_until(sexp)
     cond = translate_generic_sexp sexp[1]
-    body = @symbol_table.in_block { translate_generic_sexp sexp[2] }
-    s(:while, s(:lit, 1),
-      filtered_block(cond,
-                     s(:if, boolean_value(cond.value_sexp), s(:break)),
-                     body))
+    body1 = body2 = s()
+    @symbol_table.in_block do
+      body1 = translate_generic_sexp sexp[2]
+      body2 = @symbol_table.in_block { translate_generic_sexp sexp[2] }
+    end
+    filtered_stmts(
+      cond,
+      s(:while, s(:l_unary_oper, :'!', boolean_value(cond.value_sexp)),
+        filtered_block(
+          body1,
+          s(:while, s(:lit, 1),
+            filtered_block(
+              cond,
+              s(:if, boolean_value(cond.value_sexp), s(:break)),
+              body2)),
+          s(:break))))
   end
 
   # A trivial break translation.
