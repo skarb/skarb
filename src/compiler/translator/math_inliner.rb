@@ -14,16 +14,21 @@ class Translator
     # Attempts to translate sexp as an arithmetic expression containing operators,
     # local variables and literals.
     def translate(sexp)
-      begin
-        t = translate_generic_sexp sexp
-        ctor = (t.value_type.to_s+'_new').to_sym
-        s(:stmts).with_value s(:call, ctor, s(:args, t.value_sexp)), t.value_type
-      rescue NotInlineableError
-        nil
-      end
+      t = translate_generic_sexp sexp
+      ctor = (t.value_type.to_s+'_new').to_sym
+      s(:stmts).with_value s(:call, ctor, s(:args, t.value_sexp)), t.value_type
+    rescue NotInlineableError
+      nil
+    end
+
+    # Returns true if MathInliner can inline a given call sexp.
+    def inlineable? sexp
+      InlinedOperators.include? sexp[2]
     end
 
     protected
+
+    InlinedOperators = [:+, :-, :*, :/]
 
     # Calls one of translate_* methods depending on the given sexp's type.
     def translate_generic_sexp(sexp)
@@ -57,13 +62,12 @@ class Translator
 
     # Translates calls corresponding to arithmetic operators.
     def translate_call(sexp)
-      oper = sexp[2]
-      raise NotInlineableError unless [:+, :-, :*, :/].include? oper
+      raise NotInlineableError unless inlineable? sexp
       arg1 = translate_generic_sexp sexp[1]
       arg2 = translate_generic_sexp sexp[3][1]
       res_type = ([arg1.value_type, arg2.value_type].include? Float) ? Float : Fixnum
       s().with_value s(:binary_oper,
-                       oper, arg1.value_sexp, arg2.value_sexp), res_type
+                       sexp[2], arg1.value_sexp, arg2.value_sexp), res_type
     end
   end
 end

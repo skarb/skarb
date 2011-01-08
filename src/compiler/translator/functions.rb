@@ -23,7 +23,7 @@ class Translator
           call_constructor sexp
         end
       else
-        if [:+, :-, :*, :/].include? sexp[2]
+        if @math_inliner.inlineable? sexp
           # Attempt to inline arithmetical expression
           res = @math_inliner.translate sexp
           return res unless res.nil?
