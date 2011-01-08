@@ -115,12 +115,21 @@ class SymbolTable < Hash
   # to the previous value.
   def in_block
     raise 'Block expected' unless block_given?
+    #p @cblock[:lvars][:l]
     prev_block = @cblock
     @cblock = { lvars: {}, parent: prev_block }
     retval = yield
-    @cblock[:lvars].each_key do |k|
-      prev_block[:lvars][k] ||= { kind: :local }
-      prev_block[:lvars][k][:type] = nil
+    @cblock[:lvars].each do |k,v|
+      block = prev_block
+      begin
+        var_hash = block[:lvars][k] if block[:lvars].has_key? k
+      end while block = block[:parent]
+      if var_hash.nil?
+        # If variable was not defined in any super block
+        prev_block[:lvars][k] = { kind: :local }
+        var_hash = prev_block[:lvars][k]
+      end
+      var_hash[:type] = nil unless var_hash[:type] == v[:type]
     end
     @cblock = prev_block
     retval
