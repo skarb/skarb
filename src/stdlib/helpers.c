@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <glib.h>
 #include <gc.h>
+#include <errno.h>
+#include <string.h>
 #include "helpers.h"
 #include "object.h"
 #include "nil.h"
@@ -34,9 +36,8 @@ void die(const char *format, ...) {
 
 void initialize() {
   GC_INIT();
-  // FIXME: it's a workaround for what seems to be a libgc's bug occurring on a
-  // lot of frequent reallocs. Get rid of it as soon it's not necessary.
-  GC_expand_hp(1024L * 1024L * 1024L);
+  if (setenv("G_SLICE", "always-malloc", FALSE))
+    die("setenv: %s\n", strerror(errno));
   GMemVTable vtable = { &xmalloc, &xrealloc, &xfree, NULL, NULL, NULL };
   g_mem_set_vtable(&vtable);
 }
