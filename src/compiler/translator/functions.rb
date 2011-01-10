@@ -130,7 +130,7 @@ class Translator
               s(:var, :classes_dictionary),
               # Small hack: length of the string is converted to char
               # and concatenated at the beggining.
-              s(:str, sexp[2].length.chr+sexp[2].to_s),
+              s(:str, '\x' + sexp[2].length.to_s(16) + '""' + sexp[2].to_s),
               s(:var, args_tab))))).with_value_sexp s(:var, var)
     end
 
