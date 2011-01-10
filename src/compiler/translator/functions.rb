@@ -125,7 +125,7 @@ class Translator
           s(:call, :call_method,
             s(:args,
               s(:binary_oper, :'->',
-                s(:cast, :'Object*', class_expr.value_sexp),
+                class_expr.value_sexp,
                 s(:var, :type)),
               s(:var, :classes_dictionary),
               # Small hack: length of the string is converted to char
