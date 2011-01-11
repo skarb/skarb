@@ -59,8 +59,8 @@ Object * String__PLUS_(Object *self, Object *other) {
     const int self_len = as_string(self)->val->len,
               other_len = as_string(other)->val->len;
     char *buffer = g_alloca(self_len + other_len + 1);
-    strncpy(buffer, as_string(self)->val->str, self_len + 1);
-    strncpy(buffer + self_len, as_string(other)->val->str, other_len + 1);
+    memcpy(buffer, as_string(self)->val->str, self_len + 1);
+    memcpy(buffer + self_len, as_string(other)->val->str, other_len + 1);
     return String_new(buffer);
 }
 
