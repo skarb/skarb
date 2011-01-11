@@ -71,7 +71,7 @@ Object * String__MUL_(Object *self, Object *other) {
     int times = as_fixnum(other)->val, offset = 0;
     char *buffer = g_alloca(times * self_len + 1);
     while (times--) {
-        strncpy(buffer + offset, as_string(self)->val->str, self_len + 1);
+        memcpy(buffer + offset, as_string(self)->val->str, self_len + 1);
         offset += self_len;
     }
     return String_new(buffer);
