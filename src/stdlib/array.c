@@ -111,11 +111,11 @@ Object * Array_join(Object *self, Object *sep) {
     for (int index = 0; index < length; ++index) {
         if (index != 0)
             buf = String__PLUS_(buf, sep);
-        static const char method[] = { 5, 't', 'o', '_', '_', 's', '\0' };
+        static const char method[] = { 't', 'o', '_', '_', 's', '\0' };
         Object *item = g_array_index(as_array(self)->arr, Object*, index);
         Object *args[] = { item };
         Object *str = call_method(item->type, classes_dictionary,
-                (char*) method, args);
+                (char*) method, 5, args);
         buf = String__PLUS_(buf, str);
     }
     return buf;

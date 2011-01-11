@@ -43,12 +43,10 @@ void initialize() {
 }
 
 Object* call_method(int class_id, dict_elem* classes_dictionary,
-    char* fname, Object** args) {
+    char* fname, int len, Object** args) {
   dict_elem d_elem;
   hash_elem* h_elem;
-  unsigned int len = fname[0];
   int id = class_id;
-  fname++;
   while(1) {
     d_elem = classes_dictionary[id];
     if( d_elem.msearch != NULL && (h_elem = d_elem.msearch(fname, len)) != 0 )

@@ -128,9 +128,8 @@ class Translator
                 class_expr.value_sexp,
                 s(:var, :type)),
               s(:var, :classes_dictionary),
-              # Small hack: length of the string is converted to char
-              # and concatenated at the beggining.
-              s(:str, '\x' + sexp[2].length.to_s(16) + '""' + sexp[2].to_s),
+              s(:str, sexp[2].to_s),
+              s(:lit, sexp[2].length),
               s(:var, args_tab))))).with_value_sexp s(:var, var)
     end
 
