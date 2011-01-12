@@ -9,12 +9,12 @@ TESTS = ENV['TESTS'].split.map { |f| SRCDIR + '/' + f }
 CFLAGS = "CFLAGS='-O3 -funroll-loops #{ENV['CFLAGS']}'"
 
 def benchmark
-  Benchmark.measure do
-    3.times do
+  5.times.map do
+    Benchmark.measure do
       yield
       raise 'Child process died' unless $?.exitstatus.zero?
-    end
-  end .real
+    end .real
+  end .sort[1..-2].reduce(:+)
 end
 
 describe 'Compiler' do
