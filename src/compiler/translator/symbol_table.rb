@@ -137,8 +137,14 @@ class SymbolTable < Hash
 
   # Adds function in the current class context
   def add_function(fun, sexp)
+    @fname2id[fun] ||= fnext_id
     self[@cclass][:functions_def][fun] ||= []
     self[@cclass][:functions_def][fun].push sexp
+  end
+
+  # Returns unique id for given function name
+  def get_function_id(fun_name)
+    @fname2id[fun_name] ||= fnext_id
   end
 
   # Returns function version in a given class context
@@ -319,6 +325,12 @@ class SymbolTable < Hash
   def next_id
     @next_id ||= -1
     @next_id += 1
+  end
+
+  # Each call to this method returns a new, unique id.
+  def fnext_id
+    @fnext_id ||= -1
+    @fnext_id += 1
   end
 
   protected

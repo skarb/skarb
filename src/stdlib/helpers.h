@@ -52,7 +52,7 @@ void initialize();
  * Looks for a method through inheritance hierarchy and calls it or causes the
  * program to die with an error.
  */
-Object* call_method(int, dict_elem*, char*, int, Object**);
+Object* call_method(int, dict_elem*, int, char*, int, Object**);
 
 /**
  * Initializes the ARGV constants. It assignes a new array to the memory

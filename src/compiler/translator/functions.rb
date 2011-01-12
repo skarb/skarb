@@ -128,6 +128,7 @@ class Translator
                 class_expr.value_sexp,
                 s(:var, :type)),
               s(:var, :classes_dictionary),
+              s(:lit, @symbol_table.get_function_id(sexp[2])),
               s(:str, sexp[2].to_s),
               s(:lit, sexp[2].length),
               s(:var, args_tab))))).with_value_sexp s(:var, var)
@@ -329,6 +330,7 @@ class Translator
     def assign_function_to_class_dict(fname, impl_name, class_name, args_count)
       var = next_var_name
       s(:stmts,
+        s(:call, :clear_cache, s(:args)), # FIXME: Not always necessary
         s(:asgn,
           s(:decl, :int, var),
           s(:call, (class_name.to_s + "_hash").to_sym,

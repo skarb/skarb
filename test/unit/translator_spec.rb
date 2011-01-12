@@ -219,6 +219,7 @@ describe Translator do
               s(:block, s(:return, fixnum_new(5)))))),
         s(:file,
         main(
+          s(:call, :clear_cache, s(:args)),
           s(:asgn,
                   s(:decl, :int, :'_var1'),
                   s(:call, :"M_Object_hash",
@@ -250,6 +251,7 @@ describe Translator do
             s(:block, s(:return, fixnum_new(5)))))),
         s(:file,
         main(
+          s(:call, :clear_cache, s(:args)),
           s(:asgn,
                   s(:decl, :int, :'_var1'),
                   s(:call, :"M_Object_hash",
@@ -322,6 +324,7 @@ describe Translator do
             s(:block, s(:return, s(:var, :x)))))),
         s(:file,
         main(
+          s(:call, :clear_cache, s(:args)),
           s(:asgn,
                   s(:decl, :int, :'_var1'),
                   s(:call, :"M_Object_hash",
@@ -381,6 +384,7 @@ describe Translator do
           s(:asgn,
            s(:decl, :"Object*", :self),
            s(:cast, :"Object*", s(:var, :"&self_s"))),
+          s(:call, :clear_cache, s(:args)),
           s(:asgn,
            s(:decl, :int, :'_var1'),
            s(:call, :A_hash, s(:args, s(:str, "initialize"), s(:lit, 10)))),

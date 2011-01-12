@@ -9,6 +9,7 @@
 #include "false.h"
 #include "stringclass.h"
 #include "blocks.h"
+#include "method_cache.h"
 
 s_Array vs_Array = {{{Class_t}, {Array_t}}};
 
@@ -114,7 +115,7 @@ Object * Array_join(Object *self, Object *sep) {
         static const char method[] = { 't', 'o', '_', '_', 's', '\0' };
         Object *item = g_array_index(as_array(self)->arr, Object*, index);
         Object *args[] = { item };
-        Object *str = call_method(item->type, classes_dictionary,
+        Object *str = call_method(item->type, classes_dictionary, to__s_id,
                 (char*) method, 5, args);
         buf = String__PLUS_(buf, str);
     }

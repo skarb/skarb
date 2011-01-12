@@ -14,6 +14,7 @@
 #include "xalloc.h"
 #include "array.h"
 #include "stringclass.h"
+#include "method_cache.h"
 
 int boolean_value(Object *object) {
   return object != nil && object != false;
@@ -40,12 +41,20 @@ void initialize() {
     die("setenv: %s\n", strerror(errno));
   GMemVTable vtable = { &xmalloc, &xrealloc, &xfree, NULL, NULL, NULL };
   g_mem_set_vtable(&vtable);
+  clear_cache();
 }
 
 Object* call_method(int class_id, dict_elem* classes_dictionary,
-    char* fname, int len, Object** args) {
+    int fid, char* fname, int len, Object** args) {
   dict_elem d_elem;
   hash_elem* h_elem;
+  cache_elem* c_elem;
+
+  /* Try finding method in cache */
+  c_elem = &method_cache[HASH(class_id,fid)];
+  if(c_elem->fid == fid && c_elem->cid == class_id)
+    return c_elem->wrapper(args, c_elem->function);
+
   int id = class_id;
   while(1) {
     d_elem = classes_dictionary[id];
@@ -57,6 +66,13 @@ Object* call_method(int class_id, dict_elem* classes_dictionary,
   }
   if(h_elem->wrapper == NULL)
     die("Method \"%s\" in class with id %d not found.\n", fname, class_id);
+
+  /* Fill cache */
+  c_elem->fid = fid;
+  c_elem->cid = class_id;
+  c_elem->wrapper = h_elem->wrapper;
+  c_elem->function = h_elem->function;
+  
   return h_elem->wrapper(args, h_elem->function);
 }
 
