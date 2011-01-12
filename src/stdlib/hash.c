@@ -15,10 +15,9 @@ s_Hash vs_Hash = {{{Class_t}, {Hash_t}}};
  * Implements GEqualFunc, used for comparing keys in the hash.
  */
 static gboolean equal_func(gconstpointer a, gconstpointer b) {
-    static const char method[] = { '=', '=', '\0' };
     Object *args[] = { as_object(a), as_object(b) };
     return boolean_value(call_method(as_object(a)->type, classes_dictionary,
-            _EQ__EQ__id, (char*) method, 2, args));
+            _EQ__EQ__id, "==", 2, args));
 }
 
 static guint hash_func(gconstpointer obj) {

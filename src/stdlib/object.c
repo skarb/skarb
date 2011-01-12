@@ -25,10 +25,9 @@ static void puts_string(String *str) {
 }
 
 Object * Object_puts(Object *self, Object *what) {
-  static const char method[] = { 't', 'o', '_', '_', 's', '\0' };
   Object *args[] = { what };
   Object *str = call_method(what->type, classes_dictionary, to__s_id,
-      (char*) method, 5, args);
+      "to__s", 5, args);
   if (!is_a(str, String))
     die("Internal error");
   puts_string((String*) str);
