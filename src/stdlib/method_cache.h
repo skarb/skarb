@@ -1,6 +1,10 @@
 #ifndef METHOD_CACHE_H_
 #define METHOD_CACHE_H_
 
+/*
+ * The following solution is inspired by Ruby's 1.9 vm_method.c
+ */
+
 #include "object.h"
 
 #define CACHE_SIZE 0x800
