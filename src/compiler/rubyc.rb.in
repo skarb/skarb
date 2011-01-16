@@ -7,7 +7,7 @@ ARGV.push '-h' if ARGV.empty?
 
 options = {}
 
-OptionParser.new do |opts|
+op = OptionParser.new do |opts|
   opts.banner = "Usage: rubyc [options] input"
   opts.separator "Options:"
 
@@ -27,12 +27,31 @@ OptionParser.new do |opts|
     puts opts.help
     exit 0
   end
-end.parse!
+end
+
+begin
+  op.parse!
+rescue OptionParser::InvalidOption => e
+  puts e
+  puts op.help
+  exit 1
+end
+
+if ARGV.length > 1
+  puts "Only one input file should be specified"
+  puts op.help
+  exit 1
+end
 
 input = if ARGV[0] == '-'
           STDIN
         else
-          File.open ARGV.pop
+          begin
+            File.open ARGV.pop
+          rescue Exception => e
+            puts e
+            exit 1          
+          end
         end
 
 Manager.new.compile input, options
