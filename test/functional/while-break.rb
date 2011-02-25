@@ -11,3 +11,6 @@ while 1
   break
   puts 123
 end
+while 1
+  break if 0
+end

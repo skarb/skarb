@@ -91,7 +91,7 @@ class Translator
 
   # A trivial break translation.
   def translate_break(sexp)
-    s(:break)
+    s(:break).with_value_sexp s(:var, :nil)
   end
 
   # We cannot use C's switch if we want to implement the original Ruby's case
