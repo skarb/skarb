@@ -1,7 +1,7 @@
 # http://shootout.alioth.debian.org/
 #
 # Contributed by Christopher Williams
-size = 130
+size = 200
 
 def mkmatrix(rows, cols)
   count = 0
