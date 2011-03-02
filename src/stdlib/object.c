@@ -25,9 +25,8 @@ static void puts_string(String *str) {
 }
 
 Object * Object_puts(Object *self, Object *what) {
-  Object *args[] = { what };
-  Object *str = call_method(what->type, classes_dictionary, to__s_id,
-      "to__s", 5, args);
+  Object* str = ((Object*(*)(Object*)) find_method(what->type, classes_dictionary,
+        to__s_id, "to__s", 5))(what);
   if (!is_a(str, String))
     die("Internal error");
   puts_string((String*) str);

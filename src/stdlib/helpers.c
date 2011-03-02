@@ -44,8 +44,8 @@ void initialize() {
   clear_cache();
 }
 
-Object* call_method(int class_id, dict_elem* classes_dictionary,
-    int fid, char* fname, int len, Object** args) {
+void* find_method(int class_id, dict_elem* classes_dictionary,
+    int fid, char* fname, int len) {
   dict_elem d_elem;
   hash_elem* h_elem;
   cache_elem* c_elem;
@@ -53,7 +53,7 @@ Object* call_method(int class_id, dict_elem* classes_dictionary,
   /* Try finding method in cache */
   c_elem = &method_cache[HASH(class_id,fid)];
   if(c_elem->fid == fid && c_elem->cid == class_id)
-    return c_elem->wrapper(args, c_elem->function);
+    return c_elem->function;
 
   int id = class_id;
   while(1) {
@@ -70,10 +70,9 @@ Object* call_method(int class_id, dict_elem* classes_dictionary,
   /* Fill cache */
   c_elem->fid = fid;
   c_elem->cid = class_id;
-  c_elem->wrapper = h_elem->wrapper;
   c_elem->function = h_elem->function;
   
-  return h_elem->wrapper(args, h_elem->function);
+  return h_elem->function;
 }
 
 void prepare_argv(Object **ARGV, int argc, char **args) {

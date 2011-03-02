@@ -122,7 +122,9 @@ class Translator
         s(:decl, :'Object*', var),
         s(:asgn,
           s(:var, var),
-          s(:call, :call_method,
+          s(:call,
+          s(:cast, ("Object*(*)("+args.map { "Object*" }.join(',')+")").to_sym,
+          s(:call, :find_method,
             s(:args,
               s(:binary_oper, :'->',
                 class_expr.value_sexp,
@@ -130,8 +132,9 @@ class Translator
               s(:var, :classes_dictionary),
               s(:lit, @symbol_table.get_function_id(sexp[2])),
               s(:str, sexp[2].to_s),
-              s(:lit, sexp[2].length),
-              s(:var, args_tab))))).with_value_sexp s(:var, var)
+              s(:lit, sexp[2].length)))),
+          s(:args, *args.map { |arg| arg.value_sexp })))).
+          with_value_sexp s(:var, var)
     end
 
     # Evaluates arguments of a call sexp. We need to know what their type is in

@@ -113,9 +113,8 @@ Object * Array_join(Object *self, Object *sep) {
         if (index != 0)
             buf = String__PLUS_(buf, sep);
         Object *item = g_array_index(as_array(self)->arr, Object*, index);
-        Object *args[] = { item };
-        Object *str = call_method(item->type, classes_dictionary, to__s_id,
-                "to__s", 5, args);
+        Object *str = ( (Object*(*)(Object*)) find_method(item->type,
+              classes_dictionary, to__s_id, "to__s", 5))(item);
         buf = String__PLUS_(buf, str);
     }
     return buf;
