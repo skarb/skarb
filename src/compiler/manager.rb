@@ -11,7 +11,7 @@ class Manager
   def compile(file, options)
     code = StdlibDeclarations + file.read
     translator = Translator.new
-    translated_ast = translator.translate(Parser.new.parse(code))
+    translated_ast = translator.translate(Parser.parse(code))
     translated_code = translated_ast.map { |x| Emitter.emit(x) }
     dict_builder = ClassesDictionaryBuilder.new translator.symbol_table
     classes_dict_code = dict_builder.emit_classes_dictionary

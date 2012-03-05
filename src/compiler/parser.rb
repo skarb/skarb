@@ -4,7 +4,7 @@ require 'ruby_parser'
 # it uses RubyParser.
 class Parser
   # Returns an AST for a given string with Ruby code.
-  def parse(input)
+  def Parser.parse(input)
     begin
       RubyParser.new.parse(input)
     rescue ParseError, SyntaxError
