@@ -14,11 +14,11 @@ describe Translator do
 
   # Parses given Ruby code and passes it to the Translator.
   def translate_code(code)
-    @translator.translate @rp.parse code
+    @translator.expand_all_stmts(@translator.translate(@rp.parse(code)))
   end
 
   def translate_code_only(code)
-    @translator.send :translate_generic_sexp, @rp.parse(code)
+    @translator.expand_all_stmts(@translator.send(:translate_generic_sexp, @rp.parse(code)))
   end
 
   # Returns a sexp representing a whole C program with a given body of the

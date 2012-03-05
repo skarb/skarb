@@ -55,6 +55,30 @@ class Translator
       s(:file, *@functions_implementations.values), s(:file, main)]
   end
 
+  # Returns an array with all stmts expanded recursively on all levels.
+  def expand_all_stmts(sexps)
+     return sexps unless sexps.is_a? Array
+    
+     expanded_sexps = sexps.class.new 
+     sexps.each do |sexp|
+        if sexp.is_a? Array
+           next if sexp.empty?
+           exp_sexp = expand_all_stmts(sexp)
+           if sexp.first == :stmts
+              expanded_sexps = s(*(expanded_sexps + exp_sexp))
+           else
+              expanded_sexps << exp_sexp
+           end
+        else
+           next if sexp == :stmts
+           expanded_sexps << sexp
+        end
+     end
+
+     return expanded_sexps.with_value_of(sexps) if sexps.is_a? Sexp
+     expanded_sexps
+  end
+
   attr_accessor :symbol_table
 
   private
@@ -118,14 +142,16 @@ class Translator
 
   alias :translate_scope :translate_block
 
-  # Returns a block sexp with all stmts sexps expanded.
+  # Returns arguments wrapped in a block sexp.
   def filtered_block(*args)
-    s(:block, *expand_stmts(args))
+    #s(:block, *expand_stmts(args))
+    s(:block, *args)
   end
 
-  # Returns a stmts sexp with all stmts sexps expanded.
+  # Returns arguments wrapped in a stmts sexp.
   def filtered_stmts(*args)
-    s(:stmts, *expand_stmts(args))
+    #s(:stmts, *expand_stmts(args))
+    s(:stmts, *args)
   end
 
   # Translates a 'not' or a '!'.
@@ -156,6 +182,7 @@ class Translator
     end
     expanded_sexps
   end
+
 
   # Each call to this method returns a new, unique var name.
   def next_var_name
