@@ -1,4 +1,4 @@
-SUBDIRS = src doc test
+SUBDIRS = src test
 .PHONY: coverage rdoc benchmark
 
 coverage: all

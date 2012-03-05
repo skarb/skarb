@@ -1,4 +1,4 @@
-SUBDIRS = emitter translator
+SUBDIRS = emitter translator optimizations
 nodist_bin_SCRIPTS = rubyc
 nodist_pkgdata_DATA = config.rb
 dist_pkgdata_DATA = compiler.rb emitter.rb helpers.rb parser.rb translator.rb \

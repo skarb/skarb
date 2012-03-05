@@ -13,7 +13,7 @@ require 'translator/constants'
 require 'translator/argv'
 require 'translator/blocks'
 require 'translator/mangling'
-require 'translator/math_inliner'
+require 'optimizations/math_inliner'
 
 # Responsible for transforming a Ruby AST to its C equivalent.
 # It performs tree traversal by recursive execution of functions

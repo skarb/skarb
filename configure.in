@@ -1,5 +1,5 @@
 AC_PREREQ([2.65])
-AC_INIT([inzynierka], [snapshot])
+AC_INIT([rubyc], [snapshot])
 AM_INIT_AUTOMAKE([1.10 foreign color-tests])
 AC_DISABLE_STATIC
 
@@ -68,9 +68,9 @@ AC_CONFIG_FILES([
 				src/Makefile
 				src/compiler/emitter/Makefile
 				src/compiler/translator/Makefile
+                                src/compiler/optimizations/Makefile
 				src/compiler/Makefile
 				src/stdlib/Makefile
-				doc/Makefile
 				test/Makefile
 				test/functional/Makefile
 				test/functional/ui/Makefile
