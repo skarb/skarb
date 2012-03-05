@@ -1,5 +1,6 @@
 #720
 #253
+#6
 def fact(x)
   if x < 2
     1
@@ -21,3 +22,14 @@ def ackermann(m, n)
 end
 
 puts ackermann(3,5)
+
+def fun1(a)
+   return a if a > 5
+   fun2(a+1)
+end
+
+def fun2(a)
+   fun1(a+1)
+end
+
+puts fun1 0

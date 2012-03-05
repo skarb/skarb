@@ -23,11 +23,11 @@ class Translator
           call_constructor sexp
         end
       else
-        if @math_inliner.inlineable? sexp
+        #if @math_inliner.inlineable? sexp
           # Attempt to inline arithmetical expression
-          res = @math_inliner.translate sexp
-          return res unless res.nil?
-        end
+        #  res = @math_inliner.translate sexp
+        #  return res unless res.nil?
+        #end
         if sexp[1].nil?
           # Class is not explicit -- look for class method first
           msexp = sexp.clone
@@ -160,6 +160,8 @@ class Translator
       # Have we got an implementation of this function for given args' types?
       unless function_implemented? impl_name
         @symbol_table.in_class class_name do
+          # Every function is processed twice: first time is to determine returned
+          # type only ignoring recursive calls, then comes real processing.
           @functions_implementations[impl_name] = s().with_value_type :recur
           ret_type = process_function_definition(impl_name, defn, args_types).value_type
           @functions_implementations[impl_name] = s().with_value_type ret_type
