@@ -460,4 +460,9 @@ describe Translator do
     translate_code("a=2*2+1").join.should include \
       "binary_oper+binary_oper*lit2lit2lit1"
   end
+
+  it 'should build translation dictionary' do
+    translate_code("a=2")
+    @translator.translated_sexp_dict.should include :lasgn 
+  end
 end

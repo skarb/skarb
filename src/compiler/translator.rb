@@ -2,6 +2,7 @@ require 'sexp_processor'
 require 'helpers'
 require 'extensions'
 require 'translator/symbol_table'
+require 'translator/translated_sexp_dictionary'
 require 'translator/functions'
 require 'translator/flow_control'
 require 'translator/local_variables'
@@ -27,6 +28,7 @@ require 'optimizations/math_inliner'
 class Translator
   def initialize
     @symbol_table = SymbolTable.new
+    @translated_sexp_dict = TranslatedSexpDictionary.new
     @math_inliner = MathInliner.new @symbol_table
     [:Object, :Class, MainObject].each {|x| @symbol_table.add_class x }
     @functions_implementations = {}
@@ -79,7 +81,7 @@ class Translator
      expanded_sexps
   end
 
-  attr_accessor :symbol_table
+  attr_accessor :symbol_table, :translated_sexp_dict
 
   private
 
@@ -126,11 +128,13 @@ class Translator
   def translate_generic_sexp(sexp)
     # Is there a public or a private method translating such a sexp?
     if respond_to? (method_name = "translate_#{sexp[0]}".to_sym), true
-      send method_name, sexp
+      translated_sexp = send(method_name, sexp)
     else
       line = sexp.line - StdlibLineNumber
       die "Input contains unsupported Ruby instruction in line #{line}. Aborting."
     end
+    @translated_sexp_dict.add_entry(sexp, translated_sexp)
+    translated_sexp
   end
 
   # Translates a block of expressions by translating all of them and returning a
