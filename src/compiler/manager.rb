@@ -3,6 +3,7 @@ require 'emitter'
 require 'translator'
 require 'parser'
 require 'classes_dict_builder'
+require 'optimizer'
 
 # Manages the compilation process.
 class Manager
@@ -11,6 +12,9 @@ class Manager
   def compile(file, options)
     code = StdlibDeclarations + file.read
     translator = Translator.new
+    optimizer = Optimizer.new(translator)
+    optimizer.subscribe_to_events
+
     translated_ast = translator.translate(Parser.parse(code))
     filtered_ast = translator.expand_all_stmts(translated_ast)
     translated_code = filtered_ast.map { |x| Emitter.emit(x) }

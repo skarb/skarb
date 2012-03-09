@@ -14,6 +14,7 @@ require 'translator/constants'
 require 'translator/argv'
 require 'translator/blocks'
 require 'translator/mangling'
+require 'translator/event_manager'
 require 'optimizations/math_inliner'
 
 # Responsible for transforming a Ruby AST to its C equivalent.
@@ -29,13 +30,17 @@ class Translator
   def initialize
     @symbol_table = SymbolTable.new
     @translated_sexp_dict = TranslatedSexpDictionary.new
-    @math_inliner = MathInliner.new @symbol_table
+    @event_manager = EventManager.new
     [:Object, :Class, MainObject].each {|x| @symbol_table.add_class x }
     @functions_implementations = {}
     @structures_definitions = {}
     @globals = {}
     @user_classes = [MainObject]
     prepare_argv
+  end
+
+  def subscribe(event, method)
+    @event_manager.subscribe(event, method)
   end
 
   # Analyses a given Ruby AST tree and returns a C AST. Both the argument and
@@ -134,6 +139,7 @@ class Translator
       die "Input contains unsupported Ruby instruction in line #{line}. Aborting."
     end
     @translated_sexp_dict.add_entry(sexp, translated_sexp)
+    @event_manager.fire_event(sexp[0], self, sexp, translated_sexp)
     translated_sexp
   end
 
