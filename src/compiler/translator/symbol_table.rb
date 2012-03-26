@@ -308,8 +308,6 @@ class SymbolTable < Hash
   def value_of(cls)
     self[cls][:value]
   end
-
-  private
   
   # Returns hash corresponding to local variable or nil if variable does not
   # exist.
@@ -320,6 +318,8 @@ class SymbolTable < Hash
     end while block = block[:parent]
     nil
   end
+  
+  private
   
   # Each call to this method returns a new, unique id.
   def next_id

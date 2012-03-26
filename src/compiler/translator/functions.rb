@@ -15,6 +15,7 @@ class Translator
     # Translates a method call. Constructors are treated in special way.
     def translate_call(sexp)
       if sexp[2] == :new
+        # Class is not explicit -- look for class method first
         if sexp[1].nil? 
           msexp = sexp.clone
           msexp[1] = s(:const, @symbol_table.cclass)
