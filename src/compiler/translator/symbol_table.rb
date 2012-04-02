@@ -35,7 +35,7 @@ class SymbolTable < Hash
   end 
 
   # Adds a new class, generates id for it and initializes mandatory
-  # keys if default values.
+  # keys with default values.
   def add_class(class_name)
     self[class_name] ||= { }
     if self[class_name][:type] == :const
@@ -86,8 +86,7 @@ class SymbolTable < Hash
   end
 
   # Executes a block in a given function context and resets the current function
-  # to the previous value. A funny fact: it won't work without those two self
-  # references used below. Seems like a Ruby's bug. Or a feature.
+  # to the previous value.
   def in_function(name)
     raise 'Block expected' unless block_given?
     prev_function = cfunction
@@ -204,6 +203,14 @@ class SymbolTable < Hash
     get_ivar_class(ivar) != nil
   end
 
+  # Returns hash corresponding to instance variable or nil if variable does not
+  # exist.
+  def get_ivar(ivar)
+    cl = get_ivar_class(ivar)
+    return nil if cl.nil?
+    ivar_table(cl)[ivar]
+  end
+
   # Adds an class variable in the current class context.
   def add_cvar(cvar)
     cvars_table[cvar] ||= {}
@@ -213,6 +220,14 @@ class SymbolTable < Hash
   # context.
   def has_cvar?(cvar)
     get_cvar_class(cvar) != nil
+  end
+
+  # Returns hash corresponding to class variable or nil if variable does not
+  # exist.
+  def get_cvar(cvar)
+    cl = get_cvar_class(cvar)
+    return nil if cl.nil?
+    cvar_table(cl)[cvar]
   end
 
   # The hash of instance variables in a given (or current by default) class
