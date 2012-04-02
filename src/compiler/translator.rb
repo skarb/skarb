@@ -131,6 +131,9 @@ class Translator
 
   # Calls one of translate_* methods depending on the given sexp's type.
   def translate_generic_sexp(sexp)
+    # Notify that the sexp it to be translated.
+    @event_manager.fire_event("#{sexp[0]}_encountered".to_sym, self, sexp, nil)
+
     # Is there a public or a private method translating such a sexp?
     if respond_to? (method_name = "translate_#{sexp[0]}".to_sym), true
       translated_sexp = send(method_name, sexp)
@@ -139,7 +142,10 @@ class Translator
       die "Input contains unsupported Ruby instruction in line #{line}. Aborting."
     end
     @translated_sexp_dict.add_entry(sexp, translated_sexp)
-    @event_manager.fire_event(sexp[0], self, sexp, translated_sexp)
+
+    # Notify that the sexp was translated.
+    @event_manager.fire_event("#{sexp[0]}_translated".to_sym, self, sexp,
+                              translated_sexp)
     translated_sexp
   end
 

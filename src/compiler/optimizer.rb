@@ -11,7 +11,7 @@ class Optimizer
    end
 
    def subscribe_to_events
-      @translator.subscribe(:call, @math_inliner.method(:call_translated))
+      @translator.subscribe(:call_translated, @math_inliner.method(:call_translated))
    end
 
 end
