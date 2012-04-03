@@ -1,6 +1,8 @@
 # Class representing connection graph. It is a hash containing ids of the
 # vertices. Under each key a node object is stored -- it contains outgoing
 # and incoming edges sets as well as aditional properties.
+#
+# Convention: vertex means vertex id, node means associated node object.
 class ConnectionGraph < Hash
 
    # Generic node in connection graph. 
@@ -27,15 +29,16 @@ class ConnectionGraph < Hash
       attr_accessor :constructor_sexp
    end
 
-   def add_edge(from, to)
-      self[from].out_edges << to
-      self[to].in_edges << from
+   def add_edge(from_vertex, to_vertex)
+      self[from_vertex].out_edges << to_vertex
+      self[to_vertex].in_edges << from_vertex
    end
 
-   def delete_edge(from, to)
-      self[from].out_edges.delete(to)
-      self[to].in_edges.delete(from)
+   def delete_edge(from_vertex, to_vertex)
+      self[from_vertex].out_edges.delete(to_vertex)
+      self[to_vertex].in_edges.delete(from_vertex)
    end
 
+   
 end
    
