@@ -1,4 +1,4 @@
-require 'connection_graph'
+require 'optimizations/memory_allocator/connection_graph'
 
 class MemoryAllocator
    # Local symbol table for MemoryAllocator purposes. It stores connection graph
@@ -19,15 +19,20 @@ class MemoryAllocator
 
       # Adds new function in current class context with mandatory keys.
       def add_function(f_name)
-         self[@cclass][fname] = {
+         self[@cclass][f_name] = {
             :vars => ConnectionGraph.new,
-            :last_block => nil
+            :parent => nil
          }
       end
 
       # Adds new class with mandatory keys.
       def add_class(class_name)
          self[class_name] = {} 
+      end
+
+      # Adds key-node pair to the last open block.
+      def add_node(key, node)
+         last_block[:vars][key] = node
       end
 
       # Current class setter. Creates new class if necessary.
@@ -44,7 +49,7 @@ class MemoryAllocator
 
       # Opens new block representing conditional program branch.
       def open_block
-         last_block = { :vars => ConnectionGraph.new, :parent => last_block }
+         self.last_block = { :vars => ConnectionGraph.new, :parent => last_block }
       end
 
       # Closes block and merges conditional branches by merging nodes of
@@ -52,7 +57,7 @@ class MemoryAllocator
       def close_block
          # TODO: Intensive testing and debugging
          old_block = last_block
-         last_block = last_block[:parent]
+         self.last_block = last_block[:parent]
 
          old_block[:vars].each do |key, old_node|
             node = copy_var_node(key)
@@ -108,12 +113,12 @@ class MemoryAllocator
 
       # Last opened block getter.
       def last_block
-         self[@cclass][@cfunction][:last_block]
+         self[@cclass][@cfunction]
       end
 
       # Last opened block setter.
       def last_block=(val)
-         self[@cclass][@cfunction][:last_block] = val
+         self[@cclass][@cfunction] = val
       end
 
       # Searches for variable by traversing up the block structure and
@@ -123,7 +128,8 @@ class MemoryAllocator
          cblock = last_block
          begin
             return cblock[:vars][var] if cblock[:vars].has_key? var
-         end until cblock[:parent].nil?
+            cblock = cblock[:parent]
+         end until cblock.nil?
          nil
       end
 

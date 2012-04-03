@@ -1,3 +1,5 @@
+require 'set'
+
 # Class representing connection graph. It is a hash containing ids of the
 # vertices. Under each key a node object is stored -- it contains outgoing
 # and incoming edges sets as well as aditional properties.
@@ -15,7 +17,7 @@ class ConnectionGraph < Hash
          @escape_state = :no_escape
       end
 
-      def initialize_copy
+      def initialize_copy(src)
          super
          @out_edges = @out_edges.dup
          @in_edges = @in_edges.dup
