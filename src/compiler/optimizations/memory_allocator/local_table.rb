@@ -55,7 +55,6 @@ class MemoryAllocator
       # Closes block and merges conditional branches by merging nodes of
       # corresponding variables.
       def close_block
-         # TODO: Intensive testing and debugging
          old_block = last_block
          self.last_block = last_block[:parent]
 
@@ -64,32 +63,37 @@ class MemoryAllocator
             if node.nil?
                last_block[:vars][key] = old_node
             else
-               # Here the nodes are merged.
-               
-               # Partial by pass of node:
-               node.in_edges.each do |from_vert|
-                  copy_var_node(from_vert)
-                  node.out_edges do |to_vert|
-                     copy_var_node(to_vert)
-                     last_block[:vars].add_edge(from_vert, to_vert)
+               # The nodes are merged if their outgoing edges differ.
+               if !(node.out_edges == old_node.out_edges)
+                  # Partial by pass of node:
+                  node.in_edges.each do |from_vert|
+                     copy_var_node(from_vert)
+                     node.out_edges.each do |to_vert|
+                        copy_var_node(to_vert)
+                        last_block[:vars].add_edge(from_vert, to_vert)
+                     end
+                     last_block[:vars].delete_edge(from_vert, key)
                   end
-                  last_block[:vars].delete_edge(from_vert, key)
-               end
 
-               # Partial by pass of old node:
-               old_node.in_edges.each do |from_vert|
-                  copy_var_node(from_vert) ||
-                     (last_blok[:vars][from_vert] = old_block[:vars][from_vert])
-                  old_node.out_edges do |to_vert|
+                  # Partial by pass of the old node:
+                  old_node.in_edges.each do |from_vert|
+                     copy_var_node(from_vert) ||
+                        (last_block[:vars][from_vert] = old_block[:vars][from_vert])
+                     old_node.out_edges.each do |to_vert|
+                        copy_var_node(to_vert) ||
+                           (last_block[:vars][to_vert] = old_block[:vars][to_vert])
+                        last_block[:vars].add_edge(from_vert, to_vert)
+                     end
+                     last_block[:vars].delete_edge(from_vert, key)
+                  end
+
+                  # Copy old node out edges to the node:
+                  old_node.out_edges.each do |to_vert|
                      copy_var_node(to_vert) ||
-                        (last_blok[:vars][to_vert] = old_block[:vars][to_vert])
-                     last_block[:vars].add_edge(from_vert, to_vert)
+                        (last_block[:vars][to_vert] = old_block[:vars][to_vert])
+                     last_block[:vars].add_edge(key, to_vert)
                   end
-                  last_block[:vars].delete_edge(from_vert, key)
                end
-
-               # Copy old node out edges to node:
-               old_node.out_edges.each { |to_vert| last_block[:vars].add_edge(key, to_vert) }
             end
          end
       end
@@ -102,7 +106,7 @@ class MemoryAllocator
 
          node.in_edges.each do |from_vert|
             copy_var_node(from_vert)
-            node.out_edges do |to_vert|
+            node.out_edges.each do |to_vert|
                copy_var_node(to_vert)
                last_block[:vars].add_edge(from_vert, to_vert)
             end
@@ -138,7 +142,11 @@ class MemoryAllocator
       def copy_var_node(var)
          # If lvar is defined in the last block it is unnecessary to copy it's node.
          return last_block[:vars][var] if last_block[:vars].has_key? var
-         last_block[:vars][var] = get_var_node(var).clone
+         if (node = get_var_node(var)).nil?
+            nil
+         else
+            last_block[:vars][var] = node.clone
+         end
       end
 
    end
