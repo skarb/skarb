@@ -1,4 +1,5 @@
 require 'helpers'
+require 'event_manager'
 require 'translator/mangling'
 
 # Symbol table is a dictionary consisting of pairs:
@@ -26,6 +27,11 @@ class SymbolTable < Hash
     self.cfunction = :_main
     @cblock = self[@cclass][:functions][@cfunction]
     @fname2id = {}
+    @event_manager = EventManager.new
+  end
+
+  def subscribe(event, method)
+    @event_manager.subscribe(event, method)
   end
 
   # Adds a new constant and generates id for it.
@@ -114,10 +120,16 @@ class SymbolTable < Hash
   # to the previous value.
   def in_block
     raise 'Block expected' unless block_given?
-    #p @cblock[:lvars][:l]
+    
+    # Open new block
     prev_block = @cblock
     @cblock = { lvars: {}, parent: prev_block }
+    @event_manager.fire_event(:block_opened, nil)
+
+    # Execute code in block
     retval = yield
+
+    # Update variables in upper blocks
     @cblock[:lvars].each do |k,v|
       block = prev_block
       begin
@@ -130,7 +142,11 @@ class SymbolTable < Hash
       end
       var_hash[:type] = nil unless var_hash[:type] == v[:type]
     end
+
+    # Close block
     @cblock = prev_block
+    @event_manager.fire_event(:block_closed, nil)
+    
     retval
   end
 

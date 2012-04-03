@@ -27,6 +27,11 @@ require 'optimizations/math_inliner'
 # Final C AST is composed depending on symbol table and subtrees
 # returned by subsequent functions.
 class Translator
+      
+  # event -- original sexp type
+  # sender -- Translator instance
+  EventStruct = Struct.new(:event, :sender, :original_sexp, :translated_sexp)
+
   def initialize
     @symbol_table = SymbolTable.new
     @translated_sexp_dict = TranslatedSexpDictionary.new
@@ -132,7 +137,9 @@ class Translator
   # Calls one of translate_* methods depending on the given sexp's type.
   def translate_generic_sexp(sexp)
     # Notify that the sexp it to be translated.
-    @event_manager.fire_event("#{sexp[0]}_encountered".to_sym, self, sexp, nil)
+    @event_manager.fire_event("#{sexp[0]}_encountered".to_sym,
+                             EventStruct.new("#{sexp[0]}_encountered".to_sym,
+                                             self, sexp, nil))
 
     # Is there a public or a private method translating such a sexp?
     if respond_to? (method_name = "translate_#{sexp[0]}".to_sym), true
@@ -144,8 +151,9 @@ class Translator
     @translated_sexp_dict.add_entry(sexp, translated_sexp)
 
     # Notify that the sexp was translated.
-    @event_manager.fire_event("#{sexp[0]}_translated".to_sym, self, sexp,
-                              translated_sexp)
+    @event_manager.fire_event("#{sexp[0]}_translated".to_sym,
+                             EventStruct.new("#{sexp[0]}_translated".to_sym,
+                                             self, sexp, translated_sexp))
     translated_sexp
   end
 
