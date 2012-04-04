@@ -83,8 +83,10 @@ class MemoryAllocator
                         copy_var_node(to_vert) ||
                            (last_block[:vars][to_vert] = old_block[:vars][to_vert])
                         last_block[:vars].add_edge(from_vert, to_vert)
+                        old_block[:vars].add_edge(from_vert, to_vert)
                      end
                      last_block[:vars].delete_edge(from_vert, key)
+                     old_block[:vars].delete_edge(from_vert, key)
                   end
 
                   # Copy old node out edges to the node:

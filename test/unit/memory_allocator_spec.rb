@@ -31,6 +31,13 @@ describe MemoryAllocator do
      @mem_alloc.local_table.last_graph[:p].out_edges.should == Set[:o1, :o3]
   end
 
+  it 'should merge connection graphs from different blocks (case 2)' do
+     @translator.translate(Parser.parse("p = Object.new; q = Object.new;
+                                        if true; p = Object.new; q = p; end"))
+     @mem_alloc.local_table.last_graph[:q].out_edges.should == Set[:o2, :o3]
+     @mem_alloc.local_table.last_graph[:p].out_edges.should == Set[:o1, :o3]
+  end
+
   it 'should accept global and instance variables' do
      @translator.translate(Parser.parse("p = @@a; @b = p"))
      @mem_alloc.local_table.last_graph[:p].out_edges.should == Set[:@@a]
