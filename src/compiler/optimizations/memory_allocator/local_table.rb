@@ -120,6 +120,11 @@ class MemoryAllocator
          self[@cclass][@cfunction]
       end
 
+      # Connection graph associated with last block.
+      def last_graph
+         self[@cclass][@cfunction][:vars]
+      end
+
       # Last opened block setter.
       def last_block=(val)
          self[@cclass][@cfunction] = val
@@ -147,6 +152,11 @@ class MemoryAllocator
          else
             last_block[:vars][var] = node.clone
          end
+      end
+
+      # Copies variable node to the last block or create a new node if none exists.
+      def assure_existence(var)
+         copy_var_node(var) || (last_graph[var] = ConnectionGraph::Node.new)
       end
 
    end

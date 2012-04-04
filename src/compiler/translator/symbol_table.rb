@@ -1,5 +1,5 @@
 require 'helpers'
-require 'event_manager'
+require 'translator/event_manager'
 require 'translator/mangling'
 
 # Symbol table is a dictionary consisting of pairs:
@@ -18,16 +18,19 @@ class SymbolTable < Hash
   include Helpers
   include Mangling
 
+  ChangeValueEvent = Struct.new(:old_value, :new_value)
+
   attr_reader :cclass, :cfunction, :cblock
 
   def initialize
+    @event_manager = EventManager.new
+
     self.cclass = :Object
     class_table[:parent] = nil
     self.cclass = Translator::MainObject
     self.cfunction = :_main
     @cblock = self[@cclass][:functions][@cfunction]
     @fname2id = {}
-    @event_manager = EventManager.new
   end
 
   def subscribe(event, method)
@@ -68,8 +71,11 @@ class SymbolTable < Hash
 
   # Setter for cclass -- curent class context
   def cclass=(value)
+    prev_value = @cclass
     @cclass = value
     add_class @cclass unless self.has_key? @cclass
+    @event_manager.fire_event(:cclass_changed,
+                              ChangeValueEvent.new(prev_value, value))
   end
 
   # Sets the parent class for a given symbol. Both args are symbols.
@@ -86,9 +92,12 @@ class SymbolTable < Hash
 
   # Setter for cfunction -- current function context
   def cfunction=(value)
+    prev_value = @cfunction
     @cfunction = value
     self[@cclass][:functions][@cfunction] ||= {}
     self[@cclass][:functions][@cfunction][:lvars] ||= {}
+    @event_manager.fire_event(:cfunction_changed,
+                              ChangeValueEvent.new(prev_value, value))
   end
 
   # Executes a block in a given function context and resets the current function

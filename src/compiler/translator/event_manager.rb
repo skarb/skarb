@@ -10,7 +10,7 @@ class EventManager < Hash
    def fire_event(event, event_struct)
       if include? event  
          self[event].each do |x|
-            x.call(event_struct))
+            x.call(event_struct)
          end
       end
    end
