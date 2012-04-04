@@ -33,7 +33,7 @@ l.each do |from, from_node|
    from_node.out_edges.each { |to| g.add_edges(vertices[from], vertices[to]) }
 end
 
-g.output( :png => ARGV[1] )
+g.output( :ps2 => ARGV[1] )
 
 
 
