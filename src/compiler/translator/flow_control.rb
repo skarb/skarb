@@ -122,6 +122,7 @@ class Translator
     return nil if type1 != type2
   end
 
+  # Translates return statement.
   def translate_return(sexp)
     if sexp.count == 1
       ret = s().with_value_sexp s(:var, :nil)

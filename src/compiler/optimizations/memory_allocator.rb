@@ -4,6 +4,7 @@ require 'optimizations/memory_allocator/local_table'
 require 'optimizations/memory_allocator/connection_graph'
 
 # Class responsible for optimising memory allocation through stack allocation.
+# It main function is to build connection graphs for subsequent functions.
 class MemoryAllocator 
 
    include SexpParsing
@@ -12,7 +13,6 @@ class MemoryAllocator
 
    def initialize(translator)
       @s_table = translator.symbol_table
-      @abstract_objects = []
       @local_table = LocalTable.new
       @local_table.synchronize(@s_table)
 
@@ -22,11 +22,14 @@ class MemoryAllocator
       @s_table.subscribe(:block_closed, self.method(:block_closed))
       @s_table.subscribe(:cclass_changed, self.method(:update_context)) 
       @s_table.subscribe(:cfunction_changed, self.method(:update_context))
+
       translator.subscribe(:lasgn_translated, self.method(:lasgn_translated)) 
       translator.subscribe(:iasgn_translated, self.method(:iasgn_translated)) 
       translator.subscribe(:cvdecl_translated, self.method(:cvdecl_translated)) 
    end
 
+   ### BEGIN - Symbol table events handlers ###
+   
    def update_context(event)
       @local_table.synchronize(@s_table)
    end
@@ -38,6 +41,8 @@ class MemoryAllocator
    def block_closed(event)
       @local_table.close_block
    end
+   
+   ### END - Symbol table events handlers ###
 
    ### BEGIN - Translator events handlers ###
 
@@ -64,6 +69,14 @@ class MemoryAllocator
       asgn_update(var, rsexp, event)
    end
 
+   #def return_translated(event)
+   #   return if event.original_sexp.length == 1
+   #
+   #   case event.original_sexp[1]
+   #   when 
+   #   end
+   #end
+
    ### END - Translator events handlers ###
 
    # Performs connection graph update on assigment to variable.
@@ -87,8 +100,8 @@ class MemoryAllocator
       obj_node = ConnectionGraph::ObjectNode.new
       obj_node.constructor_sexp =
          extract_constructor_call(event.translated_sexp)
-      @abstract_objects << obj_node
       obj_key = next_obj_key
+      @local_table.abstract_objects << obj_key
       @local_table.last_graph[obj_key] = obj_node
       @local_table.by_pass(var)
       @local_table.last_graph.add_edge(var, obj_key)
@@ -97,7 +110,8 @@ class MemoryAllocator
    # Returns an unique id for newly allocated object node.
    def next_obj_key
       @obj_counter += 1
-      "o#{@obj_counter}".to_sym
+      # Every node not representing Ruby variable should be prefixed with '
+      "'o#{@obj_counter}".to_sym
    end
 
    # Extracts actual constructor call from translated sexp.

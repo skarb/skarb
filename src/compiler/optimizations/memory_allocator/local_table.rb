@@ -9,6 +9,9 @@ class MemoryAllocator
    # only to last block. Upper blocks are updated when their children are closed.
    class LocalTable < Hash
       
+      FunctionStruct = Struct.new(:last_block, :formal_params, :abstract_objects)
+      BlockStruct = Struct.new(:vars, :parent)
+
       attr_reader :cclass, :cfunction
  
       # Synchronizes current class and function with another symbol table. 
@@ -19,10 +22,8 @@ class MemoryAllocator
 
       # Adds new function in current class context with mandatory keys.
       def add_function(f_name)
-         self[@cclass][f_name] = {
-            :vars => ConnectionGraph.new,
-            :parent => nil
-         }
+         self[@cclass][f_name] = FunctionStruct.new(BlockStruct.new(
+            ConnectionGraph.new, nil), [], [])
       end
 
       # Adds new class with mandatory keys.
@@ -49,7 +50,7 @@ class MemoryAllocator
 
       # Opens new block representing conditional program branch.
       def open_block
-         self.last_block = { :vars => ConnectionGraph.new, :parent => last_block }
+         self.last_block = BlockStruct.new(ConnectionGraph.new, last_block)
       end
 
       # Closes block and merges conditional branches by merging nodes of
@@ -119,17 +120,22 @@ class MemoryAllocator
 
       # Last opened block getter.
       def last_block
-         self[@cclass][@cfunction]
+         self[@cclass][@cfunction][:last_block]
       end
 
       # Connection graph associated with last block.
       def last_graph
-         self[@cclass][@cfunction][:vars]
+         last_block[:vars]
+      end
+
+      # List of abstract objects allocated in this function.
+      def abstract_objects
+         self[@cclass][@cfunction][:abstract_objects]
       end
 
       # Last opened block setter.
       def last_block=(val)
-         self[@cclass][@cfunction] = val
+         self[@cclass][@cfunction][:last_block] = val
       end
 
       # Searches for variable by traversing up the block structure and
