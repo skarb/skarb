@@ -11,6 +11,10 @@ class MemoryAllocator
 
    attr_reader :local_table
 
+   SymbolTableEvents = [:block_opened, :block_closed, :cclass_changed, :cfunction_changed]
+   TranslatorEvents = [:lasgn_translated, :iasgn_translated, :cvdecl_translated, :lit_translated,
+      :str_translated, :lvar_translated, :ivar_translated, :cvar_translated, :call_translated]
+
    def initialize(translator)
       @s_table = translator.symbol_table
       @local_table = LocalTable.new
@@ -18,14 +22,12 @@ class MemoryAllocator
 
       @obj_counter = 0
 
-      @s_table.subscribe(:block_opened, self.method(:block_opened)) 
-      @s_table.subscribe(:block_closed, self.method(:block_closed))
-      @s_table.subscribe(:cclass_changed, self.method(:update_context)) 
-      @s_table.subscribe(:cfunction_changed, self.method(:update_context))
-
-      translator.subscribe(:lasgn_translated, self.method(:lasgn_translated)) 
-      translator.subscribe(:iasgn_translated, self.method(:iasgn_translated)) 
-      translator.subscribe(:cvdecl_translated, self.method(:cvdecl_translated)) 
+      SymbolTableEvents.each do 
+         |event| @s_table.subscribe(event, self.method(event)) 
+      end
+      TranslatorEvents.each do 
+         |event| translator.subscribe(event, self.method(event)) 
+      end
    end
 
    ### BEGIN - Symbol table events handlers ###
@@ -33,6 +35,9 @@ class MemoryAllocator
    def update_context(event)
       @local_table.synchronize(@s_table)
    end
+
+   alias :cclass_changed :update_context
+   alias :cfunction_changed :update_context
 
    def block_opened(event)
       @local_table.open_block
@@ -50,7 +55,7 @@ class MemoryAllocator
       var = lasgn_get_var(event.original_sexp)
       @local_table.assure_existence(var)
       rsexp = lasgn_get_right(event.original_sexp)
-      asgn_update(var, rsexp, event)
+      asgn_update(var, rsexp)
    end
   
    def iasgn_translated(event)
@@ -58,7 +63,7 @@ class MemoryAllocator
       @local_table.assure_existence(var)
       @local_table.last_graph[var].escape_state = :instance
       rsexp = iasgn_get_right(event.original_sexp)
-      asgn_update(var, rsexp, event)
+      asgn_update(var, rsexp)
    end
 
    def cvdecl_translated(event)
@@ -66,7 +71,7 @@ class MemoryAllocator
       @local_table.assure_existence(var)
       @local_table.last_graph[var].escape_state = :class
       rsexp = cvdecl_get_right(event.original_sexp)
-      asgn_update(var, rsexp, event)
+      asgn_update(var, rsexp)
    end
 
    #def return_translated(event)
@@ -77,36 +82,43 @@ class MemoryAllocator
    #   end
    #end
 
-   ### END - Translator events handlers ###
-
-   # Performs connection graph update on assigment to variable.
-   def asgn_update(var, rsexp, event)
-      case rsexp[0]
-      when :call
-         if call_get_method(rsexp) == :new
-            asgn_new_object(var, event)
-         end
-      when :lit, :str
-         asgn_new_object(var, event)
-      when :lvar, :ivar, :cvar
-         @local_table.by_pass(var)
-         @local_table.assure_existence(rsexp[1])
-         @local_table.last_graph.add_edge(var, rsexp[1])
-      end
-   end
-
-   # Create new object node and assign it to a variable.
-   def asgn_new_object(var, event)
+   # Creates new object node.
+   def create_new_object(event)
       obj_node = ConnectionGraph::ObjectNode.new
       obj_node.constructor_sexp =
          extract_constructor_call(event.translated_sexp)
       obj_key = next_obj_key
       @local_table.abstract_objects << obj_key
       @local_table.last_graph[obj_key] = obj_node
-      @local_table.by_pass(var)
-      @local_table.last_graph.add_edge(var, obj_key)
+      add_graph_node(event.original_sexp, obj_key)
    end
-   
+
+   def call_translated(event)
+      if call_get_method(event.original_sexp) == :new
+         create_new_object(event)
+      end
+   end
+
+   alias :lit_translated :create_new_object
+   alias :str_translated :create_new_object
+
+   def lvar_translated(event)
+      var_id = event.original_sexp[1]
+      @local_table.assure_existence(var_id)
+      add_graph_node(event.original_sexp, var_id)
+   end
+
+   alias :ivar_translated :lvar_translated
+   alias :cvar_translated :lvar_translated
+
+   ### END - Translator events handlers ###
+
+   # Performs connection graph update on assigment to variable.
+   def asgn_update(var, rsexp)
+      @local_table.by_pass(var)
+      @local_table.last_graph.add_edge(var, rsexp.graph_node)
+   end
+      
    # Returns an unique id for newly allocated object node.
    def next_obj_key
       @obj_counter += 1
@@ -116,8 +128,17 @@ class MemoryAllocator
 
    # Extracts actual constructor call from translated sexp.
    def extract_constructor_call(sexp)
-      # TODO: check if it really works ;)
-      sexp[1].last[2]
+      # TODO: Debug; it doesn't work at all
+      # sexp[1].last[2]
+   end
+
+   # Helper function. Dynamically adds an attribute with an id of the
+   # connection graph node representing returned value to an arbitrary sexp.
+   def add_graph_node(object, value)
+      object.instance_variable_set(:@graph_node, value)
+      def object.graph_node
+         @graph_node
+      end
    end
 
 end

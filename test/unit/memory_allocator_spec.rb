@@ -10,6 +10,11 @@ describe MemoryAllocator do
     @mem_alloc = MemoryAllocator.new(@translator)
   end
 
+  it 'should store node value of any sexp' do
+    @translator.translate(Parser.parse("1"))
+    @mem_alloc.local_table.last_graph[:"'o1"].should_not be_nil
+  end
+  
   it 'should build connection graph during code translation' do
      @translator.translate(Parser.parse("p = Object.new; q = p"))
      @mem_alloc.local_table.last_graph[:q].out_edges.should == Set[:p]
