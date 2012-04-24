@@ -55,4 +55,22 @@ describe MemoryAllocator do
      @mem_alloc.local_table.last_graph[:b].out_edges.should == Set[:"'o1"]
   end
 
+  it 'should link return node with all returned values' do
+     @translator.translate(Parser.parse("def foo; return 1; if true; return 2; end;
+                                        return 3; end"))
+     l_table = @mem_alloc.local_table
+     l_table[l_table.cclass][:foo][:last_block][:vars][:return].out_edges.should ==
+        Set[:"'o1", :"'o2", :"'o3"]
+  end
+
+  it 'should model abstract parameters and parameters variables at function entry' do
+     @translator.translate(Parser.parse("def foo(p1, p2, p3); end"))
+     f_table = @mem_alloc.local_table[@mem_alloc.local_table.cclass][:foo]
+     vars = f_table[:last_block][:vars]
+     vars[:p1].out_edges.should == Set[:"'p1"]
+     vars[:p2].out_edges.should == Set[:"'p2"]
+     vars[:p3].out_edges.should == Set[:"'p3"]
+     f_table.formal_params.should == [:self, :"'p1", :"'p2", :"'p3"]
+  end
+
 end

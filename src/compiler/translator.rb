@@ -1,6 +1,7 @@
 require 'sexp_processor'
 require 'helpers'
 require 'extensions'
+require 'sexp_parsing'
 require 'translator/symbol_table'
 require 'translator/translated_sexp_dictionary'
 require 'translator/functions'
@@ -107,6 +108,7 @@ class Translator
   include ARGV
   include Blocks
   include Mangling
+  include SexpParsing
 
   # Name of modified instance of Object class containing main program
   MainObject = :M_Object

@@ -133,6 +133,11 @@ class MemoryAllocator
          self[@cclass][@cfunction][:abstract_objects]
       end
 
+      # List of formal parameters in this function.
+      def formal_params
+         self[@cclass][@cfunction][:formal_params]
+      end
+
       # Last opened block setter.
       def last_block=(val)
          self[@cclass][@cfunction][:last_block] = val

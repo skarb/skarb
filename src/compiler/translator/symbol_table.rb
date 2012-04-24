@@ -19,6 +19,7 @@ class SymbolTable < Hash
   include Mangling
 
   ChangeValueEvent = Struct.new(:old_value, :new_value)
+  FunctionEvent = Struct.new(:function)
 
   attr_reader :cclass, :cfunction, :cblock
 
@@ -104,13 +105,21 @@ class SymbolTable < Hash
   # to the previous value.
   def in_function(name)
     raise 'Block expected' unless block_given?
+
+    # Enter new function context and open its basic block.
     prev_function = cfunction
     self.cfunction = name
     prev_block = @cblock
     @cblock = self[@cclass][:functions][@cfunction]
+    @event_manager.fire_event(:function_opened, FunctionEvent.new(name))
+    
+    # Execute code.
     retval = yield
+    
+    # Change the context to the previous function and block.
     @cfunction = prev_function
     @cblock = prev_block
+    @event_manager.fire_event(:function_closed, FunctionEvent.new(name))
     retval
   end
 

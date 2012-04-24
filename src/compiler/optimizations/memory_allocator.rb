@@ -11,9 +11,9 @@ class MemoryAllocator
 
    attr_reader :local_table
 
-   SymbolTableEvents = [:block_opened, :block_closed, :cclass_changed, :cfunction_changed]
+   SymbolTableEvents = [:block_opened, :block_closed, :function_opened, :function_closed, :cclass_changed, :cfunction_changed]
    TranslatorEvents = [:lasgn_translated, :iasgn_translated, :cvdecl_translated, :lit_translated,
-      :str_translated, :lvar_translated, :ivar_translated, :cvar_translated, :call_translated]
+      :str_translated, :lvar_translated, :ivar_translated, :cvar_translated, :call_translated, :return_translated]
 
    def initialize(translator)
       @s_table = translator.symbol_table
@@ -46,7 +46,29 @@ class MemoryAllocator
    def block_closed(event)
       @local_table.close_block
    end
-   
+ 
+   # Creates phantom node for each formal parameter and normal nodes for parameter
+   # variables.
+   def function_opened(event)
+      defn = @s_table.function_def(@s_table.cclass, event.function)
+      args = defn_get_args(defn)
+      @local_table.assure_existence(:self)
+      @local_table.formal_params << :self
+      p_no = 1
+      args.each do |arg|
+         formal_param = "'p#{p_no}".to_sym
+         @local_table.assure_existence(arg)
+         @local_table.assure_existence(formal_param)
+         @local_table.formal_params << formal_param
+         @local_table.last_graph.add_edge(arg, formal_param)
+         p_no += 1
+      end
+   end
+
+   def function_closed(event)
+      #p @s_table.class_table[:functions][event.function]
+   end
+
    ### END - Symbol table events handlers ###
 
    ### BEGIN - Translator events handlers ###
@@ -74,13 +96,13 @@ class MemoryAllocator
       asgn_update(var, rsexp)
    end
 
-   #def return_translated(event)
-   #   return if event.original_sexp.length == 1
-   #
-   #   case event.original_sexp[1]
-   #   when 
-   #   end
-   #end
+   def return_translated(event)
+      return if event.original_sexp.length == 1
+   
+      @local_table.assure_existence(:return)
+      rsexp = return_get_right(event.original_sexp)
+      @local_table.last_graph.add_edge(:return, rsexp.graph_node)
+   end
 
    # Creates new object node.
    def create_new_object(event)

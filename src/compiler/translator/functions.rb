@@ -263,7 +263,7 @@ class Translator
       defn_args = s(:args)
       lvars = []
       body = @symbol_table.in_function defn[1] do
-        ([:self] + defn[2].drop(1)).zip args_types do |arg, type|
+        ([:self] + defn_get_args(defn)).zip args_types do |arg, type|
           @symbol_table.add_lvar arg
           @symbol_table.set_lvar_type arg, type
           @symbol_table.set_lvar_kind arg, :param
