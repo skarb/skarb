@@ -13,7 +13,7 @@ class MemoryAllocator
 
    SymbolTableEvents = [:block_opened, :block_closed, :function_opened, :function_closed, :cclass_changed, :cfunction_changed]
    TranslatorEvents = [:lasgn_translated, :iasgn_translated, :cvdecl_translated, :lit_translated,
-      :str_translated, :lvar_translated, :ivar_translated, :cvar_translated, :call_translated, :return_translated]
+      :str_translated, :lvar_translated, :ivar_translated, :cvar_translated, :call_translated, :return_translated, :self_translated]
 
    def initialize(translator)
       @s_table = translator.symbol_table
@@ -126,6 +126,7 @@ class MemoryAllocator
    end
 
    def self_translated(event)
+      @local_table.assure_existence(:self, ConnectionGraph::PhantomNode)
       add_graph_node(event.original_sexp, :self)       
    end
 

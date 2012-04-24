@@ -73,4 +73,9 @@ describe MemoryAllocator do
      f_table.formal_params.should == [:self, :"'p1", :"'p2", :"'p3"]
   end
 
+  it 'should translate self reference correctly' do
+     @translator.translate(Parser.parse("a = self"))
+     @mem_alloc.local_table.last_graph[:a].out_edges.should == Set[:self]
+  end
+
 end
