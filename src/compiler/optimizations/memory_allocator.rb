@@ -52,13 +52,13 @@ class MemoryAllocator
    def function_opened(event)
       defn = @s_table.function_def(@s_table.cclass, event.function)
       args = defn_get_args(defn)
-      @local_table.assure_existence(:self)
+      @local_table.assure_existence(:self, ConnectionGraph::PhantomNode)
       @local_table.formal_params << :self
       p_no = 1
       args.each do |arg|
          formal_param = "'p#{p_no}".to_sym
          @local_table.assure_existence(arg)
-         @local_table.assure_existence(formal_param)
+         @local_table.assure_existence(formal_param, ConnectionGraph::PhantomNode)
          @local_table.formal_params << formal_param
          @local_table.last_graph.add_edge(arg, formal_param)
          p_no += 1
@@ -88,6 +88,7 @@ class MemoryAllocator
       asgn_update(var, rsexp)
    end
 
+ 
    def cvdecl_translated(event)
       var = cvdecl_get_var(event.original_sexp)
       @local_table.assure_existence(var)
@@ -115,14 +116,18 @@ class MemoryAllocator
       add_graph_node(event.original_sexp, obj_key)
    end
 
+   alias :lit_translated :create_new_object
+   alias :str_translated :create_new_object
+   
    def call_translated(event)
       if call_get_method(event.original_sexp) == :new
          create_new_object(event)
       end
    end
 
-   alias :lit_translated :create_new_object
-   alias :str_translated :create_new_object
+   def self_translated(event)
+      add_graph_node(event.original_sexp, :self)       
+   end
 
    def lvar_translated(event)
       var_id = event.original_sexp[1]

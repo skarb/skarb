@@ -31,6 +31,10 @@ class ConnectionGraph < Hash
       attr_accessor :constructor_sexp
    end
 
+   # Node representing formal function parameter.
+   class PhantomNode < Node
+   end
+
    def add_edge(from_vertex, to_vertex)
       self[from_vertex].out_edges << to_vertex
       self[to_vertex].in_edges << from_vertex

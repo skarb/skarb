@@ -168,8 +168,10 @@ class MemoryAllocator
       end
 
       # Copies variable node to the last block or create a new node if none exists.
-      def assure_existence(var)
-         copy_var_node(var) || (last_graph[var] = ConnectionGraph::Node.new)
+      # First parameter is variable id, the second is new node type (normal Node
+      # by default).
+      def assure_existence(var, type = ConnectionGraph::Node)
+         copy_var_node(var) || (last_graph[var] = type.new)
       end
 
    end
