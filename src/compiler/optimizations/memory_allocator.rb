@@ -77,24 +77,28 @@ class MemoryAllocator
       var = lasgn_get_var(event.original_sexp)
       @local_table.assure_existence(var)
       rsexp = lasgn_get_right(event.original_sexp)
-      asgn_update(var, rsexp)
+      @local_table.by_pass(var)
+      @local_table.last_graph.add_edge(var, rsexp.graph_node)
    end
   
    def iasgn_translated(event)
       var = iasgn_get_var(event.original_sexp)
       @local_table.assure_existence(var)
-      @local_table.last_graph[var].escape_state = :instance
+      @local_table.assure_existence(:self, ConnectionGraph::PhantomNode)
       rsexp = iasgn_get_right(event.original_sexp)
-      asgn_update(var, rsexp)
+      @local_table.by_pass(var)
+      @local_table.last_graph.add_edge(var, rsexp.graph_node)
+      @local_table.last_graph.add_edge(:self, var)
    end
 
  
    def cvdecl_translated(event)
       var = cvdecl_get_var(event.original_sexp)
       @local_table.assure_existence(var)
-      @local_table.last_graph[var].escape_state = :class
+      #@local_table.last_graph[var].escape_state = :class
       rsexp = cvdecl_get_right(event.original_sexp)
-      asgn_update(var, rsexp)
+      @local_table.by_pass(var)
+      @local_table.last_graph.add_edge(var, rsexp.graph_node)
    end
 
    def return_translated(event)
@@ -141,12 +145,6 @@ class MemoryAllocator
 
    ### END - Translator events handlers ###
 
-   # Performs connection graph update on assigment to variable.
-   def asgn_update(var, rsexp)
-      @local_table.by_pass(var)
-      @local_table.last_graph.add_edge(var, rsexp.graph_node)
-   end
-      
    # Returns an unique id for newly allocated object node.
    def next_obj_key
       @obj_counter += 1

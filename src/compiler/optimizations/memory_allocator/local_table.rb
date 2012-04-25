@@ -55,6 +55,7 @@ class MemoryAllocator
 
       # Closes block and merges conditional branches by merging nodes of
       # corresponding variables.
+      # TODO: Refactor this monster!
       def close_block
          old_block = last_block
          self.last_block = last_block[:parent]
@@ -65,29 +66,41 @@ class MemoryAllocator
                last_block[:vars][key] = old_node
             else
                # The nodes are merged if their outgoing edges differ.
-               if !(node.out_edges == old_node.out_edges)
-                  # Partial by pass of node:
-                  node.in_edges.each do |from_vert|
-                     copy_var_node(from_vert)
-                     node.out_edges.each do |to_vert|
-                        copy_var_node(to_vert)
-                        last_block[:vars].add_edge(from_vert, to_vert)
-                     end
-                     last_block[:vars].delete_edge(from_vert, key)
-                  end
+               if node.out_edges != old_node.out_edges
+                  
+                  if node.class == ConnectionGraph::Node
 
-                  # Partial by pass of the old node:
-                  old_node.in_edges.each do |from_vert|
-                     copy_var_node(from_vert) ||
-                        (last_block[:vars][from_vert] = old_block[:vars][from_vert])
-                     old_node.out_edges.each do |to_vert|
-                        copy_var_node(to_vert) ||
-                           (last_block[:vars][to_vert] = old_block[:vars][to_vert])
-                        last_block[:vars].add_edge(from_vert, to_vert)
-                        old_block[:vars].add_edge(from_vert, to_vert)
+                     # Partial by pass of the node:
+                     node.in_edges.each do |from_vert|
+                        # We want to by pass only reference edges, not field edges.
+                        next if get_var_node(from_vert).class != ConnectionGraph::Node
+
+                        copy_var_node(from_vert)
+                        node.out_edges.each do |to_vert|
+                           copy_var_node(to_vert)
+                           last_block[:vars].add_edge(from_vert, to_vert)
+                        end
+                        last_block[:vars].delete_edge(from_vert, key)
                      end
-                     last_block[:vars].delete_edge(from_vert, key)
-                     old_block[:vars].delete_edge(from_vert, key)
+
+                     # Partial by pass of the old node:
+                     old_node.in_edges.each do |from_vert|
+                        # We want to by pass only reference edges, not field edges.
+                        f_node = get_var_node(from_vert) || old_block[:vars][from_vert]
+                        next if f_node.class != ConnectionGraph::Node
+
+                        copy_var_node(from_vert) ||
+                           (last_block[:vars][from_vert] = old_block[:vars][from_vert])
+                        old_node.out_edges.each do |to_vert|
+                           copy_var_node(to_vert) ||
+                              (last_block[:vars][to_vert] = old_block[:vars][to_vert])
+                           last_block[:vars].add_edge(from_vert, to_vert)
+                           old_block[:vars].add_edge(from_vert, to_vert)
+                        end
+                        last_block[:vars].delete_edge(from_vert, key)
+                        old_block[:vars].delete_edge(from_vert, key)
+                     end
+
                   end
 
                   # Copy old node out edges to the node:
@@ -108,6 +121,9 @@ class MemoryAllocator
          return if node.nil? or node.is_a? ConnectionGraph::ObjectNode
 
          node.in_edges.each do |from_vert|
+            # We want to by pass only reference edges, not field edges.
+            next if get_var_node(from_vert).class != ConnectionGraph::Node
+            
             copy_var_node(from_vert)
             node.out_edges.each do |to_vert|
                copy_var_node(to_vert)

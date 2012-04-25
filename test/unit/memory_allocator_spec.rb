@@ -73,9 +73,22 @@ describe MemoryAllocator do
      f_table.formal_params.should == [:self, :"'p1", :"'p2", :"'p3"]
   end
 
-  it 'should translate self reference correctly' do
+  it 'should model self reference correctly' do
      @translator.translate(Parser.parse("a = self"))
      @mem_alloc.local_table.last_graph[:a].out_edges.should == Set[:self]
+  end
+
+  it 'should model instance variable assignment as edge from self object' do
+     @translator.translate(Parser.parse("@a = 1"))
+     @mem_alloc.local_table.last_graph[:self].out_edges.should == Set[:@a]
+     @mem_alloc.local_table.last_graph[:@a].out_edges.should == Set[:"'o1"]
+  end
+
+  it 'should correctly merge blocks with instance variables' do
+     @translator.translate(Parser.parse("@a = 1; if 1; @a = 2; @b = 3; end"))
+     @mem_alloc.local_table.last_graph[:self].out_edges.should == Set[:@a, :@b]
+     @mem_alloc.local_table.last_graph[:@a].out_edges.should == Set[:"'o1", :"'o3"]
+     @mem_alloc.local_table.last_graph[:@b].out_edges.should == Set[:"'o4"]
   end
 
 end

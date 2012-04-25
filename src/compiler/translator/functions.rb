@@ -39,8 +39,8 @@ class Translator
     # Returns an array containing local variables declarations (but not
     # parameters since they are already defined)
     def lvars_declarations
-      selector = lambda { |k,v| v[:kind] == :local }
-      mapper = lambda { |k| s(:decl, :'Object*', escape_name(k.first)) }
+      selector = Proc.new { |k,v| v[:kind] == :local }
+      mapper = Proc.new { |k| s(:decl, :'Object*', escape_name(k.first)) }
       @symbol_table.lvars_table.select(&selector).map(&mapper)
     end
 
