@@ -9,7 +9,8 @@ class MemoryAllocator
    # only to last block. Upper blocks are updated when their children are closed.
    class LocalTable < Hash
       
-      FunctionStruct = Struct.new(:last_block, :formal_params, :abstract_objects)
+      FunctionStruct = Struct.new(:last_block, :formal_params, :class_vars,
+                                  :abstract_objects)
       BlockStruct = Struct.new(:vars, :parent)
 
       attr_reader :cclass, :cfunction
@@ -23,7 +24,10 @@ class MemoryAllocator
       # Adds new function in current class context with mandatory keys.
       def add_function(f_name)
          self[@cclass][f_name] = FunctionStruct.new(BlockStruct.new(
-            ConnectionGraph.new, nil), [], [])
+            ConnectionGraph.new, nil), [], [], [])
+         assure_existence(:return, ConnectionGraph::Node, :arg_escape)
+         assure_existence(:self, ConnectionGraph::PhantomNode, :arg_escape)
+         formal_params << :self
       end
 
       # Adds new class with mandatory keys.
@@ -154,6 +158,11 @@ class MemoryAllocator
          self[@cclass][@cfunction][:formal_params]
       end
 
+      # List of class variables referenced in this function.
+      def class_vars
+         self[@cclass][@cfunction][:class_vars]
+      end
+
       # Last opened block setter.
       def last_block=(val)
          self[@cclass][@cfunction][:last_block] = val
@@ -186,9 +195,27 @@ class MemoryAllocator
       # Copies variable node to the last block or create a new node if none exists.
       # First parameter is variable id, the second is new node type (normal Node
       # by default).
-      def assure_existence(var, type = ConnectionGraph::Node)
-         copy_var_node(var) || (last_graph[var] = type.new)
+      def assure_existence(var, type = ConnectionGraph::Node, esc_state = :no_escape)
+         copy_var_node(var) || (last_graph[var] = type.new(esc_state))
       end
 
+      # Recursively propagate escape state down the connection graph starting from
+      # certain node.
+      def propagate_escape_state(var_a)
+         node_a = get_var_node(var_a)
+         node_a.out_edges.each do |var_b|
+            node_b = get_var_node(var_b)
+            node_b.escape_state = merge_escape_states(node_a.escape_state,
+                                                   node_b.escape_state)
+            propagate_escape_state(var_b)
+         end
+      end
+
+      # Merges two escape states according to their hierarchy.
+      def merge_escape_states(a, b)
+         return :global_escape if a == :global_escape || b == :global_escape
+         return :arg_escape if a == :arg_escape || b == :arg_escape
+         return :no_escape
+      end
    end
 end

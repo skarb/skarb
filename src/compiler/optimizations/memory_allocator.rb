@@ -12,7 +12,7 @@ class MemoryAllocator
    attr_reader :local_table
 
    SymbolTableEvents = [:block_opened, :block_closed, :function_opened, :function_closed, :cclass_changed, :cfunction_changed]
-   TranslatorEvents = [:lasgn_translated, :iasgn_translated, :cvdecl_translated, :lit_translated,
+   TranslatorEvents = [:lasgn_translated, :iasgn_translated, :cvasgn_translated, :cvdecl_translated, :lit_translated,
       :str_translated, :lvar_translated, :ivar_translated, :cvar_translated, :call_translated, :return_translated, :self_translated]
 
    def initialize(translator)
@@ -52,8 +52,6 @@ class MemoryAllocator
    def function_opened(event)
       defn = @s_table.function_def(@s_table.cclass, event.function)
       args = defn_get_args(defn)
-      @local_table.assure_existence(:self, ConnectionGraph::PhantomNode)
-      @local_table.formal_params << :self
       p_no = 1
       args.each do |arg|
          formal_param = "'p#{p_no}".to_sym
@@ -66,7 +64,14 @@ class MemoryAllocator
    end
 
    def function_closed(event)
-      #p @s_table.class_table[:functions][event.function]
+      n_function = @local_table.cfunction
+      @local_table.cfunction = event.function
+   
+      @local_table.formal_params.each { |p| @local_table.propagate_escape_state(p) }
+      @local_table.class_vars.each { |p| @local_table.propagate_escape_state(p) }
+      @local_table.propagate_escape_state(:return)
+
+      @local_table.cfunction = n_function
    end
 
    ### END - Symbol table events handlers ###
@@ -84,22 +89,25 @@ class MemoryAllocator
    def iasgn_translated(event)
       var = iasgn_get_var(event.original_sexp)
       @local_table.assure_existence(var)
-      @local_table.assure_existence(:self, ConnectionGraph::PhantomNode)
+      @local_table.assure_existence(:self)
       rsexp = iasgn_get_right(event.original_sexp)
       @local_table.by_pass(var)
       @local_table.last_graph.add_edge(var, rsexp.graph_node)
       @local_table.last_graph.add_edge(:self, var)
    end
 
- 
    def cvdecl_translated(event)
       var = cvdecl_get_var(event.original_sexp)
       @local_table.assure_existence(var)
-      #@local_table.last_graph[var].escape_state = :class
+      @local_table.class_vars << var
+      node = @local_table.get_var_node(var)
+      node.escape_state = :global_escape
       rsexp = cvdecl_get_right(event.original_sexp)
       @local_table.by_pass(var)
       @local_table.last_graph.add_edge(var, rsexp.graph_node)
    end
+
+   alias :cvasgn_translated :cvdecl_translated 
 
    def return_translated(event)
       return if event.original_sexp.length == 1
@@ -148,7 +156,7 @@ class MemoryAllocator
    # Returns an unique id for newly allocated object node.
    def next_obj_key
       @obj_counter += 1
-      # Every node not representing Ruby variable should be prefixed with '
+      # Every node not representing Ruby variable should be prefixed with >'<
       "'o#{@obj_counter}".to_sym
    end
 

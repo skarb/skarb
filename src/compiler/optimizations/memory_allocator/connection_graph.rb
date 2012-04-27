@@ -11,10 +11,10 @@ class ConnectionGraph < Hash
    class Node
       attr_accessor :escape_state, :out_edges, :in_edges
       
-      def initialize
+      def initialize(esc_state = :no_escape)
          @out_edges = Set.new
          @in_edges = Set.new
-         @escape_state = :no_escape
+         @escape_state = esc_state
       end
 
       def initialize_copy(src)

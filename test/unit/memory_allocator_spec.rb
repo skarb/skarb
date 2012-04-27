@@ -91,4 +91,18 @@ describe MemoryAllocator do
      @mem_alloc.local_table.last_graph[:@b].out_edges.should == Set[:"'o4"]
   end
 
+  it 'should update escape state of all nodes at function exit' do
+     @translator.translate(Parser.parse("def foo; @@a = 1; @a = 2; a=3; b = 4; return a; end"))
+     f_table = @mem_alloc.local_table[@mem_alloc.local_table.cclass][:foo]
+     vars = f_table[:last_block][:vars]
+     vars[:@@a].escape_state.should == :global_escape
+     vars[:"'o1"].escape_state.should == :global_escape
+     vars[:@a].escape_state.should == :arg_escape
+     vars[:"'o2"].escape_state.should == :arg_escape
+     vars[:a].escape_state.should == :arg_escape
+     vars[:"'o3"].escape_state.should == :arg_escape
+     vars[:b].escape_state.should == :no_escape
+     vars[:"'o4"].escape_state.should == :no_escape
+  end 
+
 end
