@@ -35,6 +35,11 @@ Object * Float__PLUS_(Object *self, Object *other);
 Object * Float__MINUS_(Object *self, Object *other);
 
 /**
+ * Float#-@
+ */
+Object * Float__MINUS_AMP(Object *self);
+
+/**
  * Float#*
  */
 Object * Float__MUL_(Object *self, Object *other);

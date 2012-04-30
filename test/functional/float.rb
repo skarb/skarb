@@ -4,6 +4,7 @@
 #1.125
 #6.90625
 #0.68
+#-3.25
 #ok
 #ok
 #ok
@@ -19,6 +20,7 @@ puts b - a
 puts a - b
 puts a * b
 puts b / 3.125
+puts -a
 puts 'ok' if a > b
 puts 'fail' if a < b
 puts 'fail' if a == b

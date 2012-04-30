@@ -71,7 +71,7 @@ class Fixnum
     Float.returned_if Float
   end
 
-  def -@(arg)
+  def -@
     defined_as :Fixnum__MINUS_AMP
     returns Fixnum
   end
@@ -116,6 +116,11 @@ class Float
 
   def -(arg)
     defined_as :Float__MINUS_
+    returns Float
+  end
+
+  def -@
+    defined_as :Float__MINUS_AMP
     returns Float
   end
 

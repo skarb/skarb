@@ -36,6 +36,11 @@ Object * Float__MINUS_(Object *self, Object *other) {
     return 0;
 }
 
+Object * Float__MINUS_AMP(Object *self) {
+    return Float_new(-as_float(self)->val);
+}
+
+
 Object * Float__MUL_(Object *self, Object *other) {
     if (is_a(other, Float))
         return Float_new(as_float(self)->val * as_float(other)->val);

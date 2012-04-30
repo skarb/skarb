@@ -44,7 +44,7 @@ Object * Fixnum__MINUS_(Object *self, Object *other) {
     return 0;
 }
 
-Object * Fixnum__MINUS_AMP(Object *self, Object *other) {
+Object * Fixnum__MINUS_AMP(Object *self) {
     return Fixnum_new(-as_fixnum(self)->val);
 }
 
