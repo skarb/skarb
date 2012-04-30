@@ -8,7 +8,8 @@ module Mangling
     '/'  => '__DIV__',
     '='  => '__EQ__',
     '[]' => '__INDEX__',
-    '?'  => '__QMARK' }
+    '?'  => '__QMARK',
+    '@'  => '__AMP' }
 
   CKeywords = Set.new [
     :auto,

@@ -32,7 +32,7 @@ class Translator
         end
         # Look for instance method
         ret_val or look_up_and_call sexp or \
-          die "Unknown function or method: #{sexp[2]}"
+          die "Unknown function or method #{sexp[2]} in line #{sexp.line-StdlibLineNumber}."
       end
     end
 

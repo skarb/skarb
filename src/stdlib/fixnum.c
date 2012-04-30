@@ -44,6 +44,10 @@ Object * Fixnum__MINUS_(Object *self, Object *other) {
     return 0;
 }
 
+Object * Fixnum__MINUS_AMP(Object *self, Object *other) {
+    return Fixnum_new(-as_fixnum(self)->val);
+}
+
 Object * Fixnum__MUL_(Object *self, Object *other) {
     if (is_a(other, Fixnum))
         return Fixnum_new(as_fixnum(self)->val * as_fixnum(other)->val);

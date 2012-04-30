@@ -71,6 +71,11 @@ class Fixnum
     Float.returned_if Float
   end
 
+  def -@(arg)
+    defined_as :Fixnum__MINUS_AMP
+    returns Fixnum
+  end
+
   def ==(arg)
     defined_as :Fixnum__EQ__EQ_
   end

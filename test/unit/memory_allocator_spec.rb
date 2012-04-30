@@ -105,4 +105,13 @@ describe MemoryAllocator do
      vars[:"'o4"].escape_state.should == :no_escape
   end 
 
+  #it 'should update connection graph basing on information from called functions' do
+  #   @translator.translate(Parser.parse("def p=(v); @p = v; end; p=2;"))
+  #   @mem_alloc.local_table[:M_Object].each_key { |k| puts k } 
+     #@translator.translate(Parser.parse("class A; def p=(v); @p = v; end; end;
+     #                                    a = A.new; a.p=1"))
+     #@mem_alloc.local_table.last_graph[:"'o1"].out_edges.should == Set[:"'o1_@p"]
+     #@mem_alloc.local_table.last_graph[:"'o1_@p"].out_edges.should == Set[:"'o2"]
+  #end
+
 end

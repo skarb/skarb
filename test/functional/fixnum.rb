@@ -4,6 +4,7 @@
 #1
 #6
 #1
+#-3
 #ok
 #ok
 #ok
@@ -19,6 +20,7 @@ puts b - a
 puts a - b
 puts a * b
 puts a / b
+puts -a
 puts 'ok' if a > b
 puts 'fail' if a < b
 puts 'fail' if a == b
