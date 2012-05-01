@@ -30,13 +30,22 @@ class Translator
       if sexp[1].floor == sexp[1]
         # It's an integer
         ctor = :Fixnum_new
-        type = Fixnum
+        class_name = :Fixnum
       else
         # It's a float
         ctor = :Float_new
-        type = Float
+        class_name = :Float
       end
-      s(:stmts).with_value(s(:call, ctor, s(:args, sexp)), type)
+      var = next_var_name
+      filtered_stmts(
+         s(:decl, :'Object*', var),
+         s(:asgn, s(:var, var),
+           s(:call, :xmalloc,
+             s(:args, s(:call, :sizeof, s(:args, s(:lit, class_name)))))),
+             s(:asgn,
+               s(:binary_oper, :'->', s(:var, var), s(:var, :type)),
+               s(:lit, @symbol_table.id_of(class_name))),
+         (:call, ctor, s(:args, s(:var, var), sexp))).with_value(s(:var, var), class_name)
     end
 
     # Translates a string literal.
@@ -44,47 +53,68 @@ class Translator
       sexp = sexp.clone
       # No idea why does it need that many backslashes.
       sexp[1] = sexp[1].gsub('\\', '\\\\\\').gsub("\n", "\\n")
-      s(:stmts).with_value(s(:call, :String_new, s(:args, sexp)), String)
+
+      var = next_var_name
+      filtered_stmts(
+         s(:decl, :'Object*', var),
+         s(:asgn, s(:var, var),
+           s(:call, :xmalloc,
+             s(:args, s(:call, :sizeof, s(:args, s(:lit, :String)))))),
+             s(:asgn,
+               s(:binary_oper, :'->', s(:var, var), s(:var, :type)),
+               s(:lit, @symbol_table.id_of(:String))),
+         s(:call, :String_new, s(:args, s(:var, var), sexp))).with_value(s(:var, var), :String)
     end
 
     # Translates an array literal, such as [1, 2, "three"].
     def translate_array(sexp)
-      if sexp.count == 1
-        s().with_value s(:call, :Array_new, s(:args)), :Array
-      else
-        args = sexp.rest.map { |child| translate_generic_sexp child }
-        var = next_var_name
-        filtered_stmts(
+       var = next_var_name
+       s = filtered_stmts(
           s(:decl, :'Object*', var),
-          s(:asgn, s(:var, var), s(:call, :Array_new, s(:args))),
-          filtered_block(
-            *args,
-            *args.map { |arg| s(:call, :Array_push,
-                                s(:args, s(:var, var), arg.value_sexp)) }
-        )).with_value s(:var, var), :Array
-      end
+          s(:asgn, s(:var, var),
+            s(:call, :xmalloc,
+              s(:args, s(:call, :sizeof, s(:args, s(:lit, :Array)))))),
+              s(:asgn,
+                s(:binary_oper, :'->', s(:var, var), s(:var, :type)),
+                s(:lit, @symbol_table.id_of(:Array))),
+                s(:call, :Array_new, s(:args, s(:var, var))))
+
+       if sexp.count > 1
+           args = sexp.rest.map { |child| translate_generic_sexp child }
+           s << filtered_block(
+                *args, *args.map do |arg|
+                   s(:call, :Array_push, s(:args, s(:var, var), arg.value_sexp))
+                end)
+       end  
+
+       s.with_value(s(:var, var), :Array)
     end
 
     # Translates a hash literal, such as {1 => nil, 2 => "three"}.
     def translate_hash(sexp)
-      if sexp.count == 1
-        s().with_value s(:call, :Hash_new, s(:args)), :Hash
-      else
+      var = next_var_name
+      s = filtered_stmts(
+          s(:decl, :'Object*', var),
+          s(:asgn, s(:var, var),
+            s(:call, :xmalloc,
+              s(:args, s(:call, :sizeof, s(:args, s(:lit, :Hash)))))),
+              s(:asgn,
+                s(:binary_oper, :'->', s(:var, var), s(:var, :type)),
+                s(:lit, @symbol_table.id_of(:Hash))),
+                s(:call, :Hash_new, s(:args, s(:var, var))))
+
+      if sexp.count > 1
         args = sexp.rest.map { |child| translate_generic_sexp child }
         pairs = args.odd.zip args.even
-        var = next_var_name
-        filtered_stmts(
-          s(:decl, :'Object*', var),
-          s(:asgn, s(:var, var), s(:call, :Hash_new, s(:args))),
-          filtered_block(
+        s <<  filtered_block(
             *args,
             *pairs.map do |key,val|
               s(:call, :Hash__INDEX__EQ_,
                 s(:args, s(:var, var), key.value_sexp, val.value_sexp))
-            end
-        )).with_value s(:var, var), :Hash
+            end)
       end
-    end
+
+      s.with_value(s(:var, var), :Hash)
   end
 
   # Translates a 'false'.

@@ -91,14 +91,14 @@ class Translator
       # Do not translate recursive calls until their type is determined 
       return s().with_value_type :recur if type == :recur
       # If the type is unknown we have to perform method search at runtime
-      return generate_runtime_call class_expr, sexp if type.empty?
+      return generate_runtime_call(class_expr, sexp) if type.empty?
       if type == :Class
         sexp[2] = mangle_defs_name sexp[2]
         type = class_expr.class_type
       end
       while type
-        if function_defined? sexp[2], type
-          return call_defined_function sexp[2], type, sexp
+        if function_defined?(sexp[2], type)
+          return call_defined_function(sexp[2], type, sexp)
         end
         type = @symbol_table.parent type
       end
@@ -198,6 +198,9 @@ class Translator
 
     # Returns a sexp calling a constructor. If the constructor hasn't been
     # implemented yet implement_constructor is called.
+    #
+    # TODO: Right now it is impossible to overload initialize method of
+    # stdlib class.
     def call_constructor(sexp)
       var = next_var_name
       def_name = sexp[2]
@@ -206,40 +209,52 @@ class Translator
       unless @symbol_table.has_key? class_name
         die "Unknown class: '#{class_name}'"
       end
-      args_evaluation=[]
+      args_evaluation = []
+      init_call = nil
       impl_name = mangle_function_name(def_name, 0, class_name, [])
-      if not @symbol_table.class_defined_in_stdlib? class_name
+
+      # Evaluate arguments. We need to know what their type is in order to call
+      # appropriate overloaded function.
+      args_evaluation = sexp[3].rest.map { |arg_sexp| translate_generic_sexp arg_sexp }
+
+      if @symbol_table.class_defined_in_stdlib? class_name
+         init_call = s(:call, impl_name,
+                       s(:args, s(:var, var),
+                         *(args_evaluation.map { |arg| arg.value_sexp })))
+      else
         if function_defined? :initialize, class_name
-          # Evaluate arguments. We need to know what their type is in order to call
-          # appropriate overloaded function.
-          args_evaluation = sexp[3].rest.map { |arg_sexp| translate_generic_sexp arg_sexp }
           # Get the defn sexp in which the function has been defined.
-          defn = @symbol_table.function_def class_name, :initialize
-          version = @symbol_table.function_version class_name, :initialize
+          defn = @symbol_table.function_def(class_name, :initialize)
+          version = @symbol_table.function_version(class_name, :initialize)
           # Get types of arguments.
           types = args_evaluation.map { |arg| arg.value_type }
           impl_init_name = mangle_function_name(:initialize, version, class_name, types)
           impl_name = mangle_function_name(def_name, 0, class_name, types)
-          init_fun = unpack_static(@symbol_table.in_class(class_name) do
-            implement_function impl_init_name, defn, types
-          end)
-          init_args = init_fun[3].rest(2)
-          init_body = init_fun[4].rest.rest(-1)
-          @functions_implementations[impl_name] =
-            class_constructor(class_name, impl_name, impl_init_name, init_args)
-        else
-          @functions_implementations[impl_name] =
-            class_constructor(class_name, impl_name)
+          unless function_implemented? impl_name
+            @symbol_table.in_class(class_name) do
+               implement_function impl_init_name, defn, types
+            end
+          end
+          init_call = s(:call, impl_init_name,
+                       s(:args, s(:var, var),
+                         *(args_evaluation.map { |arg| arg.value_sexp })))
         end
       end
-      call = s(:call, impl_name,
-               s(:args, *args_evaluation.map { |arg| arg.value_sexp } ))
-      filtered_stmts(
+      
+      s = filtered_stmts(
         filtered_stmts(class_expr),
         filtered_stmts(*args_evaluation),
         s(:decl, :'Object*', var),
-        s(:asgn, s(:var, var), call)
-      ).with_value s(:var, var), class_name
+        s(:asgn, s(:var, var),
+         s(:call, :xmalloc,
+              s(:args, s(:call, :sizeof, s(:args, s(:lit, class_name)))))),
+        s(:asgn,
+          s(:binary_oper, :'->', s(:var, var), s(:var, :type)),
+          s(:lit, @symbol_table.id_of(class_name))))
+      unless init_call.nil?
+         s << init_call
+      end
+      s.with_value s(:var, var), class_name
     end
 
     # Returns the translated class expression. If it's nil it returns the

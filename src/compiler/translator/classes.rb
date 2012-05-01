@@ -106,7 +106,8 @@ class Translator
 
     # Returns C constructor code for given class
     def class_constructor(class_name, constructor_name, init_name=nil, init_args=[])
-      block = s(:block,
+       var = next_var_name
+       block = s(:block,
           s(:asgn,
             s(:decl, :'Object*', :self),
             s(:call, :xmalloc,
