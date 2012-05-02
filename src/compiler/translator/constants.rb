@@ -27,7 +27,6 @@ class Translator
       # Translates a literal numeric to an empty block with a value equal to a
       # :lit sexp equal to the given literal.
       def translate_lit(sexp)
-         var = next_var_name
          if sexp[1].floor == sexp[1]
             # It's an integer
             ctor = std_init_name(:Fixnum)

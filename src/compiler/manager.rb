@@ -13,7 +13,6 @@ class Manager
     code = StdlibDeclarations + file.read
     translator = Translator.new
     optimizer = Optimizer.new(translator)
-    optimizer.subscribe_to_events
 
     translated_ast = translator.translate(Parser.parse(code))
     filtered_ast = translator.expand_all_stmts(translated_ast)

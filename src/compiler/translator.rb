@@ -94,6 +94,12 @@ class Translator
 
   attr_accessor :symbol_table, :translated_sexp_dict
 
+  # Each call to this method returns a new, unique var name.
+  def next_var_name
+    @next_id ||= 0
+    "_var#{@next_id += 1}".to_sym
+  end
+
   private
 
   include Helpers
@@ -210,11 +216,6 @@ class Translator
   end
 
 
-  # Each call to this method returns a new, unique var name.
-  def next_var_name
-    @next_id ||= 0
-    "_var#{@next_id += 1}".to_sym
-  end
 
   # Returns a sexp representing a call to the boolean_value function with a
   # given value.

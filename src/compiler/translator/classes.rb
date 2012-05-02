@@ -122,7 +122,7 @@ class Translator
           s_type = s(:call, :set_type, s(:args, s(:var, var), s(:var, class_name)))
        end
        
-       filtered_stmts(  
+       s(:stmts,
           s(:decl, :'Object*', var),
           s(:asgn, s(:var, var),
             s(:call, alloc_function,
