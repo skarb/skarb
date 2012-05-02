@@ -23,6 +23,9 @@ class Translator
       raise 'Not an stdlib class' unless declared_as_defined_in_stdlib? sexp
       @symbol_table.in_class sexp[1] do
         @symbol_table.class_defined_in_stdlib
+        if sexp[3][1].include? s(:call, nil, :atomic_alloc, s(:arglist))
+           @symbol_table.class_table[:atomic_alloc] = true
+        end
         set_parent sexp if sexp[2]
         load_instance_variables sexp
         load_methods sexp

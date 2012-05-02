@@ -15,6 +15,7 @@
 #   returns Fixnum
 class Object
   defined_in_stdlib
+  atomic_alloc
 
   def to_s
     defined_as :Object_to__s
@@ -46,6 +47,7 @@ end
 
 class Fixnum
   defined_in_stdlib
+  atomic_alloc
 
   def +(arg)
     defined_as :Fixnum__PLUS_
@@ -108,6 +110,7 @@ end
 
 class Float
   defined_in_stdlib
+  atomic_alloc
 
   def +(arg)
     defined_as :Float__PLUS_

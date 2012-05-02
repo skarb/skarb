@@ -291,6 +291,13 @@ class SymbolTable < Hash
     self[@cclass][:functions][@cfunction][:lvars]
   end
 
+  # True if instanced of this class can be allocated atomicly (object structure
+  # contains no pointers). If no class name is given the current class is taken
+  # as a default.
+  def class_atomic_alloc?(class_name=@cclass)
+    self[class_name][:atomic_alloc]
+  end
+
   # Saves an information that the current class has been defined in the standard
   # library.
   def class_defined_in_stdlib

@@ -7,6 +7,7 @@ describe Translator do
   before do
     @translator = Translator.new
     @rp = RubyParser.new
+    @stdlib_declarations = File.open('../../src/compiler/stdlib.rb').read
   end
 
   # FIXME: Temporal solution
@@ -450,6 +451,10 @@ describe Translator do
       .join.should_not include "call_method"
   end
 
+  it 'should use atomic xmalloc when appropriate' do
+    translate_code(@stdlib_declarations + "2").join.should include "xmalloc_atomic"
+  end
+
   it 'should discover return type of recursive call' do
     translate_code("class A; def foo; end; end;
                         def rec; if 1; rec; else; A.new; end; end;
@@ -460,4 +465,6 @@ describe Translator do
     translate_code("a=2")
     @translator.translated_sexp_dict.should include :lasgn 
   end
+
+
 end

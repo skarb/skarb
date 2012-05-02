@@ -107,11 +107,15 @@ class Translator
     # Returns C code allocating new object of given class and storing pointer
     # in given variable.
     def class_constructor(class_name, var)
+       alloc_function = :xmalloc
        if @symbol_table.has_key? class_name
           # We know legal class id.
           s_type = s(:asgn,
-                s(:binary_oper, :'->', s(:var, var), s(:var, :type)),
-                s(:lit, @symbol_table.id_of(class_name)))
+                     s(:binary_oper, :'->', s(:var, var), s(:var, :type)),
+                     s(:lit, @symbol_table.id_of(class_name)))
+          if @symbol_table.class_atomic_alloc? class_name
+             alloc_function = :xmalloc_atomic
+          end
        else
           # We assume that the class is defined in C file and will be included
           # later on.
@@ -121,7 +125,7 @@ class Translator
        filtered_stmts(  
           s(:decl, :'Object*', var),
           s(:asgn, s(:var, var),
-            s(:call, :xmalloc,
+            s(:call, alloc_function,
               s(:args, s(:call, :sizeof, s(:args, s(:lit, class_name)))))),
           s_type)
     end
