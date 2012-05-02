@@ -51,6 +51,7 @@ class Emitter
       begin
         Emitter.send 'emit_' + sexp[0].to_s, sexp
       rescue NoMethodError
+        p sexp
         raise UnexpectedSexpError.new sexp[0]
       end
     end

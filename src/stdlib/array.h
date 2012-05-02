@@ -18,10 +18,17 @@ typedef struct {
 } s_Array;
 extern s_Array vs_Array;
 
+
 /**
  * Casts a given Object to Array.
  */
 #define as_array(obj) ((Array*) (obj))
+
+/**
+ * Inits internal data.
+ */
+void Array__INIT(Object* x);
+
 
 /**
  * Array#new

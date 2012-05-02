@@ -24,6 +24,11 @@ extern s_Hash vs_Hash;
 #define as_hash(obj) ((Hash*) (obj))
 
 /**
+ * Inits internal data.
+ */
+void Hash__INIT(Object* x);
+
+/**
  * Hash#new
  */
 Object * Hash_new();

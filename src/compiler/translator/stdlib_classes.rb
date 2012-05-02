@@ -29,6 +29,11 @@ class Translator
       end
     end
 
+    # Returns the name of special init macro for a given class.
+    def std_init_name(class_name)
+      "#{class_name}__INIT".to_sym
+    end
+
     private
 
     # Puts all referenced instance variables in the symbol_table.

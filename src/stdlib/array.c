@@ -13,10 +13,14 @@
 
 s_Array vs_Array = {{{Class_t}, {Array_t}}};
 
+void Array__INIT(Object* x) {
+   (as_array(x)->arr = g_array_new(FALSE, FALSE, sizeof(Object*)));
+}
+
 Object * Array_new() {
     Array *self = xmalloc(sizeof(Array));
     set_type(self, Array);
-    self->arr = g_array_new(FALSE, FALSE, sizeof(Object*));
+    Array__INIT(as_object(self));
     return as_object(self);
 }
 

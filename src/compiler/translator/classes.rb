@@ -104,25 +104,26 @@ class Translator
       end
     end
 
-    # Returns C constructor code for given class
-    def class_constructor(class_name, constructor_name, init_name=nil, init_args=[])
-       var = next_var_name
-       block = s(:block,
-          s(:asgn,
-            s(:decl, :'Object*', :self),
+    # Returns C code allocating new object of given class and storing pointer
+    # in given variable.
+    def class_constructor(class_name, var)
+       if @symbol_table.has_key? class_name
+          # We know legal class id.
+          s_type = s(:asgn,
+                s(:binary_oper, :'->', s(:var, var), s(:var, :type)),
+                s(:lit, @symbol_table.id_of(class_name)))
+       else
+          # We assume that the class is defined in C file and will be included
+          # later on.
+          s_type = s(:call, :set_type, s(:args, s(:var, var), s(:var, class_name)))
+       end
+       
+       filtered_stmts(  
+          s(:decl, :'Object*', var),
+          s(:asgn, s(:var, var),
             s(:call, :xmalloc,
               s(:args, s(:call, :sizeof, s(:args, s(:lit, class_name)))))),
-          s(:asgn,
-            s(:binary_oper, :'->', s(:var, :self), s(:var, :type)),
-            s(:lit, @symbol_table.id_of(class_name))))
-      unless init_name.nil?
-        block << s(:call, init_name,
-                   s(:args, s(:var, :self),
-                      *(init_args.map { |x| s(:var, x[2]) })))
-      end
-      block << s(:return, s(:var, :self))
-      s(:static,
-        s(:defn, :'Object*', constructor_name, s(:args, *init_args), block))
+          s_type)
     end
   
     # Puts main function for class in @functions_implementations and returns

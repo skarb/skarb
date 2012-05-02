@@ -20,6 +20,11 @@ extern s_Float vs_Float;
 #define as_float(obj) ((Float*) (obj))
 
 /**
+ * Inits internal data.
+ */
+#define Float__INIT(x,y) (as_float(x)->val = y)
+
+/**
  * Float#new
  */
 Object * Float_new(double value);

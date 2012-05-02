@@ -22,7 +22,7 @@ Object * Fixnum_new(int value) {
         return as_object(cached_fixnums + 1 + value);
     Fixnum *self = xmalloc_atomic(sizeof(Fixnum));
     set_type(self, Fixnum);
-    self->val = value;
+    Fixnum__INIT(self, value);
     return as_object(self);
 }
 

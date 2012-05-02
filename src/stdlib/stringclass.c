@@ -29,7 +29,7 @@ static GString* g_string_sized_new_atomic(gsize dfl_size) {
 /*
  * Stolen from GLib's gstring.c, adapted for GC_MALLOC_ATOMIC.
  */
-static GString* g_string_new_atomic(const gchar *init) {
+GString* g_string_new_atomic(const gchar *init) {
   GString *string;
 
   if (init == NULL || *init == '\0')
@@ -49,7 +49,7 @@ static GString* g_string_new_atomic(const gchar *init) {
 Object * String_new(char *value) {
     String *self = xmalloc(sizeof(String));
     set_type(self, String);
-    self->val = g_string_new_atomic(value);
+    String__INIT(self, value);
     return as_object(self);
 }
 

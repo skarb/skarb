@@ -218,7 +218,7 @@ class Translator
       args_evaluation = sexp[3].rest.map { |arg_sexp| translate_generic_sexp arg_sexp }
 
       if @symbol_table.class_defined_in_stdlib? class_name
-         init_call = s(:call, impl_name,
+         init_call = s(:call, std_init_name(class_name),
                        s(:args, s(:var, var),
                          *(args_evaluation.map { |arg| arg.value_sexp })))
       else
@@ -244,13 +244,7 @@ class Translator
       s = filtered_stmts(
         filtered_stmts(class_expr),
         filtered_stmts(*args_evaluation),
-        s(:decl, :'Object*', var),
-        s(:asgn, s(:var, var),
-         s(:call, :xmalloc,
-              s(:args, s(:call, :sizeof, s(:args, s(:lit, class_name)))))),
-        s(:asgn,
-          s(:binary_oper, :'->', s(:var, var), s(:var, :type)),
-          s(:lit, @symbol_table.id_of(class_name))))
+        class_constructor(class_name, var)) 
       unless init_call.nil?
          s << init_call
       end

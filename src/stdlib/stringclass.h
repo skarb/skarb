@@ -14,6 +14,7 @@
  */
 #ifndef GLIB_MAJOR_VERSION
 typedef void GString;
+typedef char gchar;
 #endif /* GString */
 
 typedef struct {
@@ -30,6 +31,16 @@ extern s_String vs_String;
  * Casts a given Object to String.
  */
 #define as_string(obj) ((String*) (obj))
+
+/**
+ * Inits internal data.
+ */
+#define String__INIT(x,y) (as_string(x)->val = g_string_new_atomic(y))
+
+/*
+ * Stolen from GLib's gstring.c, adapted for GC_MALLOC_ATOMIC.
+ */
+GString* g_string_new_atomic(const gchar *init);
 
 /**
  * String#new

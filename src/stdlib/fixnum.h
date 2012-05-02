@@ -20,6 +20,11 @@ extern s_Fixnum vs_Fixnum;
 #define as_fixnum(obj) ((Fixnum*) (obj))
 
 /**
+ * Inits internal data.
+ */
+#define Fixnum__INIT(x,y) (as_fixnum(x)->val = y)
+
+/**
  * Fixnum#new
  */
 Object * Fixnum_new(int value);

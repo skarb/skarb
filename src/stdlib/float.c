@@ -14,7 +14,7 @@ s_Float vs_Float = {{{Class_t}, {Float_t}}};
 Object * Float_new(double value) {
     Float *self = xmalloc_atomic(sizeof(Float));
     set_type(self, Float);
-    self->val = value;
+    Float__INIT(self, value);
     return as_object(self);
 }
 

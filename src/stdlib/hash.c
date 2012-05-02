@@ -26,10 +26,15 @@ static guint hash_func(gconstpointer obj) {
     return as_object(obj)->type;
 }
 
+void Hash__INIT(Object* x)
+{
+   as_hash(x)->hash = g_hash_table_new(hash_func, equal_func);
+}
+
 Object * Hash_new() {
     Hash *self = xmalloc(sizeof(Hash));
     set_type(self, Hash);
-    self->hash = g_hash_table_new(hash_func, equal_func);
+    Hash__INIT(as_object(self));
     return as_object(self);
 }
 
