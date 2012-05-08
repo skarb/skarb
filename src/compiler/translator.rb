@@ -16,7 +16,6 @@ require 'translator/argv'
 require 'translator/blocks'
 require 'translator/mangling'
 require 'translator/event_manager'
-require 'optimizations/math_inliner'
 
 # Responsible for transforming a Ruby AST to its C equivalent.
 # It performs tree traversal by recursive execution of functions
@@ -159,9 +158,10 @@ class Translator
     @translated_sexp_dict.add_entry(sexp, translated_sexp)
 
     # Notify that the sexp was translated.
-    @event_manager.fire_event("#{sexp[0]}_translated".to_sym,
-                             EventStruct.new("#{sexp[0]}_translated".to_sym,
-                                             self, sexp, translated_sexp))
+    for event in ["#{sexp[0]}_translated".to_sym, :generic_sexp_translated] do
+       @event_manager.fire_event(event, EventStruct.new(event, self, sexp,
+                                                        translated_sexp))
+    end
     translated_sexp
   end
 
