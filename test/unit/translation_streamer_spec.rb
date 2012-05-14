@@ -18,9 +18,20 @@ describe TranslationStreamer do
     @functions = []
   end
 
+  def Sexp.marked?
+    false
+  end
+
+  def mark_sexp(sexp)
+    def sexp.marked?
+       true
+    end
+  end
+
   def lit_translated(event)
     @lit_count += 1
-    p event.sexp
+    throw "Duplicated sexp!" if event.sexp.marked?
+    mark_sexp(event.sexp)
   end
 
   def block_opened(event)
@@ -50,6 +61,10 @@ describe TranslationStreamer do
   it 'should keep track of current function context' do
     @translator.translate(Parser.parse("a = 10; def foo; a = 20; end; a = 30; def bar; foo; end; a = 40"))
     @functions.should == [:M_Object_foo, :M_Object_bar] 
+  end
+
+  it 'should avoid streaming duplicates' do
+    @translator.translate(Parser.parse("a = 10; def foo; a = 20; end; a = 30; def bar; foo; end; a = 40"))
   end
 
 end
