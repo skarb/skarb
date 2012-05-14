@@ -148,8 +148,8 @@ class Translator
     # which accepts given evaluated arguments. If the function isn't implemeted
     # yet its AST gets translated.
     def find_defined_function(class_name, def_name, args_types)
-      defn = @symbol_table.function_def class_name, def_name
-      version = @symbol_table.function_version class_name, def_name
+      defn = @symbol_table.function_def(class_name, def_name)
+      version = @symbol_table.function_version(class_name, def_name)
       # Here we append version number to function name
       impl_name = mangle_function_name(def_name, version, class_name, args_types)
       args_types.unshift class_name
@@ -176,7 +176,7 @@ class Translator
       return s().with_value_type :recur if args_types.include? :recur
       # Get the defn sexp in which the function has been defined.
       if @symbol_table.class_defined_in_stdlib? class_name
-        defn = @symbol_table.function_def class_name, def_name
+        defn = @symbol_table.function_def(class_name, def_name)
         impl_name = defn[1]
         if defn.value_type.is_a? Hash
           ret_type = defn.value_type[args_types.join '_']
@@ -184,7 +184,7 @@ class Translator
           ret_type = defn.value_type
         end
       else
-        impl_name = find_defined_function class_name, def_name, args_types
+        impl_name = find_defined_function(class_name, def_name, args_types)
         ret_type = return_type impl_name
       end
       var = next_var_name
@@ -271,8 +271,9 @@ class Translator
       # We don't want to destroy the original table
       defn_args = s(:args)
       lvars = []
-      body = @symbol_table.in_function defn[1] do
-        ([:self] + defn_get_args(defn)).zip args_types do |arg, type|
+      #body = @symbol_table.in_function defn[1] do
+      body = @symbol_table.in_function(impl_name, defn) do
+        ([:self] + defn_get_args(defn)).zip(args_types) do |arg, type|
           @symbol_table.add_lvar arg
           @symbol_table.set_lvar_type arg, type
           @symbol_table.set_lvar_kind arg, :param

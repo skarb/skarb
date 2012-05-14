@@ -103,12 +103,13 @@ class SymbolTable < Hash
 
   # Executes a block in a given function context and resets the current function
   # to the previous value.
-  def in_function(name)
+  def in_function(name, fun_def)
     raise 'Block expected' unless block_given?
 
     # Enter new function context and open its basic block.
     prev_function = cfunction
     self.cfunction = name
+    self[@cclass][:functions][@cfunction][:def] = fun_def
     prev_block = @cblock
     @cblock = self[@cclass][:functions][@cfunction]
     @event_manager.fire_event(:function_opened, FunctionEvent.new(name))
