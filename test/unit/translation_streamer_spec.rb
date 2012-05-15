@@ -44,7 +44,6 @@ describe TranslationStreamer do
 
   def cfunction_changed(event)
     @functions << event.new_value
-    puts "#{event.old_value} -> #{event.new_value}"
   end
 
   it 'should fire event for every C sexp in translated code' do

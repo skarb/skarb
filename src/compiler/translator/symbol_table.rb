@@ -107,7 +107,7 @@ class SymbolTable < Hash
     raise 'Block expected' unless block_given?
 
     # Enter new function context and open its basic block.
-    prev_function = cfunction
+    prev_function = @cfunction
     self.cfunction = name
     self[@cclass][:functions][@cfunction][:def] = fun_def
     prev_block = @cblock

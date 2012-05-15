@@ -1,9 +1,8 @@
-require 'optimizations/memory_allocator/connection_graph'
+require 'optimizations/connection_graph_builder/connection_graph'
 
-class MemoryAllocator
-   # Local symbol table for MemoryAllocator purposes. It stores connection graph
-   # nodes organized by class, function and block (just like in global symbol
-   # table used by translator).
+class ConnectionGraphBuilder
+   # Local symbol table for ConnectionGraphBuilder purposes. It stores connection
+   # graph nodes organized by function and block (natural structure of C code).
    #
    # Rule: information from upper blocks can be used but modifications are made
    # only to last block. Upper blocks are updated when their children are closed.
@@ -13,26 +12,15 @@ class MemoryAllocator
                                   :abstract_objects)
       BlockStruct = Struct.new(:vars, :parent)
 
-      attr_reader :cclass, :cfunction
- 
-      # Synchronizes current class and function with another symbol table. 
-      def synchronize(symbol_table) 
-         self.cclass = symbol_table.cclass
-         self.cfunction = symbol_table.cfunction
-      end
+      attr_reader :cfunction
 
       # Adds new function in current class context with mandatory keys.
       def add_function(f_name)
-         self[@cclass][f_name] = FunctionStruct.new(BlockStruct.new(
+         self[f_name] = FunctionStruct.new(BlockStruct.new(
             ConnectionGraph.new, nil), [], [], [])
          assure_existence(:return, ConnectionGraph::Node, :arg_escape)
          assure_existence(:self, ConnectionGraph::PhantomNode, :arg_escape)
          formal_params << :self
-      end
-
-      # Adds new class with mandatory keys.
-      def add_class(class_name)
-         self[class_name] = {} 
       end
 
       # Adds key-node pair to the last open block.
@@ -40,16 +28,10 @@ class MemoryAllocator
          last_block[:vars][key] = node
       end
 
-      # Current class setter. Creates new class if necessary.
-      def cclass=(class_name)
-         @cclass = class_name
-         add_class(@cclass) unless self.has_key? @cclass
-      end
-
       # Current function setter. Creates new function if necessary.
       def cfunction=(f_name)
          @cfunction = f_name
-         add_function(@cfunction) unless self[@cclass].has_key? @cfunction
+         add_function(@cfunction) unless self.has_key? @cfunction
       end
 
       # Opens new block representing conditional program branch.
@@ -140,7 +122,7 @@ class MemoryAllocator
 
       # Last opened block getter.
       def last_block
-         self[@cclass][@cfunction][:last_block]
+         self[@cfunction][:last_block]
       end
 
       # Connection graph associated with last block.
@@ -150,22 +132,22 @@ class MemoryAllocator
 
       # List of abstract objects allocated in this function.
       def abstract_objects
-         self[@cclass][@cfunction][:abstract_objects]
+         self[@cfunction][:abstract_objects]
       end
 
       # List of formal parameters in this function.
       def formal_params
-         self[@cclass][@cfunction][:formal_params]
+         self[@cfunction][:formal_params]
       end
 
       # List of class variables referenced in this function.
       def class_vars
-         self[@cclass][@cfunction][:class_vars]
+         self[@cfunction][:class_vars]
       end
 
       # Last opened block setter.
       def last_block=(val)
-         self[@cclass][@cfunction][:last_block] = val
+         self[@cfunction][:last_block] = val
       end
 
       # Searches for variable by traversing up the block structure and

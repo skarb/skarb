@@ -1,43 +1,43 @@
 require 'sexp_parsing'
 require 'extensions'
-require 'optimizations/memory_allocator/local_table'
-require 'optimizations/memory_allocator/connection_graph'
+require 'optimizations/connection_graph_builder/local_table'
+require 'optimizations/connection_graph_builder/connection_graph'
 
-# Class responsible for optimising memory allocation through stack allocation.
-# It main function is to build connection graphs for subsequent functions.
-class MemoryAllocator 
+# This class analyzes C ast code streamed by TranslationStreamer
+# and builds connection graph abstraction for it.
+class ConnectionGraphBuilder 
 
    include SexpParsing
 
    attr_reader :local_table
 
-   SymbolTableEvents = [:block_opened, :block_closed, :function_opened, :function_closed, :cclass_changed, :cfunction_changed]
-   TranslatorEvents = [:lasgn_translated, :iasgn_translated, :cvasgn_translated, :cvdecl_translated, :lit_translated,
-      :str_translated, :lvar_translated, :ivar_translated, :cvar_translated, :call_translated, :return_translated, :self_translated]
+   SymbolTableEvents = [:block_opened, :block_closed, :function_opened,
+      :function_closed, :cfunction_changed]
+
+   TranslatorEvents = [:lasgn_translated, :iasgn_translated,
+      :cvasgn_translated, :cvdecl_translated, :lit_translated, :str_translated,
+      :lvar_translated, :ivar_translated, :cvar_translated, :call_translated,
+      :return_translated, :self_translated]
 
    def initialize(translator)
       @s_table = translator.symbol_table
       @local_table = LocalTable.new
-      @local_table.synchronize(@s_table)
+      @local_table.cfunction = @s_table.cfunction
 
       @obj_counter = 0
 
       SymbolTableEvents.each do 
-         |event| @s_table.subscribe(event, self.method(event)) 
+         |event| @s_table.subscribe(event, self.method(event))
       end
+
       TranslatorEvents.each do 
          |event| translator.subscribe(event, self.method(event)) 
       end
    end
 
-   ### BEGIN - Symbol table events handlers ###
-   
-   def update_context(event)
-      @local_table.synchronize(@s_table)
+   def cfunction_changed(event)
+      @local_table.cfunction = event.new_value
    end
-
-   alias :cclass_changed :update_context
-   alias :cfunction_changed :update_context
 
    def block_opened(event)
       @local_table.open_block
@@ -50,7 +50,7 @@ class MemoryAllocator
    # Creates phantom node for each formal parameter and normal nodes for parameter
    # variables.
    def function_opened(event)
-      defn = @s_table.function_def(@s_table.cclass, event.function)
+      defn = @s_table.function_table[:def]
       args = defn_get_args(defn)
       p_no = 1
       args.each do |arg|
@@ -73,10 +73,6 @@ class MemoryAllocator
 
       @local_table.cfunction = n_function
    end
-
-   ### END - Symbol table events handlers ###
-
-   ### BEGIN - Translator events handlers ###
 
    def lasgn_translated(event)
       var = lasgn_get_var(event.original_sexp)

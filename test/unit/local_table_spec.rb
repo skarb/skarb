@@ -1,11 +1,10 @@
 require 'rspec'
 require 'set'
-require 'optimizations/memory_allocator/local_table'
+require 'optimizations/connection_graph_builder/local_table'
 
-describe MemoryAllocator::LocalTable do
+describe ConnectionGraphBuilder::LocalTable do
   before do
-    @table = MemoryAllocator::LocalTable.new
-    @table.cclass = :my_class
+    @table = ConnectionGraphBuilder::LocalTable.new
     @table.cfunction = :my_function
   end
 
