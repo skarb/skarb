@@ -142,6 +142,19 @@ class ConnectionGraphBuilder
          create_new_object(event)
       else
          f_name = translated_fun_name(event.translated_sexp)
+
+         # TODO: Handle functions without connection graph.
+         unless @local_table.has_key? f_name
+            fun_key = next_fun_key
+            @local_table.assure_existence(fun_key)
+            obj_key = next_obj_key
+            @local_table.assure_existence(obj_key, ConnectionGraph::ObjectNode)
+            @local_table.last_graph.add_edge(fun_key, obj_key)
+            add_graph_node(event.original_sexp, fun_key)
+            return
+         end
+        
+         # Update arguments 
          caller_obj = call_get_object(event.original_sexp)
          add_graph_node(caller_obj, :self) if caller_obj.nil?
          a_args = ([caller_obj] +
@@ -155,6 +168,7 @@ class ConnectionGraphBuilder
             end
          end
 
+         # Model returned value
          fun_key = next_fun_key
          @local_table.assure_existence(fun_key)
          update_ref_node(fun_key, :return, f_name, mapping)
@@ -213,7 +227,12 @@ class ConnectionGraphBuilder
       add_graph_node(event.original_sexp, var_id)
    end
 
-   alias :ivar_translated :lvar_translated
+   def ivar_translated(event)
+      var_id = "self_#{event.original_sexp[1]}".to_sym
+      @local_table.assure_existence(var_id)
+      add_graph_node(event.original_sexp, var_id)
+   end
+
    alias :cvar_translated :lvar_translated
 
    ### END - Translator events handlers ###

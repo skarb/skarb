@@ -3,21 +3,21 @@
 require 'graphviz'
 require 'translator'
 require 'parser'
-require 'optimizations/memory_allocator'
-require 'optimizations/memory_allocator/connection_graph'
+require 'optimizations/connection_graph_builder'
+require 'optimizations/connection_graph_builder/connection_graph'
 
-unless ARGV.count == 2
-   puts "Usage: #{$0} code_file output_file"
+unless ARGV.count == 3
+   puts "Usage: #{$0} code_file function output_file"
    exit
 end
 
 
 translator = Translator.new
-mem_alloc = MemoryAllocator.new(translator)
+graph_builder = ConnectionGraphBuilder.new(translator)
 
 translator.translate(Parser.parse(File.open(ARGV[0]).read))
 
-l = mem_alloc.local_table.last_graph
+l = graph_builder.local_table[ARGV[1].to_sym][:last_block][:vars]
 g = GraphViz.new( :G, :type => :digraph )
 
 vertices = {}
@@ -33,7 +33,7 @@ l.each do |from, from_node|
    from_node.out_edges.each { |to| g.add_edges(vertices[from], vertices[to]) }
 end
 
-g.output( :ps2 => ARGV[1] )
+g.output( :ps2 => ARGV[2] )
 
 
 
