@@ -17,6 +17,14 @@ graph_builder = ConnectionGraphBuilder.new(translator)
 
 translator.translate(Parser.parse(File.open(ARGV[0]).read))
 
+fun = ARGV[1].to_sym
+
+unless graph_builder.local_table.include? fun
+   puts "No function named #{fun}. Please choose from the following:"
+   p graph_builder.local_table.keys
+   exit
+end
+
 l = graph_builder.local_table[ARGV[1].to_sym][:last_block][:vars]
 g = GraphViz.new( :G, :type => :digraph )
 

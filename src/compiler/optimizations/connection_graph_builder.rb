@@ -205,7 +205,7 @@ class ConnectionGraphBuilder
          oa = (mapping.has_key? ob) ? mapping[ob] : ob
 
          unless @local_table.points_to_set(a_fid).include? oa
-            @local_table.assure_existence(oa)
+            @local_table.assure_existence(oa, ConnectionGraph::ObjectNode)
             @local_table.last_graph.add_edge(a_fid, oa)
          end
          update_obj_node(oa, ob, b_fun, mapping)
