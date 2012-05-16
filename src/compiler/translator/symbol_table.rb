@@ -118,7 +118,7 @@ class SymbolTable < Hash
     retval = yield
     
     # Change the context to the previous function and block.
-    @cfunction = prev_function
+    self.cfunction = prev_function
     @cblock = prev_block
     @event_manager.fire_event(:function_closed, FunctionEvent.new(name))
     retval

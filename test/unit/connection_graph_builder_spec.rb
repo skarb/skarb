@@ -46,7 +46,7 @@ describe ConnectionGraphBuilder do
   it 'should accept global and instance variables' do
      @translator.translate(Parser.parse("p = @@a; @b = p"))
      @graph_builder.local_table.last_graph[:p].out_edges.should == Set[:@@a]
-     @graph_builder.local_table.last_graph[:@b].out_edges.should == Set[:p]
+     @graph_builder.local_table.last_graph[:'self_@b'].out_edges.should == Set[:p]
   end
 
   it 'should accept literals and strings' do
@@ -80,15 +80,16 @@ describe ConnectionGraphBuilder do
 
   it 'should model instance variable assignment as edge from self object' do
      @translator.translate(Parser.parse("@a = 1"))
-     @graph_builder.local_table.last_graph[:self].out_edges.should == Set[:@a]
-     @graph_builder.local_table.last_graph[:@a].out_edges.should == Set[:"'o1"]
+     @graph_builder.local_table.last_graph[:self].out_edges.should == Set[:'self_@a']
+     @graph_builder.local_table.last_graph[:'self_@a'].out_edges.should == Set[:"'o1"]
   end
 
   it 'should correctly merge blocks with instance variables' do
      @translator.translate(Parser.parse("@a = 1; if 1; @a = 2; @b = 3; end"))
-     @graph_builder.local_table.last_graph[:self].out_edges.should == Set[:@a, :@b]
-     @graph_builder.local_table.last_graph[:@a].out_edges.should == Set[:"'o1", :"'o3"]
-     @graph_builder.local_table.last_graph[:@b].out_edges.should == Set[:"'o4"]
+     @graph_builder.local_table.last_graph[:self].out_edges.should == Set[:'self_@a',
+        :'self_@b']
+     @graph_builder.local_table.last_graph[:'self_@a'].out_edges.should == Set[:"'o1", :"'o3"]
+     @graph_builder.local_table.last_graph[:'self_@b'].out_edges.should == Set[:"'o4"]
   end
 
   it 'should update escape state of all nodes at function exit' do
@@ -97,7 +98,7 @@ describe ConnectionGraphBuilder do
      vars = f_table[:last_block][:vars]
      vars[:@@a].escape_state.should == :global_escape
      vars[:"'o1"].escape_state.should == :global_escape
-     vars[:@a].escape_state.should == :arg_escape
+     vars[:'self_@a'].escape_state.should == :arg_escape
      vars[:"'o2"].escape_state.should == :arg_escape
      vars[:a].escape_state.should == :arg_escape
      vars[:"'o3"].escape_state.should == :arg_escape
@@ -105,13 +106,28 @@ describe ConnectionGraphBuilder do
      vars[:"'o4"].escape_state.should == :no_escape
   end 
 
-  #it 'should update connection graph basing on information from called functions' do
-  #   @translator.translate(Parser.parse("def p=(v); @p = v; end; p=2;"))
-  #   @graph_builder.local_table[:M_Object].each_key { |k| puts k } 
-  #   @translator.translate(Parser.parse("class A; def p=(v); @p = v; end; end;
-  #                                       a = A.new; a.p=1"))
-  #   @graph_builder.local_table.last_graph[:"'o1"].out_edges.should == Set[:"'o1_@p"]
-  #   @graph_builder.local_table.last_graph[:"'o1_@p"].out_edges.should == Set[:"'o2"]
+  it 'should update connection graph basing on information from called functions' do
+     @translator.translate(Parser.parse("class A; def p=(v); @p = v; end; end;
+                                         a = A.new; a.p=1"))
+     main_graph = @graph_builder.local_table[:_main][:last_block][:vars]
+     main_graph[:"'o1"].out_edges.should == Set[:"'o1_@p"]
+     main_graph[:"'o1_@p"].out_edges.should == Set[:"'o2"]
+  end
+
+  it 'should record object returned from function' do
+     @translator.translate(Parser.parse("def foo; return 1; end; a = foo"))
+     main_graph = @graph_builder.local_table[:_main][:last_block][:vars]
+     main_graph[:a].out_edges.should == Set[:"'f1"]
+     main_graph[:"'f1"].out_edges.should == Set[:"'o2"]
+  end
+
+  #it 'should correctly update nested calls' do
+  #   @translator.translate(Parser.parse("class A; def p=(v); @p = v; end;
+  #                                       def a; self; end; end;
+  #                                       a = A.new; a.a.a.a.a.p=1"))
+  #   main_graph = @graph_builder.local_table[:_main][:last_block][:vars]
+  #   main_graph[:"'o1"].out_edges.should == Set[:"'o1_@p"]
+  #   main_graph[:"'o1_@p"].out_edges.should == Set[:"'o2"]
   #end
 
 end

@@ -32,7 +32,7 @@ class ConnectionGraph < Hash
    end
 
    # Node representing formal function parameter.
-   class PhantomNode < Node
+   class PhantomNode < ObjectNode
    end
 
    def add_edge(from_vertex, to_vertex)

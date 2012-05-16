@@ -271,7 +271,6 @@ class Translator
       # We don't want to destroy the original table
       defn_args = s(:args)
       lvars = []
-      #body = @symbol_table.in_function defn[1] do
       body = @symbol_table.in_function(impl_name, defn) do
         ([:self] + defn_get_args(defn)).zip(args_types) do |arg, type|
           @symbol_table.add_lvar arg

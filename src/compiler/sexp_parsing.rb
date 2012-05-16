@@ -27,8 +27,16 @@ module SexpParsing
       sexp[2]
    end
 
+   def call_get_args(sexp)
+      sexp[3].drop(1)
+   end
+
    def defn_get_args(sexp)
       sexp[2].drop(1)
+   end
+
+   def translated_fun_name(c_sexp)
+      c_sexp.last.last[1]
    end
 
 end

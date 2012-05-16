@@ -59,7 +59,7 @@ describe TranslationStreamer do
 
   it 'should keep track of current function context' do
     @translator.translate(Parser.parse("a = 10; def foo; a = 20; end; a = 30; def bar; foo; end; a = 40"))
-    @functions.should == [:M_Object_foo, :M_Object_bar] 
+    @functions.should == [:M_Object_foo, :_main, :M_Object_bar, :_main] 
   end
 
   it 'should avoid streaming duplicates' do

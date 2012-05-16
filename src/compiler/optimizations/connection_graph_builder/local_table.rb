@@ -20,7 +20,6 @@ class ConnectionGraphBuilder
             ConnectionGraph.new, nil), [], [], [])
          assure_existence(:return, ConnectionGraph::Node, :arg_escape)
          assure_existence(:self, ConnectionGraph::PhantomNode, :arg_escape)
-         formal_params << :self
       end
 
       # Adds key-node pair to the last open block.
@@ -153,13 +152,43 @@ class ConnectionGraphBuilder
       # Searches for variable by traversing up the block structure and
       # returns graph node corresponding to it. If no node can be found nil
       # is returned. Key can be :lvars, :ivars or :cvars.
-      def get_var_node(var)
+      def get_var_node(var, function=@cfunction)
+         ret = nil
+         old_function = @cfunction
+         @cfunction = function
+         
          cblock = last_block
          begin
-            return cblock[:vars][var] if cblock[:vars].has_key? var
+            if cblock[:vars].has_key? var
+               ret = cblock[:vars][var]
+               break
+            end
             cblock = cblock[:parent]
          end until cblock.nil?
-         nil
+      
+         @cfunction = old_function
+         ret      
+      end
+
+      # Collects all object nodes ids which are pointed to by var node. It
+      # recursively follows deferred edges.
+      def points_to_set(var, function=@cfunction)
+         old_function = @cfunction
+         @cfunction = function
+         set = []
+
+         update_set = Proc.new do |v|
+            v_node = get_var_node(v)
+            if v_node.is_a? ConnectionGraph::ObjectNode
+               set << v
+            else
+               v_node.out_edges.each { |u| update_set.call(u) }
+            end
+         end
+         update_set.call(var)
+
+         @cfunction = old_function
+         set
       end
 
       # Copies variable node and places the copy in the last block. It is necessary

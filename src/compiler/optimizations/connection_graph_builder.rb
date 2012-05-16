@@ -5,6 +5,8 @@ require 'optimizations/connection_graph_builder/connection_graph'
 
 # This class analyzes C ast code streamed by TranslationStreamer
 # and builds connection graph abstraction for it.
+#
+# TODO: Model implicit return.
 class ConnectionGraphBuilder 
 
    include SexpParsing
@@ -14,7 +16,7 @@ class ConnectionGraphBuilder
    SymbolTableEvents = [:block_opened, :block_closed, :function_opened,
       :function_closed, :cfunction_changed]
 
-   TranslatorEvents = [:lasgn_translated, :iasgn_translated,
+   TranslatorEvents = [:lasgn_translated, :iasgn_translated, :attrasgn_translated,
       :cvasgn_translated, :cvdecl_translated, :lit_translated, :str_translated,
       :lvar_translated, :ivar_translated, :cvar_translated, :call_translated,
       :return_translated, :self_translated]
@@ -25,6 +27,7 @@ class ConnectionGraphBuilder
       @local_table.cfunction = @s_table.cfunction
 
       @obj_counter = 0
+      @fun_counter = 0
 
       SymbolTableEvents.each do 
          |event| @s_table.subscribe(event, self.method(event))
@@ -50,9 +53,15 @@ class ConnectionGraphBuilder
    # Creates phantom node for each formal parameter and normal nodes for parameter
    # variables.
    def function_opened(event)
+      # If function was already translated, its connection graph has to be reseted.
+      if @local_table.formal_params.length > 0
+         @local_table.add_function(@local_table.cfunction)
+      end
+
       defn = @s_table.function_table[:def]
       args = defn_get_args(defn)
       p_no = 1
+      @local_table.formal_params << :self
       args.each do |arg|
          formal_param = "'p#{p_no}".to_sym
          @local_table.assure_existence(arg)
@@ -84,6 +93,7 @@ class ConnectionGraphBuilder
   
    def iasgn_translated(event)
       var = iasgn_get_var(event.original_sexp)
+      var = "self_#{var}".to_sym
       @local_table.assure_existence(var)
       @local_table.assure_existence(:self)
       rsexp = iasgn_get_right(event.original_sexp)
@@ -130,7 +140,66 @@ class ConnectionGraphBuilder
    def call_translated(event)
       if call_get_method(event.original_sexp) == :new
          create_new_object(event)
+      else
+         f_name = translated_fun_name(event.translated_sexp)
+         caller_obj = call_get_object(event.original_sexp)
+         add_graph_node(caller_obj, :self) if caller_obj.nil?
+         a_args = ([caller_obj] +
+            call_get_args(event.original_sexp)).map { |a| a.graph_node }
+         f_args = @local_table[f_name][:formal_params]
+         mapping = Hash[ f_args.zip(a_args) ]
+    
+         mapping.each_pair do |f_arg, a_arg|
+            @local_table.points_to_set(a_arg).each do |a_obj|
+               update_obj_node(a_obj, f_arg, f_name, mapping)
+            end
+         end
+
+         fun_key = next_fun_key
+         @local_table.assure_existence(fun_key)
+         update_ref_node(fun_key, :return, f_name, mapping)
+         add_graph_node(event.original_sexp, fun_key)
       end
+   end
+
+   alias :attrasgn_translated :call_translated
+   
+   # a -- caller object
+   # b -- callee object (possibly phantom)
+   # b_fun -- callee function
+   def update_obj_node(a, b, b_fun, mapping)
+      a_node = @local_table.get_var_node(a)
+      b_node = @local_table.get_var_node(b, b_fun)
+
+      b_node.out_edges.each do |b_fid|
+         a_fid = "#{a}_#{strip_prefix(b_fid.to_s)}".to_sym
+         unless a_node.out_edges.include? a_fid 
+            @local_table.assure_existence(a_fid)
+            @local_table.last_graph.add_edge(a, a_fid)
+         end
+
+         update_ref_node(a_fid, b_fid, b_fun, mapping)
+      end
+   end
+
+   # a -- caller reference
+   # b -- callee reference
+   # b_fun -- callee function
+   def update_ref_node(a_fid, b_fid, b_fun, mapping)
+      @local_table.points_to_set(b_fid, b_fun).each do |ob|
+         # Map ob to corresponding object in caller function.
+         oa = (mapping.has_key? ob) ? mapping[ob] : ob
+
+         unless @local_table.points_to_set(a_fid).include? oa
+            @local_table.assure_existence(oa)
+            @local_table.last_graph.add_edge(a_fid, oa)
+         end
+         update_obj_node(oa, ob, b_fun, mapping)
+      end 
+   end
+
+   def strip_prefix(f)
+      f.gsub(/^.*?_/, '')
    end
 
    def self_translated(event)
@@ -154,6 +223,13 @@ class ConnectionGraphBuilder
       @obj_counter += 1
       # Every node not representing Ruby variable should be prefixed with >'<
       "'o#{@obj_counter}".to_sym
+   end
+
+   # Returns an unique id for value returned from function.
+   def next_fun_key
+      @fun_counter += 1
+      # Every node not representing Ruby variable should be prefixed with >'<
+      "'f#{@fun_counter}".to_sym
    end
 
    # Extracts actual constructor call from translated sexp.

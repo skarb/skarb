@@ -84,4 +84,20 @@ describe ConnectionGraphBuilder::LocalTable do
     @table.last_block[:vars][:q].out_edges.should == Set[:B]
   end
 
+
+  it 'should return correct point_to_set' do
+    @table.cfunction = :t4_function
+    @table.add_node(:r, ConnectionGraph::Node.new)
+    @table.add_node(:p, ConnectionGraph::Node.new)
+    @table.add_node(:A, ConnectionGraph::ObjectNode.new)
+    @table.add_node(:B, ConnectionGraph::ObjectNode.new)
+    @table.add_node(:C, ConnectionGraph::ObjectNode.new)
+    @table.last_block[:vars].add_edge(:p, :A)
+    @table.last_block[:vars].add_edge(:p, :B)
+    @table.last_block[:vars].add_edge(:p, :r)
+    @table.last_block[:vars].add_edge(:r, :C)
+
+    @table.points_to_set(:p).should == [:A, :B, :C]
+  end
+
 end
