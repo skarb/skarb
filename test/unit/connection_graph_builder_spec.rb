@@ -121,13 +121,13 @@ describe ConnectionGraphBuilder do
      main_graph[:"'f1"].out_edges.should == Set[:"'o2"]
   end
 
-  #it 'should correctly update nested calls' do
-  #   @translator.translate(Parser.parse("class A; def p=(v); @p = v; end;
-  #                                       def a; self; end; end;
-  #                                       a = A.new; a.a.a.a.a.p=1"))
-  #   main_graph = @graph_builder.local_table[:_main][:last_block][:vars]
-  #   main_graph[:"'o1"].out_edges.should == Set[:"'o1_@p"]
-  #   main_graph[:"'o1_@p"].out_edges.should == Set[:"'o2"]
-  #end
+  it 'should correctly update nested calls' do
+     @translator.translate(Parser.parse("class A; def p=(v); @p = v; end;
+                                         def a; return self; end; end;
+                                         a = A.new; a.a.p=1"))
+     main_graph = @graph_builder.local_table[:_main][:last_block][:vars]
+     main_graph[:"'o1"].out_edges.should == Set[:"'o1_@p"]
+     main_graph[:"'o1_@p"].out_edges.should == Set[:"'o2"]
+  end
 
 end
