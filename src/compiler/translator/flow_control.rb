@@ -125,12 +125,13 @@ class Translator
   # Translates return statement.
   def translate_return(sexp)
     if sexp.count == 1
-      ret = s().with_value_sexp s(:var, :nil)
-      @symbol_table.returned_type = nil
+      ret = s().with_value(s(:var, :nil), :nil)
+      @symbol_table.returned_type = :nil
     else
-      ret = translate_generic_sexp sexp[1]
+      ret = translate_generic_sexp(sexp[1])
       @symbol_table.returned_type = ret.value_type
     end
-    filtered_stmts ret, s(:return, ret.value_sexp)
+    filtered_stmts(ret, s(:return, ret.value_sexp)).with_value(ret.value_sexp,
+                                                               ret.value_type)
   end
 end

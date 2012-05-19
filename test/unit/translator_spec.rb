@@ -200,9 +200,24 @@ describe Translator do
   end
 
   it 'should detect type of a function call returning an argument' do
-    translate_code_only('def fun(x); x; end')
+    translate_code_only('def fun(x); return x; end')
     translate_code_only('fun(3.3)').value_type.should == :Float
     translate_code_only('fun(2)').value_type.should == :Fixnum
+  end
+
+  it 'should detect self type' do
+    translate_code_only('class A; def a; self; end; end; a = A.new')
+    translate_code_only('a.a').value_type.should == :A
+  end
+
+  it 'should detect self type with return' do
+    translate_code_only('class A; def a; return self; end; end; a = A.new')
+    translate_code_only('a.a').value_type.should == :A
+  end
+
+  it 'should recognize nested call with known types' do
+    translate_code_only('class A; def a; self; end; def p=(v); @p=v; end; end; a = A.new')
+    translate_code_only('a.a.p=1').join.should_not include "find_method"
   end
 
 #  it 'should translate local assignment to new variable' do
