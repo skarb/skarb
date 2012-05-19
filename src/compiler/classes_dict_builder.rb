@@ -7,15 +7,13 @@ class ClassesDictionaryBuilder
   # on final symbol table. 
   def initialize(symbol_table)
     @symbol_table = symbol_table
-    @wrappers = {}
   end
 
   # Generates full code for classes dictionary. Returns code splitted
   # in structs, prototypes, methods and global variables + main
   def emit_classes_dictionary
-    methods = emit_methods_arrays + emit_wrappers
-    protos = emit_wrappers_protos
-    [nil, protos, methods, emit_dict_init]
+    methods = emit_methods_arrays
+    [nil, nil, methods, emit_dict_init]
   end
 
   private  
@@ -52,16 +50,11 @@ class ClassesDictionaryBuilder
     @symbol_table.map do |cname, chash|
       if chash.has_key? :functions_def
         id2fun_records = chash[:functions_def].map do |fname,farray|
-          farray.each do |fdef|
-            args_number = fdef[2].rest.length
-            # We have to count in 'self' argument
-            add_wrapper (args_number+1) unless @wrappers.has_key? (args_number+1)
-          end
           fdef = farray.first
           args_number = fdef[2].rest.length
           if fdef[0] == :stdlib_defn
             # Method defined in stdlib
-            [fname, ('&'+fdef[1].to_s).to_sym, "&wrapper_#{args_number+1}".to_sym]
+            [fname, ('&'+fdef[1].to_s).to_sym, :NULL]
           else
             # Method defined in user code
             [fname, :NULL, :NULL]
@@ -72,32 +65,4 @@ class ClassesDictionaryBuilder
     end.join
   end
 
-  # Builds AST code for wrapper function with specified amount of
-  # arguments and stores it in @wrappers
-  def add_wrapper(n)
-    @wrappers[n] =
-      s(:static,
-        s(:defn, :'Object*', ('wrapper_' + n.to_s).to_sym,
-          s(:args, s(:decl, :'Object**', :args_tab),
-            s(:decl, :'void*', :fun)),
-          s(:block,
-            s(:return,
-              s(:call, 
-                s(:cast,
-                  ('Object* (*)('+n.times.map { 'Object*' }.join(',')+')').to_sym,
-                  s(:var, :fun)),
-                s(:args, *n.times.map { |x| s(:var, "args_tab[#{x}]") }))))))
-  end
-
-  # Generates function wrappers prototypes
-  def emit_wrappers_protos
-    Emitter.emit(
-      s(:file,
-        *@wrappers.values.map { |fun| s(:static, s(:prototype, *fun[1][1,3])) }))
-  end
-
-  # Generates wrappers definitions
-  def emit_wrappers
-    Emitter.emit(s(:file, *@wrappers.values))
-  end
 end

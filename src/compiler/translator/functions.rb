@@ -68,12 +68,14 @@ class Translator
       declare_generic_function sexp[1], class_name
     end
 
+    alias :translate_attrasgn :translate_call
+
     # Translates a call to the []= method. It's treated exactly as a call sexp.
-    def translate_attrasgn(sexp)
-      sexp = sexp.clone
-      sexp[0] = :call
-      translate_call sexp
-    end
+    #def translate_attrasgn(sexp)
+    #  sexp = sexp.clone
+    #  sexp[0] = :call
+    #  translate_call sexp
+    #end
 
     private
 
@@ -98,7 +100,7 @@ class Translator
       end
       while type
         if function_defined?(sexp[2], type)
-          return call_defined_function(sexp[2], type, sexp)
+          return call_defined_function(sexp[2], type, class_expr, sexp)
         end
         type = @symbol_table.parent type
       end
@@ -106,15 +108,10 @@ class Translator
 
     # Generate AST representing args evaluation and call_method call.
     def generate_runtime_call(class_expr, sexp)
-      args = evaluate_call_args sexp
+      args = evaluate_call_args(sexp, class_expr)
       var = next_var_name
-      args_tab = next_var_name
       filtered_stmts(
-        filtered_stmts(class_expr),
         filtered_stmts(*args),
-        s(:asgn,
-          s(:decl, :'Object*', "#{args_tab}[#{args.length}]".to_sym),
-          s(:init_block, *args.map { |arg| arg.value_sexp })),
         s(:decl, :'Object*', var),
         s(:asgn,
           s(:var, var),
@@ -135,13 +132,8 @@ class Translator
 
     # Evaluates arguments of a call sexp. We need to know what their type is in
     # order to call an appropriate overloaded function.
-    def evaluate_call_args(sexp, class_name=nil)
-      if sexp[1].nil?
-        args = [s().with_value(s(:var, :self), class_name)]
-      else
-        args = [translate_generic_sexp(sexp[1])]
-      end
-      args + sexp[3].rest.map { |arg_sexp| translate_generic_sexp arg_sexp }
+    def evaluate_call_args(sexp, class_expr)
+      [class_expr] + sexp[3].rest.map { |arg_sexp| translate_generic_sexp arg_sexp }
     end
 
     # Finds a C function implementing method with a given name in a given class
@@ -169,8 +161,8 @@ class Translator
 
     # Returns a sexp calling a defined function. If the function hasn't been
     # implemented yet implement_function is called.
-    def call_defined_function(def_name, class_name, sexp)
-      args = evaluate_call_args sexp, class_name
+    def call_defined_function(def_name, class_name, class_expr, sexp)
+      args = evaluate_call_args(sexp, class_expr)
       args_types = args.rest.map { |arg| arg.value_type }
       # Do not translate recursive calls until their type is determined 
       return s().with_value_type :recur if args_types.include? :recur
@@ -255,7 +247,7 @@ class Translator
     # class we're currently in. It's used to determine whose method are we
     # supposed to call when translating a call sexp.
     def evaluate_class_expr(class_expr)
-      return s().with_value_type @symbol_table.cclass if class_expr.nil?
+      return s().with_value(s(:var, :self), @symbol_table.cclass) if class_expr.nil?
       translate_generic_sexp(class_expr)
     end
 
@@ -335,8 +327,8 @@ class Translator
       end
     end
    
-    # Returns sexp containing assignment of function and wrapper pointers to
-    # proper fields in class functions dictionary. 
+    # Returns sexp containing assignment of function pointer to
+    # proper field in class functions dictionary. 
     def assign_function_to_class_dict(fname, impl_name, class_name, args_count)
       var = next_var_name
       s(:stmts,
@@ -350,14 +342,7 @@ class Translator
             s(:indexer,
               s(:var, (class_name.to_s + "_words").to_sym), s(:var, var)),
             s(:var, :function)),
-          s(:l_unary_oper, :'&', s(:var, impl_name))),
-        s(:asgn,
-          s(:binary_oper, :'.',
-            s(:indexer,
-              s(:var, (class_name.to_s + "_words").to_sym), s(:var, var)),
-            s(:var, :wrapper)),
-          s(:l_unary_oper, :'&', s(:var, :"wrapper_#{args_count}")))).
-          with_value_sexp(s(:var, :nil))
+          s(:l_unary_oper, :'&', s(:var, impl_name)))).with_value_sexp(s(:var, :nil))
     end
   end
 end

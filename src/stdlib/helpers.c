@@ -64,7 +64,7 @@ void* find_method(int class_id, dict_elem* classes_dictionary,
       die("Method \"%s\" in class with id %d not found.\n", fname, class_id);
     id = d_elem.parent;
   }
-  if(h_elem->wrapper == NULL)
+  if(h_elem->function == NULL)
     die("Method \"%s\" in class with id %d not found.\n", fname, class_id);
 
   /* Fill cache */
