@@ -143,10 +143,15 @@ class ConnectionGraphBuilder
       else
          f_name = translated_fun_name(event.translated_sexp)
 
+         caller_obj = call_get_object(event.original_sexp)
+         add_graph_node(caller_obj, :self) if caller_obj.nil?
+         a_args = ([caller_obj] +
+                   call_get_args(event.original_sexp)).map { |a| a.graph_node }
+
          if f_name.is_a? Symbol and @local_table.has_key? f_name
-            known_function_call(f_name, event)
+            known_function_call(f_name, a_args, event)
          else
-            unknown_function_call(event)
+            unknown_function_call(a_args, event)
          end
 
       end
@@ -158,16 +163,12 @@ class ConnectionGraphBuilder
    # of the caller is updated basing on the connection graph of the callee.
    # Arguments escape states need to be updated as well as they field structure.
    # Return value is modeled as single reference node pointing to an object.
-   def known_function_call(f_name, event)
+   def known_function_call(f_name, a_args, event)
       # TODO: Set escape states of arguments
-      # Update arguments 
-      caller_obj = call_get_object(event.original_sexp)
-      add_graph_node(caller_obj, :self) if caller_obj.nil?
-      a_args = ([caller_obj] +
-                call_get_args(event.original_sexp)).map { |a| a.graph_node }
       f_args = @local_table[f_name][:formal_params]
       mapping = Hash[ f_args.zip(a_args) ]
-
+      
+      # Update arguments 
       mapping.each_pair do |f_arg, a_arg|
          @local_table.points_to_set(a_arg).each do |a_obj|
             update_obj_node(a_obj, f_arg, f_name, mapping)
@@ -185,12 +186,20 @@ class ConnectionGraphBuilder
    # pessimistically assume that all the arguments get global escape status.
    # Return value is modeled as single reference pointing to a newly created
    # object with global escape status.
-   def unknown_function_call(event)
-      # TODO: Set escape states of arguments
+   def unknown_function_call(a_args, event)
+      # Set escape state of arguments as :global_escape
+      a_args.each do |a_arg|
+         @local_table.points_to_set(a_arg).each do |a_obj|
+            @local_table.get_var_node(a_obj).escape_state = :global_escape
+         end
+      end
+
+      # Model returned value
       fun_key = next_fun_key
       @local_table.assure_existence(fun_key)
       obj_key = next_obj_key
-      @local_table.assure_existence(obj_key, ConnectionGraph::ObjectNode)
+      @local_table.assure_existence(obj_key, ConnectionGraph::ObjectNode,
+                                    :global_escape)
       @local_table.last_graph.add_edge(fun_key, obj_key)
       add_graph_node(event.original_sexp, fun_key)
    end

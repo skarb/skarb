@@ -130,4 +130,15 @@ describe ConnectionGraphBuilder do
      main_graph[:"'o1_@p"].out_edges.should == Set[:"'o2"]
   end
 
+  it 'should model unknown functions' do
+     @translator.translate(Parser.parse("class A; def a(v); 1; end; end;
+                                         if 1; a=A.new; else; a=3 end;
+                                         b = 4; a.a(b)"))
+     main_graph = @graph_builder.local_table[:_main][:last_block][:vars]
+     main_graph[:b].out_edges.should == Set[:"'o4"]
+     main_graph[:"'o4"].escape_state.should == :global_escape
+     main_graph[:"'f1"].out_edges.should == Set[:"'o5"]
+     main_graph[:"'o5"].escape_state.should == :global_escape
+  end
+
 end
