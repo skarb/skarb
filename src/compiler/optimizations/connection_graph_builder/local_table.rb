@@ -170,8 +170,11 @@ class ConnectionGraphBuilder
          ret      
       end
 
-      # Collects all object nodes ids which are pointed to by var node. It
-      # recursively follows deferred edges.
+      # Collects all object nodes and field nodes ids which are pointed to by var
+      # node. It recursively follows deferred edges.
+      # points_to_set(ref) returns pointed object or fields
+      # points_to_set(object) returns object
+      #
       def points_to_set(var, function=@cfunction)
          old_function = @cfunction
          @cfunction = function
@@ -179,7 +182,8 @@ class ConnectionGraphBuilder
 
          update_set = Proc.new do |v|
             v_node = get_var_node(v)
-            if v_node.is_a? ConnectionGraph::ObjectNode
+            cg = ConnectionGraph
+            if v_node.is_a? cg::ObjectNode
                set << v
             else
                v_node.out_edges.each { |u| update_set.call(u) }

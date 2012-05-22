@@ -46,6 +46,7 @@ describe ConnectionGraphBuilder do
   it 'should accept global and instance variables' do
      @translator.translate(Parser.parse("p = @@a; @b = p"))
      @graph_builder.local_table.last_graph[:p].out_edges.should == Set[:@@a]
+     @graph_builder.local_table.last_graph[:self].out_edges.should == Set[:'self_@b']
      @graph_builder.local_table.last_graph[:'self_@b'].out_edges.should == Set[:p]
   end
 
@@ -70,6 +71,9 @@ describe ConnectionGraphBuilder do
      vars[:p1].out_edges.should == Set[:"'p1"]
      vars[:p2].out_edges.should == Set[:"'p2"]
      vars[:p3].out_edges.should == Set[:"'p3"]
+     vars[:"'p1"].escape_state.should == :arg_escape
+     vars[:"'p2"].escape_state.should == :arg_escape
+     vars[:"'p3"].escape_state.should == :arg_escape
      f_table.formal_params.should == [:self, :"'p1", :"'p2", :"'p3"]
   end
 
@@ -140,5 +144,40 @@ describe ConnectionGraphBuilder do
      main_graph[:"'f1"].out_edges.should == Set[:"'o5"]
      main_graph[:"'o5"].escape_state.should == :global_escape
   end
+
+  it 'should recognize value returned by block' do
+     @translator.translate(Parser.parse("a = begin; a = 1; 2; end"))
+     main_graph = @graph_builder.local_table[:_main][:last_block][:vars]
+     main_graph[:a].out_edges.should == Set[:"'o2"]
+  end
+
+  it 'should model value returned implicitely' do
+     @translator.translate(Parser.parse("def foo(p); a = 2; a = p; end;
+                                         foo(1)"))
+     main_graph = @graph_builder.local_table[:_main][:last_block][:vars]
+     main_graph[:"'f1"].out_edges.should == Set[:"'o1"]
+  end
+
+  it 'should update escape state of objects passed as function arguments' do
+     @translator.translate(Parser.parse("def foo(a); @@a = a; end; foo(1)")) 
+     main_graph = @graph_builder.local_table[:_main][:last_block][:vars]
+     main_graph[:"'o1"].escape_state.should == :global_escape
+  end
+
+  it 'should assume that all ivars point to something' do
+     @translator.translate(Parser.parse("def foo; @a; end; foo")) 
+     main_graph = @graph_builder.local_table[:_main][:last_block][:vars]
+     main_graph[:"'f1"].out_edges.should == Set[:"'ph2"]
+  end
+
+#  it 'should update escape state of fields of objects passed as arguments' do
+#     @translator.translate(Parser.parse("class A; def a=(v); @a=v; end;
+#                                         def a; @a; end; end;
+#                                         def foo(a); @@g = a.a; end;
+#                                         a = A.new; a.a = 1; foo(a)")) 
+#     main_graph = @graph_builder.local_table[:_main][:last_block][:vars]
+#     main_graph[:"'o1_@a"].out_edges.should == Set[:"'o2"]
+#     main_graph[:"'o2"].escape_state.should == :global_escape
+#  end
 
 end

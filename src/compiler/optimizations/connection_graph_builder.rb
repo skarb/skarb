@@ -19,7 +19,7 @@ class ConnectionGraphBuilder
    TranslatorEvents = [:lasgn_translated, :iasgn_translated, :attrasgn_translated,
       :cvasgn_translated, :cvdecl_translated, :lit_translated, :str_translated,
       :lvar_translated, :ivar_translated, :cvar_translated, :call_translated,
-      :return_translated, :self_translated]
+      :return_translated, :self_translated, :block_translated]
 
    def initialize(translator)
       @s_table = translator.symbol_table
@@ -28,6 +28,7 @@ class ConnectionGraphBuilder
 
       @obj_counter = 0
       @fun_counter = 0
+      @ph_counter = 0
 
       SymbolTableEvents.each do 
          |event| @s_table.subscribe(event, self.method(event))
@@ -54,6 +55,7 @@ class ConnectionGraphBuilder
    # variables.
    def function_opened(event)
       # If function was already translated, its connection graph has to be reseted.
+      # TODO: This is rather not elegant, since every function is translated twice.
       if @local_table.formal_params.length > 0
          @local_table.add_function(@local_table.cfunction)
       end
@@ -65,17 +67,27 @@ class ConnectionGraphBuilder
       args.each do |arg|
          formal_param = "'p#{p_no}".to_sym
          @local_table.assure_existence(arg)
-         @local_table.assure_existence(formal_param, ConnectionGraph::PhantomNode)
+         @local_table.assure_existence(formal_param, ConnectionGraph::PhantomNode,
+                                      :arg_escape)
          @local_table.formal_params << formal_param
          @local_table.last_graph.add_edge(arg, formal_param)
          p_no += 1
       end
    end
 
+   def block_translated(event)
+      add_graph_node(event.original_sexp, event.original_sexp.last.graph_node)
+   end
+
    def function_closed(event)
       n_function = @local_table.cfunction
       @local_table.cfunction = event.function
    
+      defn = @s_table.class_table[:functions][event.function][:def]
+      unless (last_node = defn.last.last.graph_node).nil?
+         @local_table.last_graph.add_edge(:return, last_node)
+      end
+      
       @local_table.formal_params.each { |p| @local_table.propagate_escape_state(p) }
       @local_table.class_vars.each { |p| @local_table.propagate_escape_state(p) }
       @local_table.propagate_escape_state(:return)
@@ -89,20 +101,23 @@ class ConnectionGraphBuilder
       rsexp = lasgn_get_right(event.original_sexp)
       @local_table.by_pass(var)
       @local_table.last_graph.add_edge(var, rsexp.graph_node)
+      add_graph_node(event.original_sexp, var)
    end
   
    def iasgn_translated(event)
       var = iasgn_get_var(event.original_sexp)
       var = "self_#{var}".to_sym
-      @local_table.assure_existence(var)
-      @local_table.assure_existence(:self)
+      @local_table.assure_existence(var, ConnectionGraph::FieldNode)
+      @local_table.assure_existence(:self, ConnectionGraph::PhantomNode)
       rsexp = iasgn_get_right(event.original_sexp)
       @local_table.by_pass(var)
       @local_table.last_graph.add_edge(var, rsexp.graph_node)
       @local_table.last_graph.add_edge(:self, var)
+      add_graph_node(event.original_sexp, var)
    end
 
    def cvdecl_translated(event)
+      # TODO: Test it.
       var = cvdecl_get_var(event.original_sexp)
       @local_table.assure_existence(var)
       @local_table.class_vars << var
@@ -164,7 +179,6 @@ class ConnectionGraphBuilder
    # Arguments escape states need to be updated as well as they field structure.
    # Return value is modeled as single reference node pointing to an object.
    def known_function_call(f_name, a_args, event)
-      # TODO: Set escape states of arguments
       f_args = @local_table[f_name][:formal_params]
       mapping = Hash[ f_args.zip(a_args) ]
       
@@ -211,10 +225,12 @@ class ConnectionGraphBuilder
       a_node = @local_table.get_var_node(a)
       b_node = @local_table.get_var_node(b, b_fun)
 
+      a_node.escape_state = :global_escape if b_node.escape_state == :global_escape
+
       b_node.out_edges.each do |b_fid|
          a_fid = "#{a}_#{strip_prefix(b_fid.to_s)}".to_sym
          unless a_node.out_edges.include? a_fid 
-            @local_table.assure_existence(a_fid)
+            @local_table.assure_existence(a_fid, ConnectionGraph::FieldNode)
             @local_table.last_graph.add_edge(a, a_fid)
          end
 
@@ -225,6 +241,7 @@ class ConnectionGraphBuilder
    # a -- caller reference
    # b -- callee reference
    # b_fun -- callee function
+   # TODO: Dry.
    def update_ref_node(a_fid, b_fid, b_fun, mapping)
       @local_table.points_to_set(b_fid, b_fun).each do |ob|
          # Map ob to corresponding object in caller function.
@@ -242,6 +259,10 @@ class ConnectionGraphBuilder
       f.gsub(/^.*?_/, '')
    end
 
+   def get_prefix(f)
+      f.match(/^(.*?)_/)[1]
+   end
+
    def self_translated(event)
       @local_table.assure_existence(:self, ConnectionGraph::PhantomNode)
       add_graph_node(event.original_sexp, :self)       
@@ -255,8 +276,17 @@ class ConnectionGraphBuilder
 
    def ivar_translated(event)
       var_id = "self_#{event.original_sexp[1]}".to_sym
-      @local_table.assure_existence(var_id)
+      @local_table.assure_existence(var_id, ConnectionGraph::FieldNode)
+      @local_table.assure_existence(:self, ConnectionGraph::PhantomNode)
+      @local_table.last_graph.add_edge(:self, var_id)
       add_graph_node(event.original_sexp, var_id)
+
+      # Not sure if it is the right way... 
+      if @local_table.points_to_set(var_id).empty?
+         ph_id = next_phantom_key
+         @local_table.assure_existence(ph_id, ConnectionGraph::PhantomNode)
+         @local_table.last_graph.add_edge(var_id, ph_id)
+      end
    end
 
    alias :cvar_translated :lvar_translated
@@ -268,6 +298,13 @@ class ConnectionGraphBuilder
       @obj_counter += 1
       # Every node not representing Ruby variable should be prefixed with >'<
       "'o#{@obj_counter}".to_sym
+   end
+
+   # Returns an unique id for newly allocated phantom object node.
+   def next_phantom_key
+      @ph_counter += 1
+      # Every node not representing Ruby variable should be prefixed with >'<
+      "'ph#{@ph_counter}".to_sym
    end
 
    # Returns an unique id for value returned from function.

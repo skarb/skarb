@@ -31,6 +31,10 @@ class ConnectionGraph < Hash
       attr_accessor :constructor_sexp
    end
 
+   # Node representing field of an object.
+   class FieldNode < Node
+   end
+
    # Node representing formal function parameter.
    class PhantomNode < ObjectNode
    end

@@ -92,12 +92,17 @@ describe ConnectionGraphBuilder::LocalTable do
     @table.add_node(:A, ConnectionGraph::ObjectNode.new)
     @table.add_node(:B, ConnectionGraph::ObjectNode.new)
     @table.add_node(:C, ConnectionGraph::ObjectNode.new)
+    @table.add_node(:A_a, ConnectionGraph::FieldNode.new)
+    @table.add_node(:D, ConnectionGraph::ObjectNode.new)
     @table.last_block[:vars].add_edge(:p, :A)
     @table.last_block[:vars].add_edge(:p, :B)
     @table.last_block[:vars].add_edge(:p, :r)
     @table.last_block[:vars].add_edge(:r, :C)
+    @table.last_block[:vars].add_edge(:A, :A_a)
+    @table.last_block[:vars].add_edge(:r, :A_a)
+    @table.last_block[:vars].add_edge(:A_a, :D)
 
-    @table.points_to_set(:p).should == [:A, :B, :C]
+    @table.points_to_set(:p).should == [:A, :B, :C, :D]
   end
 
 end
