@@ -39,6 +39,11 @@ class ConnectionGraph < Hash
    class PhantomNode < ObjectNode
    end
 
+   # Node representing unknown value of object field.
+   class PhantomField < ObjectNode
+      attr_accessor :parent_field
+   end
+
    def add_edge(from_vertex, to_vertex)
       self[from_vertex].out_edges << to_vertex
       self[to_vertex].in_edges << from_vertex

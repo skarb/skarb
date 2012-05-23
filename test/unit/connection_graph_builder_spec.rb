@@ -170,6 +170,31 @@ describe ConnectionGraphBuilder do
      main_graph[:"'f1"].out_edges.should == Set[:"'ph2"]
   end
 
+  it 'should map object from one function to a set of objects from another' do
+     cg = ConnectionGraph
+     l_table = @graph_builder.local_table
+     
+     l_table.cfunction = :foo
+     l_table.assure_existence(:self, cg::PhantomNode)
+     l_table.assure_existence(:"self_@a", cg::FieldNode)
+     l_table.assure_existence(:"'ph1", cg::PhantomField)
+     l_table.get_var_node(:"'ph1").parent_field = :"self_@a"
+     l_table.last_graph.add_edge(:self, :"self_@a")
+
+     l_table.cfunction = :_main
+     l_table.assure_existence(:"'o1", cg::ObjectNode)
+     l_table.assure_existence(:"'o1_@a", cg::FieldNode)
+     l_table.assure_existence(:"'o2", cg::ObjectNode)
+     l_table.assure_existence(:"'o3", cg::ObjectNode)
+     l_table.last_graph.add_edge(:"'o1", :"'o1_@a")
+     l_table.last_graph.add_edge(:"'o1_@a", :"'o2")
+     l_table.last_graph.add_edge(:"'o1_@a", :"'o3")
+
+     mapping = { :self => :"'o1" }
+
+     @graph_builder.maps_to_set(:"'ph1", :foo, mapping).should == [:"'o2", :"'o3" ]
+  end
+
 #  it 'should update escape state of fields of objects passed as arguments' do
 #     @translator.translate(Parser.parse("class A; def a=(v); @a=v; end;
 #                                         def a; @a; end; end;

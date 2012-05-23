@@ -174,7 +174,6 @@ class ConnectionGraphBuilder
       # node. It recursively follows deferred edges.
       # points_to_set(ref) returns pointed object or fields
       # points_to_set(object) returns object
-      #
       def points_to_set(var, function=@cfunction)
          old_function = @cfunction
          @cfunction = function

@@ -241,7 +241,6 @@ class ConnectionGraphBuilder
    # a -- caller reference
    # b -- callee reference
    # b_fun -- callee function
-   # TODO: Dry.
    def update_ref_node(a_fid, b_fid, b_fun, mapping)
       @local_table.points_to_set(b_fid, b_fun).each do |ob|
          # Map ob to corresponding object in caller function.
@@ -253,6 +252,39 @@ class ConnectionGraphBuilder
          end
          update_obj_node(oa, ob, b_fun, mapping)
       end 
+   end
+
+   # Returns a set of object from current function to with an object bo from function
+   # b_fun maps with certain mapping given.
+   def maps_to_set(bo, b_fun, mapping)
+      bo_node = @local_table.get_var_node(bo, b_fun)
+      if bo_node.is_a? ConnectionGraph::PhantomField
+         p = bo_node.parent_field
+         po = get_prefix(p.to_s).to_sym
+         s = []
+         maps_to_set(po, b_fun, mapping).each do |a|
+            a_node = @local_table.get_var_node(a)
+            a_fid = "#{a}_#{strip_prefix(p.to_s)}".to_sym
+
+            unless a_node.out_edges.include? a_fid 
+               @local_table.assure_existence(a_fid, ConnectionGraph::FieldNode)
+               @local_table.last_graph.add_edge(a, a_fid)
+            end
+
+            unless (a_fid_set = @local_table.points_to_set(a_fid)).empty?
+               s = s + a_fid_set
+            else
+               ph = next_phantom_key
+               @local_table.assure_existence(ph, ConnectionGraph::PhantomField)
+               @local_table.last_graph.add_edge(a_fid, ph)
+               @local_table.get_var_node(ph).parent_field = a_fid
+               s << ph
+            end
+         end
+         return s
+      else
+         return [(mapping.include? bo) ? mapping[bo] : bo] 
+      end
    end
 
    def strip_prefix(f)
