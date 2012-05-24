@@ -198,30 +198,9 @@ class Translator
     s(:stmts).with_value s(:var, :nil), :NilClass
   end
 
-  # Returns an array of sexps with all stmts sexps expanded.
-  def expand_stmts(sexps)
-    # This array of sexps will be the content of the returned block.
-    expanded_sexps = []
-    sexps.each do |sexp|
-      next if sexp.nil? or sexp.empty? # Do nothing
-      if sexp.first == :stmts
-        # If it's a stmts take all its children and add them to the output
-        expanded_sexps += sexp.drop 1
-      else
-        # Otherwise add the whole sexp to the output
-        expanded_sexps << sexp
-      end
-    end
-    expanded_sexps
-  end
-
-
-
   # Returns a sexp representing a call to the boolean_value function with a
   # given value.
   def boolean_value(value)
     s(:call, :boolean_value, s(:args, value))
   end
-
-
 end

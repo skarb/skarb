@@ -8,7 +8,7 @@ describe Translator do
   before do
     @translator = Translator.new
     @rp = RubyParser.new
-    @stdlib_declarations = File.open('../../src/compiler/stdlib.rb').read
+    @stdlib_declarations = File.open('/home/julek/projects/mgr/src/compiler/stdlib.rb').read
   end
 
   # FIXME: Temporal solution
@@ -213,6 +213,11 @@ describe Translator do
   it 'should detect self type with return' do
     translate_code_only('class A; def a; return self; end; end; a = A.new')
     translate_code_only('a.a').value_type.should == :A
+  end
+
+  it 'should detect empty return' do
+    translate_code_only('class A; def a; return; end; end; a = A.new')
+    translate_code_only('a.a').value_type.should == :nil
   end
 
   it 'should recognize nested call with known types' do
