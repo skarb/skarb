@@ -5,8 +5,6 @@ require 'optimizations/connection_graph_builder/connection_graph'
 
 # This class analyzes C ast code streamed by TranslationStreamer
 # and builds connection graph abstraction for it.
-#
-# TODO: Model implicit return.
 class ConnectionGraphBuilder 
 
    include SexpParsing
@@ -242,24 +240,41 @@ class ConnectionGraphBuilder
    # b -- callee reference
    # b_fun -- callee function
    def update_ref_node(a_fid, b_fid, b_fun, mapping)
-      @local_table.points_to_set(b_fid, b_fun).each do |ob|
-         # Map ob to corresponding object in caller function.
-         oa = (mapping.has_key? ob) ? mapping[ob] : ob
+      p_set = @local_table.points_to_set(b_fid, b_fun)
 
-         unless @local_table.points_to_set(a_fid).include? oa
-            @local_table.assure_existence(oa, ConnectionGraph::ObjectNode)
-            @local_table.last_graph.add_edge(a_fid, oa)
+      # If there are no PhantomFields attached to b_fid, all previous values of
+      # a_fid should be dropped.
+      has_phantom = false
+      p_set.each do |b|
+        if @local_table.get_var_node(b, b_fun).is_a? ConnectionGraph::PhantomField
+           has_phantom = true
+        end
+      end
+      unless has_phantom
+         @local_table.get_var_node(a_fid).out_edges.each do |out|
+            @local_table.last_graph.delete_edge(a_fid, out)
          end
-         update_obj_node(oa, ob, b_fun, mapping)
+      end
+
+      # Assure existence of mapped object in a_fun and update their nodes.
+      p_set.each do |ob|
+         # Map ob to corresponding object in caller function.
+         maps_to_set(ob, b_fun, mapping).each do |oa|
+            unless @local_table.points_to_set(a_fid).include? oa
+               @local_table.assure_existence(oa, ConnectionGraph::ObjectNode)
+               @local_table.last_graph.add_edge(a_fid, oa)
+            end
+            update_obj_node(oa, ob, b_fun, mapping)
+         end
       end 
    end
 
    # Returns a set of object from current function to with an object bo from function
    # b_fun maps with certain mapping given.
-   def maps_to_set(bo, b_fun, mapping)
-      bo_node = @local_table.get_var_node(bo, b_fun)
-      if bo_node.is_a? ConnectionGraph::PhantomField
-         p = bo_node.parent_field
+   def maps_to_set(ob, b_fun, mapping)
+      ob_node = @local_table.get_var_node(ob, b_fun)
+      if ob_node.is_a? ConnectionGraph::PhantomField
+         p = ob_node.parent_field
          po = get_prefix(p.to_s).to_sym
          s = []
          maps_to_set(po, b_fun, mapping).each do |a|
@@ -282,8 +297,13 @@ class ConnectionGraphBuilder
             end
          end
          return s
-      else
-         return [(mapping.include? bo) ? mapping[bo] : bo] 
+      elsif ob_node.is_a? ConnectionGraph::ObjectNode
+         if mapping.include? ob
+            return @local_table.points_to_set(mapping[ob])
+         else
+            @local_table.assure_existence(ob, ConnectionGraph::ObjectNode)
+            return [ob]
+         end
       end
    end
 
@@ -313,10 +333,10 @@ class ConnectionGraphBuilder
       @local_table.last_graph.add_edge(:self, var_id)
       add_graph_node(event.original_sexp, var_id)
 
-      # Not sure if it is the right way... 
       if @local_table.points_to_set(var_id).empty?
          ph_id = next_phantom_key
-         @local_table.assure_existence(ph_id, ConnectionGraph::PhantomNode)
+         @local_table.assure_existence(ph_id, ConnectionGraph::PhantomField)
+         @local_table.get_var_node(ph_id).parent_field = var_id
          @local_table.last_graph.add_edge(var_id, ph_id)
       end
    end

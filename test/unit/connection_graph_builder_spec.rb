@@ -167,7 +167,7 @@ describe ConnectionGraphBuilder do
   it 'should assume that all ivars point to something' do
      @translator.translate(Parser.parse("def foo; @a; end; foo")) 
      main_graph = @graph_builder.local_table[:_main][:last_block][:vars]
-     main_graph[:"'f1"].out_edges.should == Set[:"'ph2"]
+     main_graph[:"'f1"].out_edges.should == Set[:"'ph3"]
   end
 
   it 'should map object from one function to a set of objects from another' do
@@ -177,9 +177,15 @@ describe ConnectionGraphBuilder do
      l_table.cfunction = :foo
      l_table.assure_existence(:self, cg::PhantomNode)
      l_table.assure_existence(:"self_@a", cg::FieldNode)
-     l_table.assure_existence(:"'ph1", cg::PhantomField)
-     l_table.get_var_node(:"'ph1").parent_field = :"self_@a"
+     l_table.assure_existence(:"self_@b", cg::FieldNode)
+     l_table.assure_existence(:"'ph_1", cg::PhantomField)
+     l_table.assure_existence(:"'ph_2", cg::PhantomField)
+     l_table.get_var_node(:"'ph_1").parent_field = :"self_@a"
+     l_table.get_var_node(:"'ph_2").parent_field = :"self_@b"
      l_table.last_graph.add_edge(:self, :"self_@a")
+     l_table.last_graph.add_edge(:self, :"self_@b")
+     l_table.last_graph.add_edge(:"self_@a", :"'ph_1")
+     l_table.last_graph.add_edge(:"self_@b", :"'ph_2")
 
      l_table.cfunction = :_main
      l_table.assure_existence(:"'o1", cg::ObjectNode)
@@ -192,17 +198,27 @@ describe ConnectionGraphBuilder do
 
      mapping = { :self => :"'o1" }
 
-     @graph_builder.maps_to_set(:"'ph1", :foo, mapping).should == [:"'o2", :"'o3" ]
+     @graph_builder.maps_to_set(:"'ph_1", :foo, mapping).should == [:"'o2", :"'o3" ]
+     @graph_builder.maps_to_set(:"'ph_2", :foo, mapping).should == [:"'ph1"]
+     l_table.get_var_node(:"'o1").out_edges.should == Set[:"'o1_@a", :"'o1_@b"]
+     l_table.get_var_node(:"'o1_@b").out_edges.should == Set[:"'ph1"]
+     l_table.get_var_node(:"'ph1").parent_field.should == :"'o1_@b"
   end
 
-#  it 'should update escape state of fields of objects passed as arguments' do
-#     @translator.translate(Parser.parse("class A; def a=(v); @a=v; end;
-#                                         def a; @a; end; end;
-#                                         def foo(a); @@g = a.a; end;
-#                                         a = A.new; a.a = 1; foo(a)")) 
-#     main_graph = @graph_builder.local_table[:_main][:last_block][:vars]
-#     main_graph[:"'o1_@a"].out_edges.should == Set[:"'o2"]
-#     main_graph[:"'o2"].escape_state.should == :global_escape
-#  end
+  it 'should update escape state of fields of objects passed as arguments' do
+     @translator.translate(Parser.parse("class A; def a=(v); @a=v; end;
+                                         def a; @a; end; end;
+                                         def foo(a); @@g = a.a; end;
+                                         a = A.new; a.a = 1; foo(a)")) 
+     main_graph = @graph_builder.local_table[:_main][:last_block][:vars]
+     main_graph[:"'o1_@a"].out_edges.should == Set[:"'o2"]
+     main_graph[:"'o2"].escape_state.should == :global_escape
+  end
+
+  it 'should drop outdated field values after function return' do
+     @translator.translate(Parser.parse("def foo; @a = 2; end; @a = 1; foo"))
+     main_graph = @graph_builder.local_table[:_main][:last_block][:vars]
+     main_graph[:"self_@a"].out_edges.should == Set[:"'o3"]
+  end
 
 end
