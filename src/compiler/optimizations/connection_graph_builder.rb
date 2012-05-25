@@ -115,7 +115,6 @@ class ConnectionGraphBuilder
    end
 
    def cvdecl_translated(event)
-      # TODO: Test it.
       var = cvdecl_get_var(event.original_sexp)
       @local_table.assure_existence(var)
       @local_table.class_vars << var
@@ -124,6 +123,7 @@ class ConnectionGraphBuilder
       rsexp = cvdecl_get_right(event.original_sexp)
       @local_table.by_pass(var)
       @local_table.last_graph.add_edge(var, rsexp.graph_node)
+      add_graph_node(event.original_sexp, var)
    end
 
    alias :cvasgn_translated :cvdecl_translated 
@@ -335,13 +335,25 @@ class ConnectionGraphBuilder
 
       if @local_table.points_to_set(var_id).empty?
          ph_id = next_phantom_key
-         @local_table.assure_existence(ph_id, ConnectionGraph::PhantomField)
+         @local_table.assure_existence(ph_id, ConnectionGraph::PhantomField,
+                                       :arg_escape)
          @local_table.get_var_node(ph_id).parent_field = var_id
          @local_table.last_graph.add_edge(var_id, ph_id)
       end
    end
 
-   alias :cvar_translated :lvar_translated
+   def cvar_translated(event)
+      var_id = event.original_sexp[1]
+      @local_table.assure_existence(var_id)
+      add_graph_node(event.original_sexp, var_id)
+      
+      if @local_table.points_to_set(var_id).empty?
+         ph_id = next_phantom_key
+         @local_table.assure_existence(ph_id, ConnectionGraph::PhantomNode,
+                                       :global_escape)
+         @local_table.last_graph.add_edge(var_id, ph_id)
+      end
+   end
 
    ### END - Translator events handlers ###
 

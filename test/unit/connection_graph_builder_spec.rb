@@ -221,4 +221,24 @@ describe ConnectionGraphBuilder do
      main_graph[:"self_@a"].out_edges.should == Set[:"'o3"]
   end
 
+  it 'should assume that every class var has value and model assignment to it' do
+     @translator.translate(Parser.parse("def foo; @@a = @@b; end"))
+     foo_graph = @graph_builder.local_table[:M_Object_foo][:last_block][:vars]
+     foo_graph[:"@@b"].out_edges.should == Set[:"'ph1"]
+     foo_graph[:"@@a"].out_edges.should == Set[:"@@b"]
+     foo_graph[:return].out_edges.should == Set[:"@@a"]
+  end
+ 
+  it 'should assume adequate escape state of phantom fields' do
+     @translator.translate(Parser.parse("def foo; a = @a; @a = 1; b = @@b;
+                                         @@b = 1; end")) 
+     foo_graph = @graph_builder.local_table[:M_Object_foo][:last_block][:vars]
+     foo_graph[:a].out_edges.should == Set[:"'ph1"]
+     foo_graph[:"self_@a"].out_edges.should == Set[:"'o1"]
+     foo_graph[:"'ph1"].escape_state.should == :arg_escape
+     foo_graph[:b].out_edges.should == Set[:"'ph2"]
+     foo_graph[:"'ph2"].escape_state.should == :global_escape
+     foo_graph[:"@@b"].out_edges.should == Set[:"'o2"]
+  end
+
 end
