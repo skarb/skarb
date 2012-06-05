@@ -277,6 +277,8 @@ class Translator
         @symbol_table.forget_returned_type
         body
       end
+      # Counter to track the number of stack allocated bytes.
+      lvars << s(:asgn, s(:decl, :short, :_stalloc_bytes), s(:lit, 0))
       body_block = filtered_block(*lvars, body, s(:return, body.value_sexp))
       s(:static, s(:defn, :'Object*', impl_name, defn_args, body_block)
        ).with_value_type body.value_type

@@ -380,8 +380,22 @@ class ConnectionGraphBuilder
 
    # Extracts actual constructor call from translated sexp.
    def extract_constructor_call(sexp)
-      # TODO: Debug; it doesn't work at all
-      # sexp[1].last[2]
+      find_alloc = lambda do |s|
+         return unless s.is_a? Sexp 
+         if s[0..1] == s(:call, :xmalloc)
+            s
+         else
+            s.each do |se|
+               res = find_alloc.call(se)
+               if res.is_a? Sexp
+                  return res
+               end
+            end
+            return
+         end
+      end
+
+      find_alloc.call(sexp)
    end
 
    # Helper function. Dynamically adds an attribute with an id of the

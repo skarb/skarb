@@ -3,6 +3,10 @@
 
 #include <stdlib.h>
 
+#define SMALLOC_LIMIT 30
+
+#define SMALLOC(x) ((_stalloc_bytes += (x)) > SMALLOC_LIMIT ? xmalloc(x) : alloca(x))
+
 /**
  * Error checking malloc. In case of errors it calls exit(1).
  */

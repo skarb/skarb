@@ -185,7 +185,7 @@ class ConnectionGraphBuilder
             if v_node.is_a? cg::ObjectNode
                set << v
             else
-               v_node.out_edges.each { |u| update_set.call(u) }
+               v_node.out_edges.each(&update_set)
             end
          end
          update_set.call(var)

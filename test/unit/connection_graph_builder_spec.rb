@@ -14,7 +14,14 @@ describe ConnectionGraphBuilder do
     @translator.translate(Parser.parse("1"))
     @graph_builder.local_table.last_graph[:"'o1"].should_not be_nil
   end
-  
+ 
+  it 'should store object node allocation sexp' do
+    @translator.translate(Parser.parse("1"))
+    alloc_sexp = @graph_builder.local_table.last_graph[:"'o1"].constructor_sexp
+    alloc_sexp.should == s(:call, :xmalloc, s(:args, s(:call, :sizeof,
+                                                       s(:args, s(:lit, :Fixnum)))))
+  end
+ 
   it 'should build connection graph during code translation' do
      @translator.translate(Parser.parse("p = Object.new; q = p"))
      @graph_builder.local_table.last_graph[:q].out_edges.should == Set[:p]
