@@ -90,6 +90,13 @@ class ConnectionGraphBuilder
       @local_table.class_vars.each { |p| @local_table.propagate_escape_state(p) }
       @local_table.propagate_escape_state(:return)
 
+      @local_table.abstract_objects.each do |key|
+         o = @local_table.get_var_node(key)
+         if o.escape_state == :no_escape
+            o.constructor_sexp[1] = :SMALLOC
+         end
+      end
+
       @local_table.cfunction = n_function
    end
 
@@ -382,7 +389,7 @@ class ConnectionGraphBuilder
    def extract_constructor_call(sexp)
       find_alloc = lambda do |s|
          return unless s.is_a? Sexp 
-         if s[0..1] == s(:call, :xmalloc)
+         if s[0] == :call and (s[1] == :xmalloc or s[1] == :xmalloc_atomic)
             s
          else
             s.each do |se|
