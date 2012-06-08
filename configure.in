@@ -69,6 +69,7 @@ AC_CONFIG_FILES([
 				src/compiler/emitter/Makefile
 				src/compiler/translator/Makefile
                                 src/compiler/optimizations/Makefile
+                                src/compiler/optimizations/connection_graph_builder/Makefile
 				src/compiler/Makefile
 				src/stdlib/Makefile
 				test/Makefile

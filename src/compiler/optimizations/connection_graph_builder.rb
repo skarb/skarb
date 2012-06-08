@@ -5,6 +5,8 @@ require 'optimizations/connection_graph_builder/connection_graph'
 
 # This class analyzes C ast code streamed by TranslationStreamer
 # and builds connection graph abstraction for it.
+#
+# TODO: _if, _case etc.
 class ConnectionGraphBuilder 
 
    include SexpParsing
@@ -17,7 +19,8 @@ class ConnectionGraphBuilder
    TranslatorEvents = [:lasgn_translated, :iasgn_translated, :attrasgn_translated,
       :cvasgn_translated, :cvdecl_translated, :lit_translated, :str_translated,
       :lvar_translated, :ivar_translated, :cvar_translated, :call_translated,
-      :return_translated, :self_translated, :block_translated]
+      :return_translated, :self_translated, :block_translated, :array_translated,
+      :hash_translated]
 
    def initialize(translator)
       @s_table = translator.symbol_table
@@ -156,7 +159,41 @@ class ConnectionGraphBuilder
 
    alias :lit_translated :create_new_object
    alias :str_translated :create_new_object
-   
+
+   def array_translated(event)
+      create_new_object(event)
+      
+      aid = event.original_sexp.graph_node
+      a_node = @local_table.get_var_node(aid)
+      fid = "#{aid}_[]".to_sym
+      unless a_node.out_edges.include? fid
+         @local_table.assure_existence(fid, ConnectionGraph::FieldNode)
+         @local_table.last_graph.add_edge(aid, fid)
+      end
+
+      event.original_sexp.rest.map do |arg|
+         arg_id = arg.graph_node
+         @local_table.last_graph.add_edge(fid, arg_id)
+      end
+   end
+
+   def hash_translated(event)
+      create_new_object(event)
+
+      aid = event.original_sexp.graph_node
+      a_node = @local_table.get_var_node(aid)
+      fid = "#{aid}_[]".to_sym
+      unless a_node.out_edges.include? fid
+         @local_table.assure_existence(fid, ConnectionGraph::FieldNode)
+         @local_table.last_graph.add_edge(aid, fid)
+      end
+
+      event.original_sexp.rest.map do |arg|
+         arg_id = arg.graph_node
+         @local_table.last_graph.add_edge(fid, arg_id)
+      end
+   end
+
    def call_translated(event)
       if call_get_method(event.original_sexp) == :new
          create_new_object(event)
@@ -189,6 +226,9 @@ class ConnectionGraphBuilder
       
       # Update arguments 
       mapping.each_pair do |f_arg, a_arg|
+         # TODO: Occurs with class methods, should be handled some other way.
+         next if a_arg.nil?
+
          @local_table.points_to_set(a_arg).each do |a_obj|
             update_obj_node(a_obj, f_arg, f_name, mapping)
          end
@@ -208,6 +248,9 @@ class ConnectionGraphBuilder
    def unknown_function_call(a_args, event)
       # Set escape state of arguments as :global_escape
       a_args.each do |a_arg|
+         # TODO: Occurs with class methods, should be handled some other way.
+         next if a_arg.nil?
+         
          @local_table.points_to_set(a_arg).each do |a_obj|
             @local_table.get_var_node(a_obj).escape_state = :global_escape
          end
