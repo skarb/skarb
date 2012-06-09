@@ -8,6 +8,7 @@ describe ConnectionGraphBuilder do
   before do
     @translator = Translator.new
     @graph_builder = ConnectionGraphBuilder.new(@translator)
+    @stdlib_declarations = File.open('/home/julek/projects/mgr/src/compiler/stdlib.rb').read
   end
 
   it 'should store node value of any sexp' do
@@ -40,6 +41,31 @@ describe ConnectionGraphBuilder do
     hash.out_edges.should == Set[:"'o7_[]"]
     elems = @graph_builder.local_table.last_graph[:"'o7_[]"]
     elems.out_edges.should == Set[:"'o1", :"'o2", :"'o3", :"'o4", :"'o5", :"'o6"]
+  end
+
+  it 'should model if statement value' do
+    @translator.translate(Parser.parse("a = (1 if 2)"))
+    graph = @graph_builder.local_table.last_graph
+    graph[:a].out_edges.should == Set[:"'c1"]
+    graph[:"'c1"].out_edges.should == Set[:"'o2"]
+  end
+
+  it 'should model if-else statement value' do
+    @translator.translate(Parser.parse("a = 1 ? 2 : 3"))
+    graph = @graph_builder.local_table.last_graph
+    graph[:a].out_edges.should == Set[:"'c1"]
+    graph[:"'c1"].out_edges.should == Set[:"'o2", :"'o3"]
+  end
+
+  it 'should model case statement value' do
+    @translator.translate(Parser.parse(@stdlib_declarations + "a = case 1
+                                       when 1,3 then 1
+                                       when 2 then 1
+                                       else 1
+                                       end"))
+    graph = @graph_builder.local_table.last_graph
+    graph[:a].out_edges.should == Set[:"'c2"]
+    graph[:"'c2"].out_edges.should == Set[:"'o4", :"'o8", :"'o9"]
   end
 
   it 'should build connection graph during code translation' do

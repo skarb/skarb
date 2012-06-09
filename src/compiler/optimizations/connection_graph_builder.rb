@@ -20,7 +20,7 @@ class ConnectionGraphBuilder
       :cvasgn_translated, :cvdecl_translated, :lit_translated, :str_translated,
       :lvar_translated, :ivar_translated, :cvar_translated, :call_translated,
       :return_translated, :self_translated, :block_translated, :array_translated,
-      :hash_translated]
+      :hash_translated, :if_translated, :case_translated]
 
    def initialize(translator)
       @s_table = translator.symbol_table
@@ -30,6 +30,7 @@ class ConnectionGraphBuilder
       @obj_counter = 0
       @fun_counter = 0
       @ph_counter = 0
+      @cond_counter = 0
 
       SymbolTableEvents.each do 
          |event| @s_table.subscribe(event, self.method(event))
@@ -192,6 +193,38 @@ class ConnectionGraphBuilder
          arg_id = arg.graph_node
          @local_table.last_graph.add_edge(fid, arg_id)
       end
+   end
+
+   def if_translated(event)
+      if_key = next_cond_key
+      @local_table.assure_existence(if_key)
+      
+      if (n = event.original_sexp[2]) and n.graph_node
+         @local_table.last_graph.add_edge(if_key, n.graph_node)
+      end
+      if (n = event.original_sexp[3]) and n.graph_node
+         @local_table.last_graph.add_edge(if_key, n.graph_node)
+      end
+
+      add_graph_node(event.original_sexp, if_key)
+   end
+
+   def case_translated(event)
+      case_key = next_cond_key
+      @local_table.assure_existence(case_key)
+
+      event.original_sexp.rest.find_all { |s| s.first == :when }.each do |s|
+         if (n = s[2].graph_node)
+            @local_table.last_graph.add_edge(case_key, n)
+         end
+      end
+      unless event.original_sexp.last == :when
+         if (n = event.original_sexp.last.graph_node)
+            @local_table.last_graph.add_edge(case_key, n)
+         end
+      end
+
+      add_graph_node(event.original_sexp, case_key)
    end
 
    def call_translated(event)
@@ -426,6 +459,13 @@ class ConnectionGraphBuilder
       @fun_counter += 1
       # Every node not representing Ruby variable should be prefixed with >'<
       "'f#{@fun_counter}".to_sym
+   end
+
+   # Returns an unique id for value returned from conditional block.
+   def next_cond_key
+      @cond_counter += 1
+      # Every node not representing Ruby variable should be prefixed with >'<
+      "'c#{@cond_counter}".to_sym
    end
 
    # Extracts actual constructor call from translated sexp.
