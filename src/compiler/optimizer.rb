@@ -8,8 +8,8 @@ class Optimizer
 
    def initialize(translator)
       @translator = translator
-      @math_inliner = MathInliner.new(translator)
       @connection_graph_builder = ConnectionGraphBuilder.new(translator)
+      @math_inliner = MathInliner.new(translator)
    end
 
 end

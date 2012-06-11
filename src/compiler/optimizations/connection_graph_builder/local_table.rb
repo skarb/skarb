@@ -42,6 +42,9 @@ class ConnectionGraphBuilder
       # corresponding variables.
       # TODO: Refactor this monster!
       def close_block
+         # TODO: Debug, it should not happen!
+         return if last_block[:parent].nil?
+
          old_block = last_block
          self.last_block = last_block[:parent]
 
@@ -181,11 +184,12 @@ class ConnectionGraphBuilder
 
          update_set = Proc.new do |v|
             v_node = get_var_node(v)
-            cg = ConnectionGraph
-            if v_node.is_a? cg::ObjectNode
-               set << v
-            else
-               v_node.out_edges.each(&update_set)
+            if v_node
+               if v_node.is_a? ConnectionGraph::ObjectNode
+                  set << v
+               else
+                  v_node.out_edges.each(&update_set)
+               end
             end
          end
          update_set.call(var)

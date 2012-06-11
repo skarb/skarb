@@ -6,7 +6,7 @@ require 'optimizations/connection_graph_builder/connection_graph'
 # This class analyzes C ast code streamed by TranslationStreamer
 # and builds connection graph abstraction for it.
 #
-# TODO: _if, _case etc.
+# TODO: string, nil, class.
 class ConnectionGraphBuilder 
 
    include SexpParsing
@@ -20,7 +20,7 @@ class ConnectionGraphBuilder
       :cvasgn_translated, :cvdecl_translated, :lit_translated, :str_translated,
       :lvar_translated, :ivar_translated, :cvar_translated, :call_translated,
       :return_translated, :self_translated, :block_translated, :array_translated,
-      :hash_translated, :if_translated, :case_translated]
+      :hash_translated, :if_translated, :case_translated, :class_translated]
 
    def initialize(translator)
       @s_table = translator.symbol_table
@@ -141,7 +141,7 @@ class ConnectionGraphBuilder
    
       @local_table.assure_existence(:return)
       rsexp = return_get_right(event.original_sexp)
-      @local_table.last_graph.add_edge(:return, rsexp.graph_node)
+      @local_table.last_graph.add_edge(:return, rsexp.graph_node) if rsexp.graph_node
    end
 
    # Creates new object node.
@@ -171,7 +171,7 @@ class ConnectionGraphBuilder
 
       event.original_sexp.rest.map do |arg|
          arg_id = arg.graph_node
-         @local_table.last_graph.add_edge(fid, arg_id)
+         @local_table.last_graph.add_edge(fid, arg_id) if arg_id
       end
    end
 
@@ -224,10 +224,25 @@ class ConnectionGraphBuilder
       add_graph_node(event.original_sexp, case_key)
    end
 
+   # We can assume that class contains expression returning an object.
+   def class_translated(event)
+      obj_key = next_key(:cl)
+      @local_table.assure_existence(obj_key, ConnectionGraph::ObjectNode)
+      add_graph_node(event.original_sexp, obj_key)
+   end
+
    def call_translated(event)
       if call_get_method(event.original_sexp) == :new
          create_new_object(event)
       else
+         # Recursive calls are not really modelled until their type is determined.
+         if event.translated_sexp.value_type == :recur
+            obj_key = next_key(:recur)
+            @local_table.assure_existence(obj_key, ConnectionGraph::PhantomNode)
+            add_graph_node(event.original_sexp, obj_key)
+            return
+         end
+         
          f_name = translated_fun_name(event.translated_sexp)
 
          caller_obj = call_get_object(event.original_sexp)
@@ -280,7 +295,7 @@ class ConnectionGraphBuilder
       a_args.each do |a_arg|
          # TODO: Occurs with class methods, should be handled some other way.
          next if a_arg.nil?
-         
+        
          @local_table.points_to_set(a_arg).each do |a_obj|
             @local_table.get_var_node(a_obj).escape_state = :global_escape
          end

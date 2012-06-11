@@ -2,7 +2,7 @@ require 'rspec'
 require 'ruby_parser'
 require 'sexp_processor'
 require 'translator'
-require 'optimizer'
+require 'optimizations/math_inliner'
 
 describe Translator do
   before do
@@ -488,7 +488,7 @@ describe Translator do
   end
 
   it 'should inline arithmetical expressions' do
-    Optimizer.new(@translator)
-    translate_code(@stdlib_declarations + "a = 1 + 1").join.should_not include "Fixnum__PLUS"
+   MathInliner.new(@translator)
+   translate_code(@stdlib_declarations + "a = 1 + 1").join.should_not include "Fixnum__PLUS"
   end
 end
