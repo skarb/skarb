@@ -27,10 +27,7 @@ class ConnectionGraphBuilder
       @local_table = LocalTable.new
       @local_table.cfunction = @s_table.cfunction
 
-      @obj_counter = 0
-      @fun_counter = 0
-      @ph_counter = 0
-      @cond_counter = 0
+      @key_counters = Hash.new(0)
 
       SymbolTableEvents.each do 
          |event| @s_table.subscribe(event, self.method(event))
@@ -152,7 +149,7 @@ class ConnectionGraphBuilder
       obj_node = ConnectionGraph::ObjectNode.new
       obj_node.constructor_sexp =
          extract_constructor_call(event.translated_sexp)
-      obj_key = next_obj_key
+      obj_key = next_key(:o)
       @local_table.abstract_objects << obj_key
       @local_table.last_graph[obj_key] = obj_node
       add_graph_node(event.original_sexp, obj_key)
@@ -196,7 +193,7 @@ class ConnectionGraphBuilder
    end
 
    def if_translated(event)
-      if_key = next_cond_key
+      if_key = next_key(:c)
       @local_table.assure_existence(if_key)
       
       if (n = event.original_sexp[2]) and n.graph_node
@@ -210,7 +207,7 @@ class ConnectionGraphBuilder
    end
 
    def case_translated(event)
-      case_key = next_cond_key
+      case_key = next_key(:c)
       @local_table.assure_existence(case_key)
 
       event.original_sexp.rest.find_all { |s| s.first == :when }.each do |s|
@@ -268,7 +265,7 @@ class ConnectionGraphBuilder
       end
 
       # Model returned value
-      fun_key = next_fun_key
+      fun_key = next_key(:f)
       @local_table.assure_existence(fun_key)
       update_ref_node(fun_key, :return, f_name, mapping)
       add_graph_node(event.original_sexp, fun_key)
@@ -290,9 +287,9 @@ class ConnectionGraphBuilder
       end
 
       # Model returned value
-      fun_key = next_fun_key
+      fun_key = next_key(:f)
       @local_table.assure_existence(fun_key)
-      obj_key = next_obj_key
+      obj_key = next_key(:o)
       @local_table.assure_existence(obj_key, ConnectionGraph::ObjectNode,
                                     :global_escape)
       @local_table.last_graph.add_edge(fun_key, obj_key)
@@ -372,7 +369,7 @@ class ConnectionGraphBuilder
             unless (a_fid_set = @local_table.points_to_set(a_fid)).empty?
                s = s + a_fid_set
             else
-               ph = next_phantom_key
+               ph = next_key(:ph)
                @local_table.assure_existence(ph, ConnectionGraph::PhantomField)
                @local_table.last_graph.add_edge(a_fid, ph)
                @local_table.get_var_node(ph).parent_field = a_fid
@@ -417,7 +414,7 @@ class ConnectionGraphBuilder
       add_graph_node(event.original_sexp, var_id)
 
       if @local_table.points_to_set(var_id).empty?
-         ph_id = next_phantom_key
+         ph_id = next_key(:ph)
          @local_table.assure_existence(ph_id, ConnectionGraph::PhantomField,
                                        :arg_escape)
          @local_table.get_var_node(ph_id).parent_field = var_id
@@ -431,7 +428,7 @@ class ConnectionGraphBuilder
       add_graph_node(event.original_sexp, var_id)
       
       if @local_table.points_to_set(var_id).empty?
-         ph_id = next_phantom_key
+         ph_id = next_key(:ph)
          @local_table.assure_existence(ph_id, ConnectionGraph::PhantomNode,
                                        :global_escape)
          @local_table.last_graph.add_edge(var_id, ph_id)
@@ -440,32 +437,11 @@ class ConnectionGraphBuilder
 
    ### END - Translator events handlers ###
 
-   # Returns an unique id for newly allocated object node.
-   def next_obj_key
-      @obj_counter += 1
+   # Returns an unique id for requested id class.
+   def next_key(cl)
+      @key_counters[cl] += 1
       # Every node not representing Ruby variable should be prefixed with >'<
-      "'o#{@obj_counter}".to_sym
-   end
-
-   # Returns an unique id for newly allocated phantom object node.
-   def next_phantom_key
-      @ph_counter += 1
-      # Every node not representing Ruby variable should be prefixed with >'<
-      "'ph#{@ph_counter}".to_sym
-   end
-
-   # Returns an unique id for value returned from function.
-   def next_fun_key
-      @fun_counter += 1
-      # Every node not representing Ruby variable should be prefixed with >'<
-      "'f#{@fun_counter}".to_sym
-   end
-
-   # Returns an unique id for value returned from conditional block.
-   def next_cond_key
-      @cond_counter += 1
-      # Every node not representing Ruby variable should be prefixed with >'<
-      "'c#{@cond_counter}".to_sym
+      "'#{cl}#{@key_counters[cl]}".to_sym
    end
 
    # Extracts actual constructor call from translated sexp.
