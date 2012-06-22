@@ -11,11 +11,12 @@ unless ARGV.count == 3
    exit
 end
 
+stdlib = File.open('../src/compiler/stdlib.rb').read
 
 translator = Translator.new
 graph_builder = ConnectionGraphBuilder.new(translator)
 
-translator.translate(Parser.parse(File.open(ARGV[0]).read))
+translator.translate(Parser.parse(stdlib + File.open(ARGV[0]).read))
 
 fun = ARGV[1].to_sym
 

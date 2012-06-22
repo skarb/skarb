@@ -6,7 +6,7 @@ require 'optimizations/connection_graph_builder/connection_graph'
 # This class analyzes C ast code streamed by TranslationStreamer
 # and builds connection graph abstraction for it.
 #
-# TODO: string, nil, class.
+# TODO: string, nil, class, constructors with params!
 class ConnectionGraphBuilder 
 
    include SexpParsing

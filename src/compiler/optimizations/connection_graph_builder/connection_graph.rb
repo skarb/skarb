@@ -45,13 +45,31 @@ class ConnectionGraph < Hash
    end
 
    def add_edge(from_vertex, to_vertex)
-      self[from_vertex].out_edges << to_vertex
-      self[to_vertex].in_edges << from_vertex
+      begin
+         self[from_vertex].out_edges << to_vertex
+         self[to_vertex].in_edges << from_vertex
+      rescue NoMethodError => e
+         err_suffix = "in add_edge(#{from_vertex}, #{to_vertex})."
+         if self[from_vertex].nil?
+            puts("No vertex with id #{from_vertex} " << err_suffix)
+         else
+            puts("No vertex with id #{to_vertex} " << err_suffix)
+         end 
+      end
    end
 
    def delete_edge(from_vertex, to_vertex)
-      self[from_vertex].out_edges.delete(to_vertex)
-      self[to_vertex].in_edges.delete(from_vertex)
+      begin
+         self[from_vertex].out_edges.delete(to_vertex)
+         self[to_vertex].in_edges.delete(from_vertex)
+      rescue NoMethodError => e
+         err_suffix = "in delete_edge(#{from_vertex}, #{to_vertex})."
+         if self[from_vertex].nil?
+            puts("No vertex with id #{from_vertex} " << err_suffix)
+         else
+            puts("No vertex with id #{to_vertex} " << err_suffix)
+         end 
+      end
    end
 
    
