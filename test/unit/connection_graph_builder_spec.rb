@@ -294,4 +294,11 @@ describe ConnectionGraphBuilder do
      foo_graph[:"@@b"].out_edges.should == Set[:"'o2"]
   end
 
+  it 'should use supplied connection graphs of stdlib functions' do
+     @translator.translate(Parser.parse(@stdlib_declarations + "n = 1; puts(n)"))
+     main_graph = @graph_builder.local_table[:_main][:last_block][:vars]
+     main_graph[:n].out_edges.should == Set[:"'o1"]
+     main_graph[:"'o1"].escape_state.should == :no_escape
+  end
+
 end

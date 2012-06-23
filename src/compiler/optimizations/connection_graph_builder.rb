@@ -2,6 +2,8 @@ require 'sexp_parsing'
 require 'extensions'
 require 'optimizations/connection_graph_builder/local_table'
 require 'optimizations/connection_graph_builder/connection_graph'
+require 'optimizations/connection_graph_builder/stdlib_graphs'
+require 'optimizations/connection_graph_builder/stdlib_graphs_loader'
 
 # This class analyzes C ast code streamed by TranslationStreamer
 # and builds connection graph abstraction for it.
@@ -36,6 +38,10 @@ class ConnectionGraphBuilder
       TranslatorEvents.each do 
          |event| translator.subscribe(event, self.method(event)) 
       end
+
+      # Load stdlib graphs.
+      graph_loader = StdlibGraphsLoader.new(self)
+      StdlibGraphs.each { |g| graph_loader.load(g) }
    end
 
    def cfunction_changed(event)
