@@ -30,7 +30,7 @@ describe StdlibGraphsLoader do
     cg[:"self_@a"].out_edges.should == Set[:"'p1"]
     cg[:"'p2"].out_edges.should  == Set[:"'p2_@a"]
     cg[:"'p2_@a"].out_edges.should == Set[:"'p1"]
-    cg[:return].out_edges.should == Set[:"'os5"]
+    cg[:return].out_edges.to_a[0].match(/'os/).should == 0
     cg[:"'p2"].escape_state.should == :global_escape
     cg[:"'p1"].escape_state.should == :global_escape
   end
@@ -39,7 +39,7 @@ describe StdlibGraphsLoader do
     g = s(:function, :foo, s(:return, :a))
     @graph_loader.load(g)
     cg = @ltable[:foo].last_block[:vars]
-    cg[:return].out_edges.should == Set[:"'os5"]
+    cg[:return].out_edges.to_a[0].match(/'os/).should == 0
   end
   
 end

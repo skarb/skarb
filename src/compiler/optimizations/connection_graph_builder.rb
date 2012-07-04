@@ -286,6 +286,7 @@ class ConnectionGraphBuilder
       end
 
       # Model returned value
+      #fun_key = "#{next_key(:f)}_#{f_name}"
       fun_key = next_key(:f)
       @local_table.assure_existence(fun_key)
       update_ref_node(fun_key, :return, f_name, mapping)
@@ -308,6 +309,8 @@ class ConnectionGraphBuilder
       end
 
       # Model returned value
+      #f_name = translated_fun_name(event.translated_sexp)
+      #fun_key = "#{next_key(:f)}_#{f_name}"
       fun_key = next_key(:f)
       @local_table.assure_existence(fun_key)
       obj_key = next_key(:o)
@@ -329,6 +332,7 @@ class ConnectionGraphBuilder
       b_node.out_edges.each do |b_fid|
          a_fid = "#{a}_#{strip_prefix(b_fid.to_s)}".to_sym
          unless a_node.out_edges.include? a_fid 
+            @local_table.copy_var_node(a)
             @local_table.assure_existence(a_fid, ConnectionGraph::FieldNode)
             @local_table.last_graph.add_edge(a, a_fid)
          end
@@ -353,6 +357,8 @@ class ConnectionGraphBuilder
       end
       unless has_phantom
          @local_table.get_var_node(a_fid).out_edges.each do |out|
+            @local_table.copy_var_node(a_fid)
+            @local_table.copy_var_node(out)
             @local_table.last_graph.delete_edge(a_fid, out)
          end
       end
@@ -362,6 +368,7 @@ class ConnectionGraphBuilder
          # Map ob to corresponding object in caller function.
          maps_to_set(ob, b_fun, mapping).each do |oa|
             unless @local_table.points_to_set(a_fid).include? oa
+               @local_table.copy_var_node(a_fid)
                @local_table.assure_existence(oa, ConnectionGraph::ObjectNode)
                @local_table.last_graph.add_edge(a_fid, oa)
             end

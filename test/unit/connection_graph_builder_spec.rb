@@ -65,7 +65,7 @@ describe ConnectionGraphBuilder do
                                        end"))
     graph = @graph_builder.local_table.last_graph
     graph[:a].out_edges.should == Set[:"'c2"]
-    graph[:"'c2"].out_edges.should == Set[:"'o4", :"'o8", :"'o9"]
+    graph[:"'c2"].out_edges.should == Set[:"'o3", :"'o6", :"'o7"]
   end
 
   it 'should build connection graph during code translation' do
