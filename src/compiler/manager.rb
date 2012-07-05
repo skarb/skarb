@@ -12,7 +12,7 @@ class Manager
   def compile(file, options)
     code = StdlibDeclarations + file.read
     translator = Translator.new
-    optimizer = Optimizer.new(translator)
+    optimizer = Optimizer.new(translator, options)
 
     translated_ast = translator.translate(Parser.parse(code))
     filtered_ast = translator.expand_all_stmts(translated_ast)

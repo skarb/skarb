@@ -23,6 +23,14 @@ op = OptionParser.new do |opts|
     options[:dont_link] = true
   end
 
+  opts.on('--math_inline', 'Attempt to use standard C operators in math expressions') do
+    options[:math_inline] = true
+  end
+
+  opts.on('--stack_alloc', 'Attempt to use stack allocation for function local objects') do
+    options[:stack_alloc] = true
+  end
+
   opts.on("-h", "Show this message") do
     puts opts.help
     exit 0
