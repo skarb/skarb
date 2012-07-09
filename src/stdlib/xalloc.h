@@ -5,7 +5,8 @@
 
 #define SMALLOC_LIMIT 30
 
-#define SMALLOC(x) ((_stalloc_bytes += (x)) > SMALLOC_LIMIT ? xmalloc(x) : alloca(x))
+#define SMALLOC(x) (((_stalloc_bytes < SMALLOC_LIMIT) && (_stalloc_bytes += (x))) ? \
+                     alloca(x) : xmalloc(x))
 
 /**
  * Error checking malloc. In case of errors it calls exit(1).

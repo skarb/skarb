@@ -203,9 +203,11 @@ class ConnectionGraphBuilder
       @local_table.assure_existence(if_key)
       
       if (n = event.original_sexp[2]) and n.graph_node
+         @local_table.copy_var_node(n.graph_node)
          @local_table.last_graph.add_edge(if_key, n.graph_node)
       end
       if (n = event.original_sexp[3]) and n.graph_node
+         @local_table.copy_var_node(n.graph_node)
          @local_table.last_graph.add_edge(if_key, n.graph_node)
       end
 
@@ -218,11 +220,13 @@ class ConnectionGraphBuilder
 
       event.original_sexp.rest.find_all { |s| s.first == :when }.each do |s|
          if (n = s[2].graph_node)
+            @local_table.copy_var_node(n)
             @local_table.last_graph.add_edge(case_key, n)
          end
       end
       unless event.original_sexp.last == :when
          if (n = event.original_sexp.last.graph_node)
+            @local_table.copy_var_node(n)
             @local_table.last_graph.add_edge(case_key, n)
          end
       end
