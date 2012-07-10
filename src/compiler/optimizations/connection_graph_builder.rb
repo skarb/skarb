@@ -8,7 +8,7 @@ require 'optimizations/connection_graph_builder/stdlib_graphs_loader'
 # This class analyzes C ast code streamed by TranslationStreamer
 # and builds connection graph abstraction for it.
 #
-# TODO: string, nil, class, constructors with params!
+# TODO: nil, constructors with params!
 class ConnectionGraphBuilder 
 
    include SexpParsing
@@ -155,6 +155,7 @@ class ConnectionGraphBuilder
       obj_node = ConnectionGraph::ObjectNode.new
       obj_node.constructor_sexp =
          extract_constructor_call(event.translated_sexp)
+      obj_node.type = event.translated_sexp.value_type 
       obj_key = next_key(:o)
       @local_table.abstract_objects << obj_key
       @local_table.last_graph[obj_key] = obj_node
@@ -332,6 +333,7 @@ class ConnectionGraphBuilder
       b_node = @local_table.get_var_node(b, b_fun)
 
       a_node.escape_state = :global_escape if b_node.escape_state == :global_escape
+      a_node.type = b_node.type if a_node.type.nil?
 
       b_node.out_edges.each do |b_fid|
          a_fid = "#{a}_#{strip_prefix(b_fid.to_s)}".to_sym
@@ -381,7 +383,7 @@ class ConnectionGraphBuilder
       end 
    end
 
-   # Returns a set of object from current function to with an object bo from function
+   # Returns a set of object from current function to with an object ob from function
    # b_fun maps with certain mapping given.
    def maps_to_set(ob, b_fun, mapping)
       ob_node = @local_table.get_var_node(ob, b_fun)
