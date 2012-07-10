@@ -301,4 +301,11 @@ describe ConnectionGraphBuilder do
      main_graph[:"'o1"].escape_state.should == :no_escape
   end
 
+  it 'should store the type of created objects' do
+     @translator.translate(Parser.parse("def foo; a = 1.2; @a = a; end; foo;"))
+     main_graph = @graph_builder.local_table[:_main][:last_block][:vars]
+     main_graph[:'self_@a'].out_edges.should == Set[:"'o2"]
+     main_graph[:"'o2"].type.should == :Float
+  end
+
 end
