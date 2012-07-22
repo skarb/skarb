@@ -2,6 +2,7 @@ require 'sexp_parsing'
 require 'extensions'
 require 'optimizations/connection_graph_builder/local_table'
 require 'optimizations/connection_graph_builder/connection_graph'
+require 'optimizations/connection_graph_builder/objects_succession'
 require 'optimizations/connection_graph_builder/stdlib_graphs'
 require 'optimizations/connection_graph_builder/stdlib_graphs_loader'
 
@@ -12,6 +13,7 @@ require 'optimizations/connection_graph_builder/stdlib_graphs_loader'
 class ConnectionGraphBuilder 
 
    include SexpParsing
+   include ObjectsSuccession
 
    attr_reader :local_table
 
@@ -25,6 +27,7 @@ class ConnectionGraphBuilder
       :hash_translated, :if_translated, :case_translated, :class_translated]
 
    def initialize(translator)
+      @translator = translator
       @s_table = translator.symbol_table
       @local_table = LocalTable.new
       @local_table.cfunction = @s_table.cfunction
@@ -97,12 +100,27 @@ class ConnectionGraphBuilder
       @local_table.class_vars.each { |p| @local_table.propagate_escape_state(p) }
       @local_table.propagate_escape_state(:return)
 
-      @local_table.abstract_objects.each do |key|
-         o = @local_table.get_var_node(key)
-         if o.escape_state == :no_escape
-            o.constructor_sexp[1] = :SMALLOC
+      objects = @local_table.abstract_objects.map do |k|
+         [k, @local_table.get_var_node(k)]
+      end
+      local_objects = objects.select { |o| o[1].escape_state == :no_escape }
+      objects_lives = local_objects.map do |o|
+         ObjectLife.new(o[0], o[1].constructor_sexp, o[1].potential_precursors)
+      end
+      succession = find_objects_succession(objects_lives)
+      succession.each do |line|
+         line[0].constructor_sexp[2][1] = :SMALLOC
+         for i in 1..(line.length-1)
+            line[i].constructor_sexp[2] = line[i-1].constructor_sexp[1]
          end
       end
+
+      #@local_table.abstract_objects.each do |key|
+      #   o = @local_table.get_var_node(key)
+      #   if o.escape_state == :no_escape
+      #      o.constructor_sexp[2][1] = :SMALLOC
+      #   end
+      #end
 
       @local_table.cfunction = n_function
    end
@@ -154,8 +172,9 @@ class ConnectionGraphBuilder
    def create_new_object(event)
       obj_node = ConnectionGraph::ObjectNode.new
       obj_node.constructor_sexp =
-         extract_constructor_call(event.translated_sexp)
-      obj_node.type = event.translated_sexp.value_type 
+         extract_allocator_call(event.translated_sexp)
+      obj_node.type = event.translated_sexp.value_type
+      obj_node.potential_precursors = @local_table.find_dead_objects(obj_node.type)
       obj_key = next_key(:o)
       @local_table.abstract_objects << obj_key
       @local_table.last_graph[obj_key] = obj_node
@@ -478,12 +497,14 @@ class ConnectionGraphBuilder
       "'#{cl}#{@key_counters[cl]}".to_sym
    end
 
-   # Extracts actual constructor call from translated sexp.
-   def extract_constructor_call(sexp)
+   # Extracts actual allocator call (with assigment to variable) from translated sexp.
+   def extract_allocator_call(sexp)
       find_alloc = lambda do |s|
          return unless s.is_a? Sexp 
-         if s[0] == :call and (s[1] == :xmalloc or s[1] == :xmalloc_atomic)
-            s
+         if s[0] == :asgn and s[2].is_a? Sexp and s[2][0] == :call
+            if s[2][1] == :xmalloc or s[2][1] == :xmalloc_atomic
+               s
+            end
          else
             s.each do |se|
                res = find_alloc.call(se)

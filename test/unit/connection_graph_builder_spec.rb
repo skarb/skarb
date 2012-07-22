@@ -19,15 +19,15 @@ describe ConnectionGraphBuilder do
   it 'should store object node allocation sexp' do
     @translator.translate(Parser.parse("1"))
     alloc_sexp = @graph_builder.local_table.last_graph[:"'o1"].constructor_sexp
-    alloc_sexp.should == s(:call, :xmalloc, s(:args, s(:call, :sizeof,
-                                                       s(:args, s(:lit, :Fixnum)))))
+    alloc_sexp.should == s(:asgn, s(:var, :_var2), s(:call, :xmalloc, s(:args, s(:call, :sizeof,
+                                                       s(:args, s(:lit, :Fixnum))))))
   end
 
   it 'should model array literal' do
     @translator.translate(Parser.parse("[1,2,3]"))
     arr = @graph_builder.local_table.last_graph[:"'o4"]
-    arr.constructor_sexp.should == s(:call, :xmalloc, s(:args, s(:call, :sizeof,
-                                                       s(:args, s(:lit, :Array)))))
+    arr.constructor_sexp.should == s(:asgn, s(:var, :_var2), s(:call, :xmalloc, s(:args, s(:call, :sizeof,
+                                                       s(:args, s(:lit, :Array))))))
     arr.out_edges.should == Set[:"'o4_[]"]
     elems = @graph_builder.local_table.last_graph[:"'o4_[]"]
     elems.out_edges.should == Set[:"'o1", :"'o2", :"'o3"]
@@ -36,8 +36,8 @@ describe ConnectionGraphBuilder do
   it 'should model hash literal' do
     @translator.translate(Parser.parse("{1 => 1, 2 => 2, 3 => 3}"))
     hash = @graph_builder.local_table.last_graph[:"'o7"]
-    hash.constructor_sexp.should == s(:call, :xmalloc, s(:args, s(:call, :sizeof,
-                                                       s(:args, s(:lit, :Hash)))))
+    hash.constructor_sexp.should == s(:asgn, s(:var, :_var2), s(:call, :xmalloc, s(:args, s(:call, :sizeof,
+                                                       s(:args, s(:lit, :Hash))))))
     hash.out_edges.should == Set[:"'o7_[]"]
     elems = @graph_builder.local_table.last_graph[:"'o7_[]"]
     elems.out_edges.should == Set[:"'o1", :"'o2", :"'o3", :"'o4", :"'o5", :"'o6"]

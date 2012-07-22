@@ -51,7 +51,7 @@ class ConnectionGraphBuilder
          old_block[:vars].each do |key, old_node|
             node = copy_var_node(key)
             if node.nil?
-               last_block[:vars][key] = old_node
+               assure_existence_from_old_block(key, old_block)
             else
                # The nodes are merged if their outgoing edges differ.
                if node.out_edges != old_node.out_edges
@@ -77,11 +77,9 @@ class ConnectionGraphBuilder
                         f_node = get_var_node(from_vert) || old_block[:vars][from_vert]
                         next if f_node.class != ConnectionGraph::Node
 
-                        copy_var_node(from_vert) ||
-                           (last_block[:vars][from_vert] = old_block[:vars][from_vert])
+                        assure_existence_from_old_block(from_vert, old_block)
                         old_node.out_edges.each do |to_vert|
-                           copy_var_node(to_vert) ||
-                              (last_block[:vars][to_vert] = old_block[:vars][to_vert])
+                           assure_existence_from_old_block(to_vert, old_block)
                            last_block[:vars].add_edge(from_vert, to_vert)
                            old_block[:vars].add_edge(from_vert, to_vert)
                         end
@@ -93,12 +91,20 @@ class ConnectionGraphBuilder
 
                   # Copy old node out edges to the node:
                   old_node.out_edges.each do |to_vert|
-                     copy_var_node(to_vert) ||
-                        (last_block[:vars][to_vert] = old_block[:vars][to_vert])
+                     assure_existence_from_old_block(to_vert, old_block)
                      last_block[:vars].add_edge(key, to_vert)
                   end
                end
             end
+         end
+      end
+
+      # Assures that node with given id exists in a current block. When necessary the
+      # node is copied from old_block, so it should exists there. 
+      def assure_existence_from_old_block(id, old_block)
+         unless copy_var_node(id)
+           last_block[:vars][id] = old_block[:vars][id]
+           last_block[:vars][id].existence_state = :conditional
          end
       end
 
@@ -171,6 +177,24 @@ class ConnectionGraphBuilder
       
          @cfunction = old_function
          ret      
+      end
+
+      # Returns an array of objects currently unreachable and of given type.
+      def find_dead_objects(type)
+         s = []
+
+         cblock = last_block
+         begin
+            dead_hash = cblock[:vars].select do |k,o|
+               o.is_a? ConnectionGraph::ObjectNode and \
+                  o.in_edges.empty? and \
+                  o.existence_state == :certain and o.type == type
+            end
+            s = s + dead_hash.keys
+            cblock = cblock[:parent]
+         end until cblock.nil?
+
+         s
       end
 
       # Collects all object nodes and field nodes ids which are pointed to by var

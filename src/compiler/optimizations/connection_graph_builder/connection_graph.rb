@@ -5,16 +5,22 @@ require 'set'
 # and incoming edges sets as well as aditional properties.
 #
 # Convention: vertex means vertex id, node means associated node object.
+# TODO: Change object hierarchy
 class ConnectionGraph < Hash
 
    # Generic node in connection graph. 
    class Node
-      attr_accessor :escape_state, :out_edges, :in_edges
+      # escape_state -- if the node escapes from its local function.
+      # out_edges, in_edges -- connected nodes.
+      # existence_state -- if the node exists in current block regerdless of
+      #                    execution path or if its existence is conditional.
+      attr_accessor :escape_state, :out_edges, :in_edges, :existence_state
       
       def initialize(esc_state = :no_escape)
          @out_edges = Set.new
          @in_edges = Set.new
          @escape_state = esc_state
+         @existence_state = :certain
       end
 
       def initialize_copy(src)
@@ -28,7 +34,7 @@ class ConnectionGraph < Hash
    # Node representing abstract object; it has a reference to sexp with translated
    # constructor call.
    class ObjectNode < Node
-      attr_accessor :constructor_sexp, :type
+      attr_accessor :constructor_sexp, :type, :potential_precursors
    end
 
    # Node representing field of an object.

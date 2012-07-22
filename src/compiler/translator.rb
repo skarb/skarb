@@ -33,6 +33,7 @@ class Translator
   EventStruct = Struct.new(:event, :sender, :original_sexp, :translated_sexp)
 
   def initialize
+    @tmp_id_counter = 0
     @symbol_table = SymbolTable.new
     @translated_sexp_dict = TranslatedSexpDictionary.new
     @event_manager = EventManager.new
@@ -92,11 +93,11 @@ class Translator
   end
 
   attr_accessor :symbol_table, :translated_sexp_dict
+  attr_reader :tmp_id
 
   # Each call to this method returns a new, unique var name.
   def next_var_name
-    @next_id ||= 0
-    "_var#{@next_id += 1}".to_sym
+    "_var#{@tmp_id_counter += 1}".to_sym
   end
 
   private
