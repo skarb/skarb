@@ -255,6 +255,14 @@ class ConnectionGraphBuilder
       end
 
       add_graph_node(event.original_sexp, if_key)
+
+      # If returned object is an argument of an expression, it has to live until
+      # the expression is evaluated. To assure that it is linked with special
+      # expression node.
+      if expr = @local_table.current_expression
+         @local_table.copy_var_node(expr)
+         @local_table.last_graph.add_edge(expr, if_key)
+      end
    end
 
    def case_translated(event)
@@ -275,6 +283,14 @@ class ConnectionGraphBuilder
       end
 
       add_graph_node(event.original_sexp, case_key)
+    
+      # If returned object is an argument of an expression, it has to live until
+      # the expression is evaluated. To assure that it is linked with special
+      # expression node.
+      if expr = @local_table.current_expression
+         @local_table.copy_var_node(expr)
+         @local_table.last_graph.add_edge(expr, case_key)
+      end
    end
 
    # We can assume that class contains expression returning an object.
@@ -282,6 +298,14 @@ class ConnectionGraphBuilder
       obj_key = next_key(:cl)
       @local_table.assure_existence(obj_key, ConnectionGraph::ObjectNode)
       add_graph_node(event.original_sexp, obj_key)
+    
+      # If returned object is an argument of an expression, it has to live until
+      # the expression is evaluated. To assure that it is linked with special
+      # expression node.
+      if expr = @local_table.current_expression
+         @local_table.copy_var_node(expr)
+         @local_table.last_graph.add_edge(expr, obj_key)
+      end
    end
 
    alias :call_encountered :open_expression
@@ -341,6 +365,14 @@ class ConnectionGraphBuilder
       @local_table.assure_existence(fun_key)
       update_ref_node(fun_key, :return, f_name, mapping)
       add_graph_node(event.original_sexp, fun_key)
+
+      # If returned object is an argument of an expression, it has to live until
+      # the expression is evaluated. To assure that it is linked with special
+      # expression node.
+      if expr = @local_table.current_expression
+         @local_table.copy_var_node(expr)
+         @local_table.last_graph.add_edge(expr, fun_key)
+      end
    end
 
    # When function with unknown connection graph is called, we have to
@@ -368,6 +400,14 @@ class ConnectionGraphBuilder
                                     :global_escape)
       @local_table.last_graph.add_edge(fun_key, obj_key)
       add_graph_node(event.original_sexp, fun_key)
+
+      # If returned object is an argument of an expression, it has to live until
+      # the expression is evaluated. To assure that it is linked with special
+      # expression node.
+      if expr = @local_table.current_expression
+         @local_table.copy_var_node(expr)
+         @local_table.last_graph.add_edge(expr, fun_key)
+      end
    end
 
    # a -- caller object
