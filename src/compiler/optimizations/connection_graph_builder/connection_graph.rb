@@ -50,6 +50,11 @@ class ConnectionGraph < Hash
       attr_accessor :parent_field
    end
 
+   # Node representing currently evaluated expression.
+   class ExprNode < Node
+   end
+
+   # Adds edge between two vertices, updating in_edges and out_edges sets.
    def add_edge(from_vertex, to_vertex)
       begin
          self[from_vertex].out_edges << to_vertex
@@ -64,6 +69,7 @@ class ConnectionGraph < Hash
       end
    end
 
+   # Deletes edge between two vertices, updating in_edges and out_edges sets.
    def delete_edge(from_vertex, to_vertex)
       begin
          self[from_vertex].out_edges.delete(to_vertex)
@@ -78,6 +84,14 @@ class ConnectionGraph < Hash
       end
    end
 
+   # Deletes vertex deleting all its edges before.
+   def delete_vertex(vertex)
+      out_e = self[vertex].out_edges.to_a
+      out_e.each { |e| delete_edge(vertex, e) }
+      in_e = self[vertex].in_edges.to_a
+      in_e.each { |e| delete_edge(e, vertex) }
+      self.delete(vertex)
+   end
    
 end
    

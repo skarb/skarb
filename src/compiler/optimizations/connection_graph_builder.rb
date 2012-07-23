@@ -9,6 +9,11 @@ require 'optimizations/connection_graph_builder/stdlib_graphs_loader'
 # This class analyzes C ast code streamed by TranslationStreamer
 # and builds connection graph abstraction for it.
 #
+# Any sexp containing arguments is treated as an expression. When encountering
+# it is needed to push it on expression stack, after evaluation is needed to
+# pop it.
+# Sexp treated as expressions: call, array, hash, and, or, not.
+#
 # TODO: nil, constructors with params!
 class ConnectionGraphBuilder 
 
@@ -24,7 +29,9 @@ class ConnectionGraphBuilder
       :cvasgn_translated, :cvdecl_translated, :lit_translated, :str_translated,
       :lvar_translated, :ivar_translated, :cvar_translated, :call_translated,
       :return_translated, :self_translated, :block_translated, :array_translated,
-      :hash_translated, :if_translated, :case_translated, :class_translated]
+      :hash_translated, :if_translated, :case_translated, :class_translated,
+      :call_encountered, :array_encountered, :hash_encountered, :and_encountered,
+      :or_encountered, :not_encountered]
 
    def initialize(translator)
       @translator = translator
@@ -100,6 +107,9 @@ class ConnectionGraphBuilder
       @local_table.class_vars.each { |p| @local_table.propagate_escape_state(p) }
       @local_table.propagate_escape_state(:return)
 
+      # Objects are allocated with respect to the succession lines. Memory for the
+      # first object in a line is allocated on the stack; the same memory is reused
+      # for the successive objects.
       objects = @local_table.abstract_objects.map do |k|
          [k, @local_table.get_var_node(k)]
       end
@@ -114,13 +124,6 @@ class ConnectionGraphBuilder
             line[i].constructor_sexp[2] = line[i-1].constructor_sexp[1]
          end
       end
-
-      #@local_table.abstract_objects.each do |key|
-      #   o = @local_table.get_var_node(key)
-      #   if o.escape_state == :no_escape
-      #      o.constructor_sexp[2][1] = :SMALLOC
-      #   end
-      #end
 
       @local_table.cfunction = n_function
    end
@@ -179,12 +182,28 @@ class ConnectionGraphBuilder
       @local_table.abstract_objects << obj_key
       @local_table.last_graph[obj_key] = obj_node
       add_graph_node(event.original_sexp, obj_key)
+
+      # If created object is an argument of an expression, it has to live until
+      # the expression is evaluated. To assure that it is linked with special
+      # expression node.
+      if expr = @local_table.current_expression
+         @local_table.copy_var_node(expr)
+         @local_table.last_graph.add_edge(expr, obj_key)
+      end
    end
 
    alias :lit_translated :create_new_object
    alias :str_translated :create_new_object
 
+   def open_expression(event)
+      @local_table.push_expr(next_key(:expr))
+   end
+
+   alias :array_encountered :open_expression
+
    def array_translated(event)
+      @local_table.pop_expr
+      
       create_new_object(event)
       
       aid = event.original_sexp.graph_node
@@ -201,7 +220,11 @@ class ConnectionGraphBuilder
       end
    end
 
+   alias :hash_encountered :open_expression
+   
    def hash_translated(event)
+      @local_table.pop_expr
+
       create_new_object(event)
 
       aid = event.original_sexp.graph_node
@@ -261,7 +284,11 @@ class ConnectionGraphBuilder
       add_graph_node(event.original_sexp, obj_key)
    end
 
+   alias :call_encountered :open_expression
+
    def call_translated(event)
+      @local_table.pop_expr
+      
       if call_get_method(event.original_sexp) == :new
          create_new_object(event)
       else
@@ -285,7 +312,6 @@ class ConnectionGraphBuilder
          else
             unknown_function_call(a_args, event)
          end
-
       end
    end
 
@@ -487,6 +513,17 @@ class ConnectionGraphBuilder
          @local_table.last_graph.add_edge(var_id, ph_id)
       end
    end
+
+   def close_expression
+      @local_table.pop_expr
+   end 
+
+   alias :and_encountered :open_expression
+   alias :and_translated :close_expression
+   alias :or_encountered :open_expression
+   alias :or_translated :close_expression
+   alias :not_encountered :open_expression
+   alias :not_translated :close_expression
 
    ### END - Translator events handlers ###
 

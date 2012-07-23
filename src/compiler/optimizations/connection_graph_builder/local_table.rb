@@ -7,9 +7,9 @@ class ConnectionGraphBuilder
    # Rule: information from upper blocks can be used but modifications are made
    # only to last block. Upper blocks are updated when their children are closed.
    class LocalTable < Hash
-      
+     
       FunctionStruct = Struct.new(:last_block, :formal_params, :class_vars,
-                                  :abstract_objects)
+                                  :abstract_objects, :expr_stack)
       BlockStruct = Struct.new(:vars, :parent)
 
       attr_reader :cfunction
@@ -17,7 +17,7 @@ class ConnectionGraphBuilder
       # Adds new function in current class context with mandatory keys.
       def add_function(f_name)
          self[f_name] = FunctionStruct.new(BlockStruct.new(
-            ConnectionGraph.new, nil), [], [], [])
+            ConnectionGraph.new, nil), [], [], [], [])
          assure_existence(:return, ConnectionGraph::Node, :arg_escape)
          assure_existence(:self, ConnectionGraph::PhantomNode, :arg_escape)
       end
@@ -222,16 +222,27 @@ class ConnectionGraphBuilder
          set
       end
 
-      # Copies variable node and places the copy in the last block. It is necessary
-      # to do so before assigment to variable. Key can be :lvars, :ivars or :cvars.
+      # Copies node and places the copy in the last block. It is necessary
+      # to do so before an assigment to variable.
       def copy_var_node(var)
-         # If lvar is defined in the last block it is unnecessary to copy it's node.
+         # If lvar is defined in the last block it is not necessary to copy its node.
          return last_block[:vars][var] if last_block[:vars].has_key? var
          if (node = get_var_node(var)).nil?
             nil
          else
             last_block[:vars][var] = node.clone
          end
+      end
+
+      # Deletes node permanently from all the blocks. 
+      def delete_node(id)
+         cblock = last_block
+         begin
+            if cblock[:vars].has_key? id
+               cblock[:vars].delete_vertex(id)
+            end
+            cblock = cblock[:parent]
+         end until cblock.nil?
       end
 
       # Copies variable node to the last block or create a new node if none exists.
@@ -259,5 +270,25 @@ class ConnectionGraphBuilder
          return :arg_escape if a == :arg_escape || b == :arg_escape
          return :no_escape
       end
+    
+
+      # Pushes expression to the expression stack and creates its node.
+      def push_expr(expr)
+         self[@cfunction].expr_stack.push expr
+         assure_existence(expr, ConnectionGraph::ExprNode)
+      end
+
+      # Pops expression from the expression stack and deletes its node.
+      def pop_expr
+         return if self[@cfunction].expr_stack.empty?
+         expr = self[@cfunction].expr_stack.pop
+         last_graph.delete_vertex(expr) 
+      end
+
+      # Returns top element of the expression stack.
+      def current_expression
+         self[@cfunction].expr_stack.last
+      end
+
    end
 end
