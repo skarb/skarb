@@ -48,6 +48,23 @@ class ::Sexp
     @value_sexp = other_sexp.value_sexp
     self
   end
+
+  # Recursively searches for first sexp satisfying condition given as block.
+  def find_recursive(&cond)
+      if yield self
+         self
+      else
+         self.each do |se|
+            if se.is_a? Sexp
+               res = se.find_recursive &cond
+               if res.is_a? Sexp
+                  return res
+               end
+            end
+         end
+         return
+      end
+   end
 end
 
 # Extensions for standard Array class used by the Emitter.

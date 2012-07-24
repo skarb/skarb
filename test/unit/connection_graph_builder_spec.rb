@@ -3,6 +3,7 @@ require 'set'
 require 'translator'
 require 'parser'
 require 'optimizations/connection_graph_builder'
+require 'optimizations/math_inliner'
 
 describe ConnectionGraphBuilder do
   before do
@@ -308,4 +309,8 @@ describe ConnectionGraphBuilder do
      main_graph[:"'o2"].type.should == :Float
   end
 
+  it 'should reuse stack allocated object memory' do
+     s = @translator.translate(Parser.parse("def foo; a = 1; a = 2; 3; end; foo;"))
+     s.join(" ").include?("asgn var _var7 var _var6").should be_true
+  end
 end

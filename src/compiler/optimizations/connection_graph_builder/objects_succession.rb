@@ -28,7 +28,13 @@ class ConnectionGraphBuilder
       # each object belongs to its own succession line. The goal is to create
       # as few succession lines as possible.
       def find_succession(succ_lines, remaining_objects, current_line)
-         return succ_lines if remaining_objects.empty?
+         if remaining_objects.empty?
+            if current_line.empty?
+               return succ_lines
+            else
+               return succ_lines + [current_line]
+            end
+         end
          succ = find_best_successor(current_line.last, remaining_objects)
          return find_succession(succ_lines + [current_line], remaining_objects, []) if succ.nil?
          return find_succession(succ_lines, remaining_objects - [succ], current_line + [succ])

@@ -35,6 +35,7 @@ class MathInliner
       t = translate_generic_sexp(sexp)
       var = @translator.next_var_name
       ctor = std_init_name(t.value_type)
+      add_border_mark(sexp)
       s(:stmts, class_constructor(t.value_type, var),
         s(:call, ctor,
           s(:args, s(:var, var), t.value_sexp))).with_value(s(:var, var), t.value_type)
@@ -55,6 +56,7 @@ class MathInliner
    def translate_generic_sexp(sexp)
       # Is there a public or a private method translating such a sexp?
       if respond_to? (method_name = "translate_#{sexp[0]}".to_sym), true
+         remove_border_mark(sexp)
          send(method_name, sexp)
       else
          raise NotInlineableError 
@@ -90,4 +92,21 @@ class MathInliner
       s().with_value(s(:binary_oper,
                        sexp[2], arg1.value_sexp, arg2.value_sexp), res_type)
    end
+
+   # Adds meta information to the sexp informing that it is a border of inlined
+   # expression.
+   def add_border_mark(sexp)
+      def sexp.inline_border?
+         true
+      end 
+   end
+   
+   # Removes meta information from the sexp informing that it is a border of inlined
+   # expression.
+   def remove_border_mark(sexp)
+      def sexp.inline_border?
+         false
+      end 
+   end
+
 end

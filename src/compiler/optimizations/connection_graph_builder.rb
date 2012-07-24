@@ -44,8 +44,23 @@ class ConnectionGraphBuilder
       StdlibGraphs.each { |g| graph_loader.load(g) }
    end
 
+   def erase_sexp_nodes(sexp)
+      sexp.each do |s|
+         if s.is_a? Sexp
+            if s.graph_node
+               node = @local_table.get_var_node(s.graph_node)
+               node.existence_state = :nonexistent
+            end
+            erase_sexp_nodes(s)
+         end
+      end
+   end
+
    def dispatch_event(event_struct)
-      if respond_to? event_struct.event
+      if event_struct.original_sexp.inline_border? and event_struct.translated_sexp
+         erase_sexp_nodes(event_struct.original_sexp)
+         create_new_object(event_struct) 
+      elsif respond_to? event_struct.event
          send(event_struct.event, event_struct)
       end
    end
@@ -128,6 +143,22 @@ class ConnectionGraphBuilder
       var = lasgn_get_var(event.original_sexp)
       @local_table.assure_existence(var)
       rsexp = lasgn_get_right(event.original_sexp)
+
+      # If overriden variable was last reference to an object, value of the right
+      # expression can be stored in this object.
+      r_node = @local_table.get_var_node(rsexp.graph_node)
+      if r_node.is_a? ConnectionGraph::ObjectNode
+         node = @local_table.get_var_node(var) 
+         node.out_edges.each do |e|
+            e_node = @local_table.get_var_node(e)
+            if e_node.in_edges.length == 1 and \
+               e_node.is_a? ConnectionGraph::ObjectNode and \
+               e_node.existence_state == :certain and e_node.type == r_node.type
+               r_node.potential_precursors.push(e)
+            end
+         end
+      end
+
       @local_table.by_pass(var)
       @local_table.last_graph.add_edge(var, rsexp.graph_node)
       add_graph_node(event.original_sexp, var)
@@ -570,26 +601,13 @@ class ConnectionGraphBuilder
       "'#{cl}#{@key_counters[cl]}".to_sym
    end
 
+   
    # Extracts actual allocator call (with assigment to variable) from translated sexp.
    def extract_allocator_call(sexp)
-      find_alloc = lambda do |s|
-         return unless s.is_a? Sexp 
-         if s[0] == :asgn and s[2].is_a? Sexp and s[2][0] == :call
-            if s[2][1] == :xmalloc or s[2][1] == :xmalloc_atomic
-               s
-            end
-         else
-            s.each do |se|
-               res = find_alloc.call(se)
-               if res.is_a? Sexp
-                  return res
-               end
-            end
-            return
-         end
+      sexp.find_recursive do |s|
+         s[0] == :asgn and s[2].is_a? Sexp and s[2][0] == :call and \
+            (s[2][1] == :xmalloc or s[2][1] == :xmalloc_atomic)
       end
-
-      find_alloc.call(sexp)
    end
 
    # Helper function. Dynamically adds an attribute with an id of the
