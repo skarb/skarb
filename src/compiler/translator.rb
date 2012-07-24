@@ -49,6 +49,10 @@ class Translator
     @event_manager.subscribe(event, method)
   end
 
+  def subscribe_all(method)
+    @event_manager.subscribe_all(method)
+  end
+
   # Analyses a given Ruby AST tree and returns a C AST. Both the argument and
   # the returned value are Sexps from the sexp_processor gem. AST is splitted
   # in 4 sections: structs, prototypes, functions, global variables + main
@@ -145,9 +149,8 @@ class Translator
   # Calls one of translate_* methods depending on the given sexp's type.
   def translate_generic_sexp(sexp)
     # Notify that the sexp it to be translated.
-    @event_manager.fire_event("#{sexp[0]}_encountered".to_sym,
-                             EventStruct.new("#{sexp[0]}_encountered".to_sym,
-                                             self, sexp, nil))
+    event = "#{sexp[0]}_encountered".to_sym
+    @event_manager.fire_event(event, EventStruct.new(event, self, sexp, nil))
 
     # Is there a public or a private method translating such a sexp?
     if respond_to? (method_name = "translate_#{sexp[0]}".to_sym), true
@@ -159,10 +162,8 @@ class Translator
     @translated_sexp_dict.add_entry(sexp, translated_sexp)
 
     # Notify that the sexp was translated.
-    for event in ["#{sexp[0]}_translated".to_sym, :generic_sexp_translated] do
-       @event_manager.fire_event(event, EventStruct.new(event, self, sexp,
-                                                        translated_sexp))
-    end
+    event = "#{sexp[0]}_translated".to_sym
+    @event_manager.fire_event(event, EventStruct.new(event, self, sexp, translated_sexp))
     translated_sexp
   end
 

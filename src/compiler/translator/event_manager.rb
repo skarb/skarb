@@ -8,20 +8,24 @@ class EventManager < Hash
    def initialize
       super
       @active = true
+      @all_events = []
    end
 
    def subscribe(event, method)
       (self[event] ||= []).push method
    end
 
+   def subscribe_all(method)
+      @all_events.push method
+   end
+
    def fire_event(event, event_struct)
       return unless @active
 
       if include? event  
-         self[event].each do |x|
-            x.call(event_struct)
-         end
+         self[event].each { |x| x.call(event_struct) }
       end
+      @all_events.each { |x| x.call(event_struct) }
    end
 
    def activate

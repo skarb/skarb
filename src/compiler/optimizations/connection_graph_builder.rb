@@ -25,14 +25,6 @@ class ConnectionGraphBuilder
    SymbolTableEvents = [:block_opened, :block_closed, :function_opened,
       :function_closed, :cfunction_changed]
 
-   TranslatorEvents = [:lasgn_translated, :iasgn_translated, :attrasgn_translated,
-      :cvasgn_translated, :cvdecl_translated, :lit_translated, :str_translated,
-      :lvar_translated, :ivar_translated, :cvar_translated, :call_translated,
-      :return_translated, :self_translated, :block_translated, :array_translated,
-      :hash_translated, :if_translated, :case_translated, :class_translated,
-      :call_encountered, :array_encountered, :hash_encountered, :and_encountered,
-      :or_encountered, :not_encountered]
-
    def initialize(translator)
       @translator = translator
       @s_table = translator.symbol_table
@@ -45,13 +37,17 @@ class ConnectionGraphBuilder
          |event| @s_table.subscribe(event, self.method(event))
       end
 
-      TranslatorEvents.each do 
-         |event| translator.subscribe(event, self.method(event)) 
-      end
+      translator.subscribe_all(self.method(:dispatch_event))
 
       # Load stdlib graphs.
       graph_loader = StdlibGraphsLoader.new(self)
       StdlibGraphs.each { |g| graph_loader.load(g) }
+   end
+
+   def dispatch_event(event_struct)
+      if respond_to? event_struct.event
+         send(event_struct.event, event_struct)
+      end
    end
 
    def cfunction_changed(event)
@@ -554,7 +550,7 @@ class ConnectionGraphBuilder
       end
    end
 
-   def close_expression
+   def close_expression(event)
       @local_table.pop_expr
    end 
 

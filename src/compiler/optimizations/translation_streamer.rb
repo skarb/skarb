@@ -14,7 +14,7 @@ class TranslationStreamer
    def initialize(translator)
       @event_manager = EventManager.new
       
-      translator.subscribe(:generic_sexp_translated, self.method(:sexp_translated))
+      translator.subscribe_all(self.method(:sexp_translated))
       
       s_table = translator.symbol_table
       s_table.subscribe(:function_opened, self.method(:function_opened))
@@ -30,8 +30,10 @@ class TranslationStreamer
    # wrapper or empty s(). Because of this, traversal should be started on the
    # lower level.
    def sexp_translated(event)
-      event.translated_sexp.each do |t_sexp|
-         traverse_sexp(t_sexp, event.original_sexp)
+      if event.translated_sexp
+         event.translated_sexp.each do |t_sexp|
+            traverse_sexp(t_sexp, event.original_sexp)
+         end
       end
    end
 
