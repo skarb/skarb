@@ -1,3 +1,4 @@
+require 'set'
 require 'optimizations/connection_graph_builder/connection_graph'
 
 class ConnectionGraphBuilder
@@ -8,8 +9,8 @@ class ConnectionGraphBuilder
    # only to last block. Upper blocks are updated when their children are closed.
    class LocalTable < Hash
      
-      FunctionStruct = Struct.new(:last_block, :formal_params, :class_vars,
-                                  :abstract_objects, :expr_stack)
+      FunctionStruct = Struct.new(:last_block, :formal_params, :abstract_objects,
+                                  :expr_stack, :class_vars, :local_vars)
       BlockStruct = Struct.new(:vars, :parent)
 
       attr_reader :cfunction
@@ -17,7 +18,7 @@ class ConnectionGraphBuilder
       # Adds new function in current class context with mandatory keys.
       def add_function(f_name)
          self[f_name] = FunctionStruct.new(BlockStruct.new(
-            ConnectionGraph.new, nil), [], [], [], [])
+            ConnectionGraph.new, nil), [], [], [], Set.new, Set.new)
          assure_existence(:return, ConnectionGraph::Node, :arg_escape)
          assure_existence(:self, ConnectionGraph::PhantomNode, :arg_escape)
       end
@@ -153,6 +154,11 @@ class ConnectionGraphBuilder
          self[@cfunction][:class_vars]
       end
 
+      # List of local variables referenced in this function.
+      def local_vars
+         self[@cfunction][:local_vars]
+      end
+
       # Last opened block setter.
       def last_block=(val)
          self[@cfunction][:last_block] = val
@@ -179,22 +185,41 @@ class ConnectionGraphBuilder
          ret      
       end
 
-      # Returns an array of objects currently unreachable and of given type.
-      def find_dead_objects(type)
-         s = []
+      # Returns a set of all objects still accessible from roots.
+      def find_live_objects
+         to_visit = formal_params + class_vars.to_a + local_vars.to_a + expr_stack
+         visited = Set.new
+         live_objects = Set.new
+         until to_visit.empty?
+            v = to_visit.pop
+            next if visited.member? v
+            visited << v
+            v_node = get_var_node(v)
+            to_visit = to_visit + v_node.out_edges.to_a
+            live_objects << v if v_node.is_a? ConnectionGraph::ObjectNode 
+         end
+         live_objects
+      end
 
+      # Returns a set of all existing objects.
+      def find_all_objects
+         s = Set.new
          cblock = last_block
          begin
-            dead_hash = cblock[:vars].select do |k,o|
-               o.is_a? ConnectionGraph::ObjectNode and \
-                  o.in_edges.empty? and \
-                  o.existence_state == :certain and o.type == type
-            end
-            s = s + dead_hash.keys
+            hash = cblock[:vars].select { |k,o| o.is_a? ConnectionGraph::ObjectNode }
+            s = s + hash.keys
             cblock = cblock[:parent]
          end until cblock.nil?
-
          s
+      end
+
+      # Returns an array of objects currently unreachable and of given type.
+      def find_dead_objects(type)
+         s = find_all_objects - find_live_objects
+         s.select do |o|
+            o_node = get_var_node(o)
+            o_node.type == type and o_node.existence_state == :certain
+         end
       end
 
       # Collects all object nodes and field nodes ids which are pointed to by var
@@ -288,6 +313,11 @@ class ConnectionGraphBuilder
       # Returns top element of the expression stack.
       def current_expression
          self[@cfunction].expr_stack.last
+      end
+
+      # Returns expression stack.
+      def expr_stack
+         self[@cfunction].expr_stack
       end
 
    end

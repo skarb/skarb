@@ -19,15 +19,17 @@ describe ConnectionGraphBuilder do
  
   it 'should store object node allocation sexp' do
     @translator.translate(Parser.parse("1"))
-    alloc_sexp = @graph_builder.local_table.last_graph[:"'o1"].constructor_sexp
-    alloc_sexp.should == s(:asgn, s(:var, :_var2), s(:call, :xmalloc, s(:args, s(:call, :sizeof,
-                                                       s(:args, s(:lit, :Fixnum))))))
+    constructor_sexp = @graph_builder.local_table.last_graph[:"'o1"].constructor_sexp
+    alloc_sexp = constructor_sexp.alloc
+    type_set_sexp = constructor_sexp.type_set
+    alloc_sexp.should == s(:asgn, s(:var, :_var2), s(:call, :xmalloc, s(:args, s(:call, :sizeof, s(:args, s(:lit, :Fixnum))))))
+    type_set_sexp.should == s(:call, :set_type, s(:args, s(:var, :_var2), s(:var, :Fixnum)))
   end
 
   it 'should model array literal' do
     @translator.translate(Parser.parse("[1,2,3]"))
     arr = @graph_builder.local_table.last_graph[:"'o4"]
-    arr.constructor_sexp.should == s(:asgn, s(:var, :_var2), s(:call, :xmalloc, s(:args, s(:call, :sizeof,
+    arr.constructor_sexp.alloc.should == s(:asgn, s(:var, :_var2), s(:call, :xmalloc, s(:args, s(:call, :sizeof,
                                                        s(:args, s(:lit, :Array))))))
     arr.out_edges.should == Set[:"'o4_[]"]
     elems = @graph_builder.local_table.last_graph[:"'o4_[]"]
@@ -37,7 +39,7 @@ describe ConnectionGraphBuilder do
   it 'should model hash literal' do
     @translator.translate(Parser.parse("{1 => 1, 2 => 2, 3 => 3}"))
     hash = @graph_builder.local_table.last_graph[:"'o7"]
-    hash.constructor_sexp.should == s(:asgn, s(:var, :_var2), s(:call, :xmalloc, s(:args, s(:call, :sizeof,
+    hash.constructor_sexp.alloc.should == s(:asgn, s(:var, :_var2), s(:call, :xmalloc, s(:args, s(:call, :sizeof,
                                                        s(:args, s(:lit, :Hash))))))
     hash.out_edges.should == Set[:"'o7_[]"]
     elems = @graph_builder.local_table.last_graph[:"'o7_[]"]
@@ -312,5 +314,13 @@ describe ConnectionGraphBuilder do
   it 'should reuse stack allocated object memory' do
      s = @translator.translate(Parser.parse("def foo; a = 1; a = 2; 3; end; foo;"))
      s.join(" ").include?("asgn var _var7 var _var6").should be_true
+  end
+
+  it 'should find dead objects' do
+     @translator.translate(Parser.parse("a = 1; a = 2; @a = 5.5; @@a = a; if 1; @a = 3; end"))
+     l_table = @graph_builder.local_table
+     l_table.find_all_objects.should == Set[:self, :"'o1", :"'o2", :"'o3", :"'o4", :"'o5"]
+     l_table.find_live_objects.should == Set[:self, :"'o2", :"'o3", :"'o5"]
+     l_table.find_dead_objects(:Fixnum).should == [:"'o1", :"'o4"]
   end
 end

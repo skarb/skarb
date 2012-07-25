@@ -25,11 +25,14 @@ class ConnectionGraphBuilder
    SymbolTableEvents = [:block_opened, :block_closed, :function_opened,
       :function_closed, :cfunction_changed]
 
+   ConstructorSexp = Struct.new(:alloc, :type_set)
+
    def initialize(translator)
       @translator = translator
       @s_table = translator.symbol_table
       @local_table = LocalTable.new
       @local_table.cfunction = @s_table.cfunction
+      @local_table.formal_params << :self
 
       @key_counters = Hash.new(0)
 
@@ -130,9 +133,10 @@ class ConnectionGraphBuilder
       end
       succession = find_objects_succession(objects_lives)
       succession.each do |line|
-         line[0].constructor_sexp[2][1] = :SMALLOC
+         line[0].constructor_sexp.alloc[2][1] = :SMALLOC
          for i in 1..(line.length-1)
-            line[i].constructor_sexp[2] = line[i-1].constructor_sexp[1]
+            line[i].constructor_sexp.alloc[2] = line[i-1].constructor_sexp.alloc[1]
+            line[i].constructor_sexp.type_set.clear
          end
       end
 
@@ -142,6 +146,7 @@ class ConnectionGraphBuilder
    def lasgn_translated(event)
       var = lasgn_get_var(event.original_sexp)
       @local_table.assure_existence(var)
+      @local_table.local_vars << var
       rsexp = lasgn_get_right(event.original_sexp)
 
       # If overriden variable was last reference to an object, value of the right
@@ -202,7 +207,8 @@ class ConnectionGraphBuilder
    def create_new_object(event)
       obj_node = ConnectionGraph::ObjectNode.new
       obj_node.constructor_sexp =
-         extract_allocator_call(event.translated_sexp)
+         ConstructorSexp.new(extract_allocator_call(event.translated_sexp),
+                             extract_type_setter(event.translated_sexp))
       obj_node.type = event.translated_sexp.value_type
       obj_node.potential_precursors = @local_table.find_dead_objects(obj_node.type)
       obj_key = next_key(:o)
@@ -601,12 +607,20 @@ class ConnectionGraphBuilder
       "'#{cl}#{@key_counters[cl]}".to_sym
    end
 
-   
    # Extracts actual allocator call (with assigment to variable) from translated sexp.
    def extract_allocator_call(sexp)
       sexp.find_recursive do |s|
          s[0] == :asgn and s[2].is_a? Sexp and s[2][0] == :call and \
             (s[2][1] == :xmalloc or s[2][1] == :xmalloc_atomic)
+      end
+   end
+
+   # Extracts assignment of object type from translated sexp.
+   def extract_type_setter(sexp)
+      sexp.find_recursive do |s|
+         (s[0] == :call and s[1] == :set_type) or \
+         (s[0] == :asgn and s[1].is_a? Sexp and s[1][0] == :binary_oper and \
+            s[1][1] == :"->" and s[1][3].is_a? Sexp and s[1][3][1] == :type)
       end
    end
 
