@@ -31,6 +31,10 @@ op = OptionParser.new do |opts|
     options[:stack_alloc] = true
   end
 
+  opts.on('--object_reuse', 'Attempt to reuse memory of no longer accessible local object (compile time garbage collection)') do
+    options[:object_reuse] = true
+  end
+
   opts.on("-h", "Show this message") do
     puts opts.help
     exit 0
@@ -62,4 +66,4 @@ input = if ARGV[0] == '-'
           end
         end
 
-Manager.new.compile input, options
+Manager.new.compile(input, options)

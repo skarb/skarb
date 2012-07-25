@@ -8,7 +8,8 @@ require 'optimizations/math_inliner'
 describe ConnectionGraphBuilder do
   before do
     @translator = Translator.new
-    @graph_builder = ConnectionGraphBuilder.new(@translator)
+    options = { :object_reuse => true, :stack_alloc => true }
+    @graph_builder = ConnectionGraphBuilder.new(@translator, options)
     @stdlib_declarations = File.open('/home/julek/projects/mgr/src/compiler/stdlib.rb').read
   end
 

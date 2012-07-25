@@ -27,7 +27,8 @@ class ConnectionGraphBuilder
 
    ConstructorSexp = Struct.new(:alloc, :type_set)
 
-   def initialize(translator)
+   def initialize(translator, options)
+      @options = options
       @translator = translator
       @s_table = translator.symbol_table
       @local_table = LocalTable.new
@@ -108,6 +109,28 @@ class ConnectionGraphBuilder
       add_graph_node(event.original_sexp, event.original_sexp.last.graph_node)
    end
 
+   # Changes xmalloc to SMALLOC equivalent.
+   def substitute_allocation_sexp(sexp)
+      sexp[2][1] = ((sexp[2][1] == :xmalloc_atomic) ? :SMALLOC_ATOMIC : :SMALLOC)
+   end
+
+   # Processes succession lines according to selected options.
+   def process_succession_lines(succession)
+      if @options[:object_reuse]
+         succession.each do |line|
+            substitute_allocation_sexp(line[0].constructor_sexp.alloc) if @options[:stack_alloc]
+            for i in 1..(line.length-1)
+               line[i].constructor_sexp.alloc[2] = line[i-1].constructor_sexp.alloc[1]
+               line[i].constructor_sexp.type_set.clear
+            end
+         end
+      elsif @options[:stack_alloc]
+         succession.each do |line|
+            line.each { |o| substitute_allocation_sexp(o.constructor_sexp.alloc) }
+         end
+      end
+   end
+
    def function_closed(event)
       n_function = @local_table.cfunction
       @local_table.cfunction = event.function
@@ -132,13 +155,7 @@ class ConnectionGraphBuilder
          ObjectLife.new(o[0], o[1].constructor_sexp, o[1].potential_precursors)
       end
       succession = find_objects_succession(objects_lives)
-      succession.each do |line|
-         line[0].constructor_sexp.alloc[2][1] = :SMALLOC
-         for i in 1..(line.length-1)
-            line[i].constructor_sexp.alloc[2] = line[i-1].constructor_sexp.alloc[1]
-            line[i].constructor_sexp.type_set.clear
-         end
-      end
+      process_succession_lines(succession)
 
       @local_table.cfunction = n_function
    end

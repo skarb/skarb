@@ -2,7 +2,7 @@
 
 PROJECT_DIR = "/home/julek/projects/mgr/"
 
-LegalSwitches = ["--math_inline", "--stack_alloc"]
+LegalSwitches = ["--math_inline", "--stack_alloc", "--object_reuse"]
 
 Dir.chdir(PROJECT_DIR)
 

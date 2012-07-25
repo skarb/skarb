@@ -9,7 +9,8 @@ require 'optimizations/connection_graph_builder/stdlib_graphs_loader'
 describe StdlibGraphsLoader do
   before do
     @translator = Translator.new
-    @graph_builder = ConnectionGraphBuilder.new(@translator)
+    options = { :object_reuse => true, :stack_alloc => true }
+    @graph_builder = ConnectionGraphBuilder.new(@translator, options)
     @graph_loader = StdlibGraphsLoader.new(@graph_builder)
     @ltable = @graph_builder.local_table
   end

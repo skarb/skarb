@@ -8,6 +8,9 @@
 #define SMALLOC(x) (((_stalloc_bytes < SMALLOC_LIMIT) && (_stalloc_bytes += (x))) ? \
                      alloca(x) : xmalloc(x))
 
+#define SMALLOC_ATOMIC(x) (((_stalloc_bytes < SMALLOC_LIMIT) && (_stalloc_bytes += (x))) ? \
+                     alloca(x) : xmalloc_atomic(x))
+
 /**
  * Error checking malloc. In case of errors it calls exit(1).
  */

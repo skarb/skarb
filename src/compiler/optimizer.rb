@@ -11,8 +11,8 @@ class Optimizer
       if options[:math_inline]
          @math_inliner = MathInliner.new(translator)
       end
-      if options[:stack_alloc]
-         @connection_graph_builder = ConnectionGraphBuilder.new(translator)
+      if options[:stack_alloc] or options[:object_reuse]
+         @connection_graph_builder = ConnectionGraphBuilder.new(translator, options)
       end
    end
 
