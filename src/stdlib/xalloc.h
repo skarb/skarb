@@ -2,6 +2,7 @@
 #define XALLOC_H_
 
 #include <stdlib.h>
+#include <gc.h>
 
 #define SMALLOC_LIMIT 30
 
@@ -11,6 +12,15 @@
 #define SMALLOC_ATOMIC(x) (((_stalloc_bytes < SMALLOC_LIMIT) && (_stalloc_bytes += (x))) ? \
                      alloca(x) : xmalloc_atomic(x))
 
+#ifndef MEMORY_ALLOC_CHECK
+
+#define xmalloc(x) GC_MALLOC(x)
+#define xmalloc_atomic(x) GC_MALLOC_ATOMIC(x)
+#define xcalloc(n, x) GC_MALLOC((n)*(x))
+#define xrealloc(ptr, x) GC_REALLOC(ptr, x)
+#define xfree(ptr) GC_FREE(ptr)
+
+#else
 /**
  * Error checking malloc. In case of errors it calls exit(1).
  */
@@ -36,5 +46,6 @@ void* xrealloc(void *ptr, size_t size);
  * A wrapper around the GC_FREE macro.
  */
 void xfree(void *ptr);
+#endif
 
 #endif /* XALLOC_H_ */

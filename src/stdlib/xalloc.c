@@ -4,6 +4,8 @@
 #include <gc.h>
 #include "xalloc.h"
 
+#ifdef MEMORY_ALLOC_CHECK
+
 void* xmalloc(size_t s) {
     void *ptr = GC_MALLOC(s);
     if (!ptr) {
@@ -43,3 +45,5 @@ void* xrealloc(void *ptr, size_t s) {
 void xfree(void *ptr) {
   GC_FREE(ptr);
 }
+
+#endif

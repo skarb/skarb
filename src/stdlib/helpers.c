@@ -39,7 +39,11 @@ void initialize() {
   GC_INIT();
   if (setenv("G_SLICE", "always-malloc", FALSE))
     die("setenv: %s\n", strerror(errno));
+#ifdef MEMORY_ALLOC_CHECK
   GMemVTable vtable = { &xmalloc, &xrealloc, &xfree, NULL, NULL, NULL };
+#else
+  GMemVTable vtable = { &GC_malloc, &GC_realloc, &GC_free, NULL, NULL, NULL };
+#endif
   g_mem_set_vtable(&vtable);
   clear_cache();
 }
