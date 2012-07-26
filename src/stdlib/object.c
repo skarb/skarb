@@ -9,6 +9,8 @@
 #include "helpers.h"
 #include "float.h"
 #include "method_cache.h"
+#include "true.h"
+#include "false.h"
 
 s_Object vs_Object = {{{Class_t},{Object_t}}};
 
@@ -47,4 +49,9 @@ Object * Object__EQ__EQ_(Object *self, Object *other) {
 
 Object * Object_rand(Object *self) {
   return Float_new(drand48());
+}
+
+Object * Object_nil__QMARK(Object *self) {
+  if(self->type == NilClass_t) return true;
+  return false;
 }

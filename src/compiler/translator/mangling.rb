@@ -2,6 +2,7 @@ require 'set'
 
 module Mangling
   SpecialCharsConversion = {
+    '**' => '__POW__', 
     '+'  => '__PLUS__',
     '-'  => '__MINUS__',
     '*'  => '__MUL__',

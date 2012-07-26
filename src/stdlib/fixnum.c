@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <math.h>
 #include <glib.h>
 #include "fixnum.h"
 #include "xalloc.h"
@@ -55,6 +56,26 @@ Object * Fixnum__MUL_(Object *self, Object *other) {
         return Float_new(as_fixnum(self)->val * as_float(other)->val);
     die("TypeError");
     return 0;
+}
+
+Object * Fixnum__POW_(Object *self, Object *other) {
+   if (is_a(other, Fixnum)) {
+      int other_val = as_fixnum(other)->val;
+      if(other_val == 0) return Fixnum_new(1);
+      int v = as_fixnum(self)->val;
+      if(other_val < 0) {
+         for(int i = 0; i < -other_val; i++) v *= v;
+         return Float_new(1.0f / v);
+      }
+      for(int i = 0; i < other_val; i++) v *= v;
+      return Fixnum_new(v);
+   }
+   if (is_a(other, Float)) {
+      float v = powf((float)as_fixnum(self)->val, (float)as_fixnum(other)->val);
+      return Float_new(v);
+   }
+   die("TypeError");
+   return 0;
 }
 
 Object * Fixnum__DIV_(Object *self, Object *other) {

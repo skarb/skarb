@@ -13,6 +13,9 @@ StdlibGraphs = [
    s(:function, :Object__EQ__EQ_,
      s(:return, :s)),
 
+   s(:function, :Object_nil__QMARK,
+     s(:return, :s)),
+
    s(:function, :Fixnum__PLUS_, s(:args, :p1),
      s(:return, :s)),
   
@@ -22,6 +25,9 @@ StdlibGraphs = [
    s(:function, :Fixnum__MUL_, s(:args, :p1),
      s(:return, :s)),
   
+   s(:function, :Fixnum__POW_, s(:args, :p1),
+     s(:return, :s)),
+
    s(:function, :Fixnum__DIV_, s(:args, :p1),
      s(:return, :s)),
   
@@ -154,6 +160,9 @@ StdlibGraphs = [
    s(:function, :Array_map, s(:args, :p1),
      s(:return, :s)),
    
+   s(:function, :Array_max, 
+     s(:return, :"self_[]")),
+
    s(:function, :Hash__INDEX_, s(:args, :p1),
      s(:return, :"self_[]")),
    

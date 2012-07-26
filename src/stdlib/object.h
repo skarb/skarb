@@ -42,4 +42,9 @@ Object * Object__EQ__EQ_(Object *self, Object *other);
  */
 Object * Object_rand(Object *self);
 
+/**
+ * Object.nil?
+ */
+Object * Object_nil__QMARK(Object *self);
+
 #endif /* OBJECTS_H_ */

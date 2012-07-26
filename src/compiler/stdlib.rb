@@ -37,6 +37,10 @@ class Object
   def ==(arg)
     defined_as :Object__EQ__EQ_
   end
+
+  def nil?
+    defined_as :Object_nil__QMARK
+  end
 end
 
 class Class
@@ -65,6 +69,10 @@ class Fixnum
     defined_as :Fixnum__MUL_
     Fixnum.returned_if Fixnum
     Float.returned_if Float
+  end
+
+  def **(arg)
+    defined_as :Fixnum__POW_
   end
 
   def /(arg)
@@ -268,6 +276,10 @@ class Array
   def map
     defined_as :Array_map
     returns Array
+  end
+  
+  def max
+    defined_as :Array_max
   end
 end
 

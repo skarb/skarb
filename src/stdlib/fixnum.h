@@ -50,6 +50,11 @@ Object * Fixnum__MINUS_AMP(Object *self);
 Object * Fixnum__MUL_(Object *self, Object *other);
 
 /**
+ * Fixnum#**
+ */
+Object * Fixnum__POW_(Object *self, Object *other);
+
+/**
  * Fixnum#/
  */
 Object * Fixnum__DIV_(Object *self, Object *other);

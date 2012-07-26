@@ -90,4 +90,9 @@ Object * Array_join(Object *self, Object *separator);
  */
 Object * Array_map(Object *self);
 
+/**
+ * Array#max
+ */
+Object * Array_max(Object *self);
+
 #endif /* ARRAY_H_ */

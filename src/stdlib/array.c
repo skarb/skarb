@@ -133,3 +133,15 @@ Object * Array_map(Object *self) {
     }
     return arr;
 }
+
+Object * Array_max(Object *self) {
+    Object *max = g_array_index(as_array(self)->arr, Object*, 0);
+    for (int i = 1; i < as_array(self)->arr->len; ++i) {
+       Object *obj = g_array_index(as_array(self)->arr, Object*, i);
+       Object *compar = ((Object*(*)(Object*,Object*)) find_method(max->type,
+              classes_dictionary, _LT__id, "<", 1))(max, obj);
+       if(boolean_value(compar)) max = obj;
+    }
+    return max;
+}
+
