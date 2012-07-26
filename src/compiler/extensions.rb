@@ -51,20 +51,31 @@ class ::Sexp
 
   # Recursively searches for first sexp satisfying condition given as block.
   def find_recursive(&cond)
-      if yield self
-         self
-      else
-         self.each do |se|
-            if se.is_a? Sexp
-               res = se.find_recursive &cond
-               if res.is_a? Sexp
-                  return res
-               end
-            end
-         end
-         return
-      end
-   end
+     if yield self
+        self
+     else
+        self.each do |se|
+           if se.is_a? Sexp
+              res = se.find_recursive &cond
+              if res.is_a? Sexp
+                 return res
+              end
+           end
+        end
+        return
+     end
+  end
+ 
+  # Execute block recursively for sexp and all its children.
+  def each_recursive(&block)
+     yield self
+     self.each do |se|
+        if se.is_a? Sexp
+           se.each_recursive &block
+        end
+     end
+  end
+
 end
 
 # Extensions for standard Array class used by the Emitter.

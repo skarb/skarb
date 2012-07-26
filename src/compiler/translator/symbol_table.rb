@@ -135,14 +135,22 @@ class SymbolTable < Hash
     retval
   end
 
+  # Adds special mark denoting block of instructions executed inside a loop.
+  def add_loop_interior_mark(obj)
+     def obj.loop_interior?
+        true
+     end
+  end
+
   # Executes a block in a given block context and resets the context
   # to the previous value.
-  def in_block
+  def in_block(loop_interior=false)
     raise 'Block expected' unless block_given?
     
     # Open new block
     prev_block = @cblock
     @cblock = { lvars: {}, parent: prev_block }
+    add_loop_interior_mark(@cblock) if loop_interior
     @event_manager.fire_event(:block_opened, nil)
 
     # Execute code in block

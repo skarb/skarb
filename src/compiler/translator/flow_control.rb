@@ -44,21 +44,26 @@ class Translator
   # variable changing during the first execution of the body and it is possible
   # to exit with a single break statement. 
   def translate_while(sexp)
-    cond = translate_generic_sexp sexp[1]
-    body1 = body2 = s()
+    cond1 = translate_generic_sexp(sexp[1])
+    body1 = body2 = cond2 = s()
     @symbol_table.in_block do
-      body1 = translate_generic_sexp sexp[2]
-      body2 = @symbol_table.in_block { translate_generic_sexp sexp[2] }
+      body1 = translate_generic_sexp(sexp[2])
+      body2 = @symbol_table.in_block(true) do
+         translate_generic_sexp(sexp[2])
+      end
+      cond2 = @symbol_table.in_block(true) do
+         translate_generic_sexp(sexp[1])
+      end
     end
     filtered_stmts(
-      cond,
-      s(:while, boolean_value(cond.value_sexp),
+      cond1,
+      s(:while, boolean_value(cond1.value_sexp),
         filtered_block(
           body1,
           s(:while, s(:lit, 1),
              filtered_block(
-             cond,
-             s(:if, s(:l_unary_oper, :'!', boolean_value(cond.value_sexp)), s(:break)),
+             cond2,
+             s(:if, s(:l_unary_oper, :'!', boolean_value(cond2.value_sexp)), s(:break)),
              body2)),
           s(:break))))
   end
@@ -70,21 +75,26 @@ class Translator
   # variable changing during the first execution of the body and it is possible
   # to exit with a single break statement. 
   def translate_until(sexp)
-    cond = translate_generic_sexp sexp[1]
-    body1 = body2 = s()
+    cond1 = translate_generic_sexp(sexp[1])
+    body1 = body2 = cond2 = s()
     @symbol_table.in_block do
-      body1 = translate_generic_sexp sexp[2]
-      body2 = @symbol_table.in_block { translate_generic_sexp sexp[2] }
+      body1 = translate_generic_sexp(sexp[2])
+      body2 = @symbol_table.in_block(true) do
+         translate_generic_sexp(sexp[2])
+      end
+      cond2 = @symbol_table.in_block(true) do
+         translate_generic_sexp(sexp[1])
+      end
     end
     filtered_stmts(
-      cond,
-      s(:while, s(:l_unary_oper, :'!', boolean_value(cond.value_sexp)),
+      cond1,
+      s(:while, s(:l_unary_oper, :'!', boolean_value(cond1.value_sexp)),
         filtered_block(
           body1,
           s(:while, s(:lit, 1),
             filtered_block(
-              cond,
-              s(:if, boolean_value(cond.value_sexp), s(:break)),
+              cond2,
+              s(:if, boolean_value(cond2.value_sexp), s(:break)),
               body2)),
           s(:break))))
   end

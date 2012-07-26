@@ -3,7 +3,8 @@ require 'set'
 class ConnectionGraphBuilder
    module ObjectsSuccession
       
-      ObjectLife = Struct.new(:id, :constructor_sexp, :potential_precursors)
+      ObjectLife = Struct.new(:id, :constructor_sexp, :potential_precursors,
+                              :inside_loop)
 
       Pair = Struct.new(:a, :b)
 

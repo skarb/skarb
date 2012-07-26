@@ -314,7 +314,16 @@ describe ConnectionGraphBuilder do
 
   it 'should reuse stack allocated object memory' do
      s = @translator.translate(Parser.parse("def foo; a = 1; a = 2; 3; end; foo;"))
-     s.join(" ").include?("asgn var _var7 var _var6").should be_true
+     prg_txt = s.join(" ")
+     prg_txt.include?("_var6 call SMALLOC").should be_true
+     prg_txt.include?("asgn var _var7 var _var6").should be_true
+  end
+
+  it 'should not allocate object created inside loops on the stack' do
+     s = @translator.translate(Parser.parse("def foo; a = 1; while 1; b = 1; end; end; foo;"))
+     prg_txt = s.join(" ")
+     prg_txt.include?("_var12 call xmalloc").should be_true
+     prg_txt.include?("_var8 call SMALLOC").should be_true
   end
 
   it 'should find dead objects' do

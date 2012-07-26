@@ -11,14 +11,14 @@ class ConnectionGraphBuilder
      
       FunctionStruct = Struct.new(:last_block, :formal_params, :abstract_objects,
                                   :expr_stack, :class_vars, :local_vars)
-      BlockStruct = Struct.new(:vars, :parent)
+      BlockStruct = Struct.new(:vars, :parent, :loop_interior)
 
       attr_reader :cfunction
 
       # Adds new function in current class context with mandatory keys.
       def add_function(f_name)
          self[f_name] = FunctionStruct.new(BlockStruct.new(
-            ConnectionGraph.new, nil), [], [], [], Set.new, Set.new)
+            ConnectionGraph.new, nil, false), [], [], [], Set.new, Set.new)
          assure_existence(:return, ConnectionGraph::Node, :arg_escape)
          assure_existence(:self, ConnectionGraph::PhantomNode, :arg_escape)
       end
@@ -36,7 +36,7 @@ class ConnectionGraphBuilder
 
       # Opens new block representing conditional program branch.
       def open_block
-         self.last_block = BlockStruct.new(ConnectionGraph.new, last_block)
+         self.last_block = BlockStruct.new(ConnectionGraph.new, last_block, false)
       end
 
       # Closes block and merges conditional branches by merging nodes of

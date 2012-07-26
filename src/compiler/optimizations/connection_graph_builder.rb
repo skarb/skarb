@@ -60,12 +60,16 @@ class ConnectionGraphBuilder
       end
    end
 
-   def dispatch_event(event_struct)
-      if event_struct.original_sexp.inline_border? and event_struct.translated_sexp
-         erase_sexp_nodes(event_struct.original_sexp)
-         create_new_object(event_struct) 
-      elsif respond_to? event_struct.event
-         send(event_struct.event, event_struct)
+   def dispatch_event(event_st)
+      # Inlined expressions are modelled in a special way.
+      if event_st.original_sexp.inline_border? and event_st.translated_sexp
+         erase_sexp_nodes(event_st.original_sexp)
+         create_new_object(event_st)
+         return 
+      end
+
+      if respond_to? event_st.event
+         send(event_st.event, event_st)
       end
    end
 
@@ -75,6 +79,15 @@ class ConnectionGraphBuilder
 
    def block_opened(event)
       @local_table.open_block
+      # If the block is executed in a loop, it should be marked as such.
+      begin
+         if (@local_table.last_block.parent.loop_interior or \
+            @s_table.cblock.loop_interior?)
+            @local_table.last_block.loop_interior = true
+         end
+      rescue NoMethodError
+         nil
+      end
    end
    
    def block_closed(event)
@@ -118,7 +131,9 @@ class ConnectionGraphBuilder
    def process_succession_lines(succession)
       if @options[:object_reuse]
          succession.each do |line|
-            substitute_allocation_sexp(line[0].constructor_sexp.alloc) if @options[:stack_alloc]
+            if @options[:stack_alloc] and not line[0].inside_loop
+               substitute_allocation_sexp(line[0].constructor_sexp.alloc)
+            end
             for i in 1..(line.length-1)
                line[i].constructor_sexp.alloc[2] = line[i-1].constructor_sexp.alloc[1]
                line[i].constructor_sexp.type_set.clear
@@ -126,7 +141,11 @@ class ConnectionGraphBuilder
          end
       elsif @options[:stack_alloc]
          succession.each do |line|
-            line.each { |o| substitute_allocation_sexp(o.constructor_sexp.alloc) }
+            line.each do |o|
+               unless o.inside_loop
+                  substitute_allocation_sexp(o.constructor_sexp.alloc)
+               end
+            end
          end
       end
    end
@@ -134,11 +153,15 @@ class ConnectionGraphBuilder
    def function_closed(event)
       n_function = @local_table.cfunction
       @local_table.cfunction = event.function
-   
+  
+      # Model implicit return. 
       defn = @s_table.class_table[:functions][event.function][:def]
       unless (last_node = defn.last.last.graph_node).nil?
          @local_table.last_graph.add_edge(:return, last_node)
       end
+
+      # Clear translated sexp from graph nodes meta attributes.
+      defn.each_recursive { |s| set_graph_node(s, nil) }
       
       @local_table.formal_params.each { |p| @local_table.propagate_escape_state(p) }
       @local_table.class_vars.each { |p| @local_table.propagate_escape_state(p) }
@@ -152,7 +175,8 @@ class ConnectionGraphBuilder
       end
       local_objects = objects.select { |o| o[1].escape_state == :no_escape }
       objects_lives = local_objects.map do |o|
-         ObjectLife.new(o[0], o[1].constructor_sexp, o[1].potential_precursors)
+         ObjectLife.new(o[0], o[1].constructor_sexp, o[1].potential_precursors,
+                        o[1].inside_loop)
       end
       succession = find_objects_succession(objects_lives)
       process_succession_lines(succession)
@@ -228,6 +252,7 @@ class ConnectionGraphBuilder
                              extract_type_setter(event.translated_sexp))
       obj_node.type = event.translated_sexp.value_type
       obj_node.potential_precursors = @local_table.find_dead_objects(obj_node.type)
+      obj_node.inside_loop = true if @local_table.last_block.loop_interior
       obj_key = next_key(:o)
       @local_table.abstract_objects << obj_key
       @local_table.last_graph[obj_key] = obj_node
@@ -294,7 +319,7 @@ class ConnectionGraphBuilder
    def if_translated(event)
       if_key = next_key(:c)
       @local_table.assure_existence(if_key)
-      
+     
       if (n = event.original_sexp[2]) and n.graph_node
          @local_table.copy_var_node(n.graph_node)
          @local_table.last_graph.add_edge(if_key, n.graph_node)
@@ -648,6 +673,11 @@ class ConnectionGraphBuilder
       def object.graph_node
          @graph_node
       end
+   end
+
+   # Helper function. Dynamically sets value of graph node instance variable.
+   def set_graph_node(object, value)
+      object.instance_variable_set(:@graph_node, value)
    end
 
 end
