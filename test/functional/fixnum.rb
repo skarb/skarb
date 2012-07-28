@@ -3,6 +3,8 @@
 #-1
 #1
 #6
+#9
+#64
 #1
 #-3
 #ok
@@ -11,6 +13,8 @@
 #6
 #3.5
 #1.5
+#0.333333
+#3
 
 a = 3
 b = 2
@@ -19,6 +23,8 @@ puts b + a
 puts b - a
 puts a - b
 puts a * b
+puts a ** b
+puts 2 ** 6
 puts a / b
 puts -a
 puts 'ok' if a > b
@@ -35,6 +41,8 @@ puts b.to_s
 a = 3
 puts a + 0.5
 puts a - 1.5
+puts a ** -1.0
+puts 9 ** 0.5
 puts '> fail' if a > 3.1
 puts '< fail' if a < 2.9
 puts '== fail' unless a == 3.0
