@@ -14,7 +14,8 @@ end
 stdlib = File.open('../src/compiler/stdlib.rb').read
 
 translator = Translator.new
-graph_builder = ConnectionGraphBuilder.new(translator)
+options = { :stack_alloc => true, :object_reuse => true, :math_inline => true }
+graph_builder = ConnectionGraphBuilder.new(translator, options)
 
 translator.translate(Parser.parse(stdlib + File.open(ARGV[0]).read))
 

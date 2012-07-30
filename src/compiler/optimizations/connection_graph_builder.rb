@@ -14,7 +14,7 @@ require 'optimizations/connection_graph_builder/stdlib_graphs_loader'
 # pop it.
 # Sexp treated as expressions: call, array, hash, and, or, not.
 #
-# TODO: nil, constructors with params!
+# TODO: constructors with params!
 class ConnectionGraphBuilder 
 
    include SexpParsing
@@ -98,8 +98,11 @@ class ConnectionGraphBuilder
    # variables.
    def function_opened(event)
       # If function was already translated, its connection graph has to be reseted.
-      # TODO: This is rather not elegant, since every function is translated twice.
+      # The old graph is stored under the name "[function_name]_RECUR" and can be
+      # used to model recursion.
       if @local_table.formal_params.length > 0
+         recur_f_name = "#{@local_table.cfunction}_RECUR".to_sym
+         @local_table[recur_f_name] = @local_table[@local_table.cfunction]
          @local_table.add_function(@local_table.cfunction)
       end
 
@@ -401,6 +404,12 @@ class ConnectionGraphBuilder
          
          f_name = translated_fun_name(event.translated_sexp)
 
+         # If it is a recursive call, we shall use graph built during the first
+         # pass.
+         if f_name == @local_table.cfunction
+            f_name = "#{@local_table.cfunction}_RECUR".to_sym
+         end
+
          caller_obj = call_get_object(event.original_sexp)
          add_graph_node(caller_obj, :self) if caller_obj.nil?
          a_args = ([caller_obj] +
@@ -415,7 +424,9 @@ class ConnectionGraphBuilder
    end
 
    alias :attrasgn_translated :call_translated
- 
+
+   Pair = Struct.new(:a, :b)
+
    # When function with known connection graph is called, connection graph
    # of the caller is updated basing on the connection graph of the callee.
    # Arguments escape states need to be updated as well as they field structure.
@@ -423,14 +434,15 @@ class ConnectionGraphBuilder
    def known_function_call(f_name, a_args, event)
       f_args = @local_table[f_name][:formal_params]
       mapping = Hash[ f_args.zip(a_args) ]
-      
+      processed = Set.new
+
       # Update arguments 
-      mapping.each_pair do |f_arg, a_arg|
+      mapping.dup.each_pair do |f_arg, a_arg|
          # TODO: Occurs with class methods, should be handled some other way.
          next if a_arg.nil?
 
          @local_table.points_to_set(a_arg).each do |a_obj|
-            update_obj_node(a_obj, f_arg, f_name, mapping)
+            update_obj_node(a_obj, f_arg, f_name, mapping, processed)
          end
       end
 
@@ -438,7 +450,7 @@ class ConnectionGraphBuilder
       #fun_key = "#{next_key(:f)}_#{f_name}"
       fun_key = next_key(:f)
       @local_table.assure_existence(fun_key)
-      update_ref_node(fun_key, :return, f_name, mapping)
+      update_ref_node(fun_key, :return, f_name, mapping, processed)
       add_graph_node(event.original_sexp, fun_key)
 
       # If returned object is an argument of an expression, it has to live until
@@ -470,7 +482,7 @@ class ConnectionGraphBuilder
       #fun_key = "#{next_key(:f)}_#{f_name}"
       fun_key = next_key(:f)
       @local_table.assure_existence(fun_key)
-      obj_key = next_key(:o)
+      obj_key = next_key(:om)
       @local_table.assure_existence(obj_key, ConnectionGraph::ObjectNode,
                                     :global_escape)
       @local_table.last_graph.add_edge(fun_key, obj_key)
@@ -488,7 +500,11 @@ class ConnectionGraphBuilder
    # a -- caller object
    # b -- callee object (possibly phantom)
    # b_fun -- callee function
-   def update_obj_node(a, b, b_fun, mapping)
+   def update_obj_node(a, b, b_fun, mapping, processed)
+      pair = Pair.new(a,b)
+      return if processed.member? pair
+      processed << pair
+
       a_node = @local_table.get_var_node(a)
       b_node = @local_table.get_var_node(b, b_fun)
 
@@ -503,14 +519,14 @@ class ConnectionGraphBuilder
             @local_table.last_graph.add_edge(a, a_fid)
          end
 
-         update_ref_node(a_fid, b_fid, b_fun, mapping)
+         update_ref_node(a_fid, b_fid, b_fun, mapping, processed)
       end
    end
 
    # a -- caller reference
    # b -- callee reference
    # b_fun -- callee function
-   def update_ref_node(a_fid, b_fid, b_fun, mapping)
+   def update_ref_node(a_fid, b_fid, b_fun, mapping, processed)
       p_set = @local_table.points_to_set(b_fid, b_fun)
 
       # If there are no PhantomFields attached to b_fid, all previous values of
@@ -535,10 +551,15 @@ class ConnectionGraphBuilder
          maps_to_set(ob, b_fun, mapping).each do |oa|
             unless @local_table.points_to_set(a_fid).include? oa
                @local_table.copy_var_node(a_fid)
+               if @local_table[b_fun].abstract_objects.include? oa
+                  oa_m = next_key(:om)
+                  mapping[oa] = oa_m
+                  oa = oa_m
+               end
                @local_table.assure_existence(oa, ConnectionGraph::ObjectNode)
                @local_table.last_graph.add_edge(a_fid, oa)
             end
-            update_obj_node(oa, ob, b_fun, mapping)
+            update_obj_node(oa, ob, b_fun, mapping, processed)
          end
       end 
    end
@@ -627,6 +648,12 @@ class ConnectionGraphBuilder
                                        :global_escape)
          @local_table.last_graph.add_edge(var_id, ph_id)
       end
+   end
+
+   def nil_translated(event)
+      @local_table.assure_existence(:nil, ConnectionGraph::ObjectNode,
+                                    :global_escape)
+      add_graph_node(event.original_sexp, :nil)
    end
 
    def close_expression(event)

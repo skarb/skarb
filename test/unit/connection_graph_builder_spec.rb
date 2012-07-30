@@ -179,7 +179,7 @@ describe ConnectionGraphBuilder do
      @translator.translate(Parser.parse("def foo; return 1; end; a = foo"))
      main_graph = @graph_builder.local_table[:_main][:last_block][:vars]
      main_graph[:a].out_edges.should == Set[:"'f1"]
-     main_graph[:"'f1"].out_edges.should == Set[:"'o2"]
+     main_graph[:"'f1"].out_edges.should == Set[:"'om1"]
   end
 
   it 'should correctly update nested calls' do
@@ -198,8 +198,8 @@ describe ConnectionGraphBuilder do
      main_graph = @graph_builder.local_table[:_main][:last_block][:vars]
      main_graph[:b].out_edges.should == Set[:"'o4"]
      main_graph[:"'o4"].escape_state.should == :global_escape
-     main_graph[:"'f1"].out_edges.should == Set[:"'o5"]
-     main_graph[:"'o5"].escape_state.should == :global_escape
+     main_graph[:"'f1"].out_edges.should == Set[:"'om1"]
+     main_graph[:"'om1"].escape_state.should == :global_escape
   end
 
   it 'should recognize value returned by block' do
@@ -275,7 +275,7 @@ describe ConnectionGraphBuilder do
   it 'should drop outdated field values after function return' do
      @translator.translate(Parser.parse("def foo; @a = 2; end; @a = 1; foo"))
      main_graph = @graph_builder.local_table[:_main][:last_block][:vars]
-     main_graph[:"self_@a"].out_edges.should == Set[:"'o3"]
+     main_graph[:"self_@a"].out_edges.should == Set[:"'om1"]
   end
 
   it 'should assume that every class var has value and model assignment to it' do
@@ -308,8 +308,8 @@ describe ConnectionGraphBuilder do
   it 'should store the type of created objects' do
      @translator.translate(Parser.parse("def foo; a = 1.2; @a = a; end; foo;"))
      main_graph = @graph_builder.local_table[:_main][:last_block][:vars]
-     main_graph[:'self_@a'].out_edges.should == Set[:"'o2"]
-     main_graph[:"'o2"].type.should == :Float
+     main_graph[:'self_@a'].out_edges.should == Set[:"'om1"]
+     main_graph[:"'om1"].type.should == :Float
   end
 
   it 'should reuse stack allocated object memory' do
@@ -332,5 +332,28 @@ describe ConnectionGraphBuilder do
      l_table.find_all_objects.should == Set[:self, :"'o1", :"'o2", :"'o3", :"'o4", :"'o5"]
      l_table.find_live_objects.should == Set[:self, :"'o2", :"'o3", :"'o5"]
      l_table.find_dead_objects(:Fixnum).should == [:"'o1", :"'o4"]
+  end
+
+  it 'should cope with cyclic references' do
+     @translator.translate(Parser.parse(
+        <<-eos
+class A
+   def a=(v)
+      @a = v
+   end
+
+   def a
+      @a
+   end
+end
+
+def foo
+   o = A.new
+   o.a = o
+end
+
+foo
+        eos
+     ))
   end
 end

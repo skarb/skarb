@@ -53,6 +53,7 @@ class StdlibGraphsLoader
         unless @local_table.last_graph[ret_obj]
            mapping[ret_obj] = @graph_builder.next_key(:os)
            ret_obj = mapping[ret_obj]
+           @local_table.abstract_objects << ret_obj
            @local_table.assure_existence(ret_obj, ConnectionGraph::ObjectNode,
                                       :arg_escape)
         end
@@ -76,6 +77,7 @@ class StdlibGraphsLoader
       if new_objs
          new_objs.rest.each do |new_obj|
             mapping[new_obj] = @graph_builder.next_key(:os)
+            @local_table.abstract_objects << mapping[new_obj]
             @local_table.assure_existence(mapping[new_obj],
                                           ConnectionGraph::ObjectNode, :arg_escape)
          end

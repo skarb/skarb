@@ -230,8 +230,11 @@ class ConnectionGraphBuilder
          old_function = @cfunction
          @cfunction = function
          set = []
+         processed = Set.new
 
          update_set = Proc.new do |v|
+            return if processed.member? v
+            processed << v
             v_node = get_var_node(v)
             if v_node
                if v_node.is_a? ConnectionGraph::ObjectNode
@@ -280,12 +283,20 @@ class ConnectionGraphBuilder
       # Recursively propagate escape state down the connection graph starting from
       # certain node.
       def propagate_escape_state(var_a)
-         node_a = get_var_node(var_a)
-         node_a.out_edges.each do |var_b|
-            node_b = get_var_node(var_b)
-            node_b.escape_state = merge_escape_states(node_a.escape_state,
+         to_process = [var_a]
+         processed = Set.new
+
+         until to_process.empty?
+            a = to_process.pop
+            next if processed.member? a
+            node_a = get_var_node(a)
+            node_a.out_edges.each do |b|
+               node_b = get_var_node(b)
+               node_b.escape_state = merge_escape_states(node_a.escape_state,
                                                    node_b.escape_state)
-            propagate_escape_state(var_b)
+               to_process << b
+            end
+            processed << a
          end
       end
 

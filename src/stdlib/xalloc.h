@@ -4,14 +4,6 @@
 #include <stdlib.h>
 #include <gc.h>
 
-#define SMALLOC_LIMIT 30
-
-#define SMALLOC(x) (((_stalloc_bytes < SMALLOC_LIMIT) && (_stalloc_bytes += (x))) ? \
-                     alloca(x) : xmalloc(x))
-
-#define SMALLOC_ATOMIC(x) (((_stalloc_bytes < SMALLOC_LIMIT) && (_stalloc_bytes += (x))) ? \
-                     alloca(x) : xmalloc_atomic(x))
-
 #ifndef MEMORY_ALLOC_CHECK
 
 #define xmalloc(x) GC_MALLOC(x)
@@ -47,5 +39,13 @@ void* xrealloc(void *ptr, size_t size);
  */
 void xfree(void *ptr);
 #endif
+
+#define SMALLOC_LIMIT 30
+
+#define SMALLOC(x) (((_stalloc_bytes < SMALLOC_LIMIT) && (_stalloc_bytes += (x))) ? \
+                     alloca(x) : xmalloc(x))
+
+#define SMALLOC_ATOMIC(x) (((_stalloc_bytes < SMALLOC_LIMIT) && (_stalloc_bytes += (x))) ? \
+                     alloca(x) : xmalloc_atomic(x))
 
 #endif /* XALLOC_H_ */
