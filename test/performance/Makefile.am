@@ -1,5 +1,5 @@
-TESTSCRIPTS = ackermann.rb heapsort.rb matrix.rb strings.rb quicksort.rb arrays.rb \
-	      arithmetic_expressions.rb
+TESTSCRIPTS = binary_trees.rb ackermann.rb heapsort.rb matrix.rb strings.rb \
+	      quicksort.rb arrays.rb arithmetic_expressions.rb
 BENCHMARK = RUBYC_PATH=$(top_builddir)/src/compiler/rubyc \
             CFLAGS="-I$(top_builddir)/src/stdlib" \
             LD_LIBRARY_PATH="$(top_builddir)/src/stdlib/.libs" \
