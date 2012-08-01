@@ -32,16 +32,13 @@ g = GraphViz.new( :G, :type => :digraph )
 
 vertices = {}
 l.each_key do |key|
-   color = case l[key].escape_state
-           when :no_escape then "green"
-           when :arg_escape then "blue"
-           when :global_escape then "red"
-           else "white"
-           end
    shape = (l[key].is_a? ConnectionGraph::ObjectNode) ? "box" : "ellipse"
-
-   vertices[key] = g.add_nodes(key.to_s, :style => "filled", :shape => shape,
-                               :color => color)
+   if l[key].escape_state == :no_escape
+      vertices[key] = g.add_nodes(key.to_s, :shape => shape)
+   else
+      vertices[key] = g.add_nodes(key.to_s, :style => "filled", :shape => shape,
+                               :fillcolor => "lightgray")
+   end
 end
 
 l.each do |from, from_node|
