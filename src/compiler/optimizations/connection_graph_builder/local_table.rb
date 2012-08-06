@@ -230,21 +230,22 @@ class ConnectionGraphBuilder
          old_function = @cfunction
          @cfunction = function
          set = []
+         to_process = [var]
          processed = Set.new
 
-         update_set = Proc.new do |v|
-            return if processed.member? v
+         until to_process.empty?
+            v = to_process.pop
+            next if processed.member? v
             processed << v
             v_node = get_var_node(v)
             if v_node
                if v_node.is_a? ConnectionGraph::ObjectNode
                   set << v
                else
-                  v_node.out_edges.each(&update_set)
+                  v_node.out_edges.each { |e| to_process << e }
                end
             end
          end
-         update_set.call(var)
 
          @cfunction = old_function
          set

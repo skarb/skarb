@@ -134,8 +134,10 @@ class ConnectionGraphBuilder
    def process_succession_lines(succession)
       if @options[:object_reuse]
          succession.each do |line|
-            if @options[:stack_alloc] and not line[0].inside_loop
-               substitute_allocation_sexp(line[0].constructor_sexp.alloc)
+            if @options[:stack_alloc]
+               if not @options[:stack_alloc_no_loops] or not line[0].inside_loop
+                  substitute_allocation_sexp(line[0].constructor_sexp.alloc)
+               end
             end
             for i in 1..(line.length-1)
                line[i].constructor_sexp.alloc[2] = line[i-1].constructor_sexp.alloc[1]
@@ -145,7 +147,7 @@ class ConnectionGraphBuilder
       elsif @options[:stack_alloc]
          succession.each do |line|
             line.each do |o|
-               unless o.inside_loop
+               if not @options[:stack_alloc_no_loops] or not o.inside_loop
                   substitute_allocation_sexp(o.constructor_sexp.alloc)
                end
             end
@@ -528,6 +530,13 @@ class ConnectionGraphBuilder
    # b_fun -- callee function
    def update_ref_node(a_fid, b_fid, b_fun, mapping, processed)
       p_set = @local_table.points_to_set(b_fid, b_fun)
+
+      if p_set.nil?
+         p a_fid
+         p b_fid
+         p b_fun
+         puts "----"
+      end
 
       # If there are no PhantomFields attached to b_fid, all previous values of
       # a_fid should be dropped.

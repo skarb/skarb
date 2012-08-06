@@ -46,8 +46,17 @@ void initialize() {
 #endif
   g_mem_set_vtable(&vtable);
   clear_cache();
+#ifdef OBJECT_COUNT
+  sa_count = 0;
+  ha_count = 0;
+#endif
 }
 
+void finalize() {
+#ifdef OBJECT_COUNT
+  printf("sa_objects: %ld ha_objects:%ld\n", sa_count, ha_count);
+#endif
+}
 void* find_method(int class_id, dict_elem* classes_dictionary,
     int fid, char* fname, int len) {
   dict_elem d_elem;

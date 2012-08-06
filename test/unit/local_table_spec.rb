@@ -102,7 +102,7 @@ describe ConnectionGraphBuilder::LocalTable do
     @table.last_block[:vars].add_edge(:r, :A_a)
     @table.last_block[:vars].add_edge(:A_a, :D)
 
-    @table.points_to_set(:p).should == [:A, :B, :C, :D]
+    @table.points_to_set(:p).should == [:D, :C, :B, :A]
   end
 
 end

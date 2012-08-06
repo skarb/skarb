@@ -31,6 +31,11 @@ op = OptionParser.new do |opts|
     options[:stack_alloc] = true
   end
 
+  opts.on('--stack_alloc_no_loops', 'Attempt to use stack allocation for function local objects, excluding objects created inside loop constructs') do
+    options[:stack_alloc] = true
+    options[:stack_alloc_no_loops] = true
+  end
+
   opts.on('--object_reuse', 'Attempt to reuse memory of no longer accessible local object (compile time garbage collection)') do
     options[:object_reuse] = true
   end

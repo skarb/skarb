@@ -48,6 +48,8 @@ void die(const char *format, ...);
  */
 void initialize();
 
+void finalize();
+
 /**
  * Looks for a method through inheritance hierarchy and returns it or causes the
  * program to die with an error.

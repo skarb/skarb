@@ -4,6 +4,11 @@
 #include <gc.h>
 #include "xalloc.h"
 
+#ifdef OBJECT_COUNT
+long sa_count;
+long ha_count;
+#endif
+
 #ifdef MEMORY_ALLOC_CHECK
 
 void* xmalloc(size_t s) {

@@ -19,7 +19,7 @@ def benchmark
 end
 
 describe 'Compiler' do
-  TESTS.each do |file|
+   TESTS.each do |file|
     it "should pass #{file}" do
       # Compile the test file, run it in MRI, run the compiled version and
       # compare the results.

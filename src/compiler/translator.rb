@@ -58,8 +58,8 @@ class Translator
   # in 4 sections: structs, prototypes, functions, global variables + main
   def translate(sexp)
     main_block = translate_generic_sexp(sexp)
-    main = main_function CallInitialize, AllocateSelf, ARGVInitialization,
-        *lvars_declarations, main_block, ReturnZero
+    main = main_function(CallInitialize, AllocateSelf, ARGVInitialization,
+        *lvars_declarations, main_block, CallFinalize, ReturnZero)
     @user_classes.each do |x|
       generate_class_generic_methods x
       generate_class_structure x
@@ -133,6 +133,9 @@ class Translator
 
   # A call to the initialize function
   CallInitialize = s(:call, :initialize, s(:args))
+
+  # A call to the finalize function
+  CallFinalize = s(:call, :finalize, s(:args))
 
   # Number of lines in stdlib.rb
   StdlibLineNumber = File.readlines(File.dirname(__FILE__) + '/stdlib.rb').length

@@ -8,7 +8,8 @@ require 'optimizations/math_inliner'
 describe ConnectionGraphBuilder do
   before do
     @translator = Translator.new
-    options = { :object_reuse => true, :stack_alloc => true }
+    options = { :object_reuse => true, :stack_alloc => true,
+       :stack_alloc_no_loops => true }
     @graph_builder = ConnectionGraphBuilder.new(@translator, options)
     @stdlib_declarations = File.open('/home/julek/projects/mgr/src/compiler/stdlib.rb').read
   end
@@ -255,7 +256,7 @@ describe ConnectionGraphBuilder do
 
      mapping = { :self => :"'o1" }
 
-     @graph_builder.maps_to_set(:"'ph_1", :foo, mapping).should == [:"'o2", :"'o3" ]
+     @graph_builder.maps_to_set(:"'ph_1", :foo, mapping).should == [:"'o3", :"'o2" ]
      @graph_builder.maps_to_set(:"'ph_2", :foo, mapping).should == [:"'ph1"]
      l_table.get_var_node(:"'o1").out_edges.should == Set[:"'o1_@a", :"'o1_@b"]
      l_table.get_var_node(:"'o1_@b").out_edges.should == Set[:"'ph1"]
