@@ -73,7 +73,9 @@ describe Translator do
            s(:l_unary_oper, :&, s(:var, :'c_ARGV')),
            s(:var, :argc),
            s(:var, :args))),
-       *body, s(:return, s(:lit, 0))))
+       *body,
+       s(:call, :finalize, s(:args)),
+       s(:return, s(:lit, 0))))
   end
 
   # Returns a sexp representing a call to the Fixnum_new function with a given
