@@ -48,7 +48,11 @@ Object * Object__EQ__EQ_(Object *self, Object *other) {
 }
 
 Object * Object_rand(Object *self) {
-  return Float_new(drand48());
+#ifdef WIN32
+   return Float_new((double)(rand())/RAND_MAX);
+#else
+   return Float_new(drand48());
+#endif
 }
 
 Object * Object_nil__QMARK(Object *self) {

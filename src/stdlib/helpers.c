@@ -37,12 +37,13 @@ void die(const char *format, ...) {
 
 void initialize() {
   GC_INIT();
-  if (setenv("G_SLICE", "always-malloc", FALSE))
-    die("setenv: %s\n", strerror(errno));
+  g_slice_set_config(G_SLICE_CONFIG_ALWAYS_MALLOC, 1);
 #ifdef MEMORY_ALLOC_CHECK
-  GMemVTable vtable = { &xmalloc, &xrealloc, &xfree, NULL, NULL, NULL };
+  GMemVTable vtable = { (gpointer) &xmalloc, (gpointer) &xrealloc, (gpointer) &xfree,
+     NULL, NULL, NULL };
 #else
-  GMemVTable vtable = { &GC_malloc, &GC_realloc, &GC_free, NULL, NULL, NULL };
+  GMemVTable vtable = { (gpointer) &GC_malloc, (gpointer) &GC_realloc,
+     (gpointer) &GC_free, NULL, NULL, NULL };
 #endif
   g_mem_set_vtable(&vtable);
   clear_cache();
