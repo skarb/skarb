@@ -58,7 +58,7 @@ class Translator
   # in 4 sections: structs, prototypes, functions, global variables + main
   def translate(sexp)
     main_block = translate_generic_sexp(sexp)
-    main = main_function(CallInitialize, AllocateSelf, ARGVInitialization,
+    main = main_function(SetClassDictionary, CallInitialize, AllocateSelf, ARGVInitialization,
         *lvars_declarations, main_block, CallFinalize, ReturnZero)
     @user_classes.each do |x|
       generate_class_generic_methods x
@@ -125,6 +125,10 @@ class Translator
 
   # A sexp representing 'return 0;'
   ReturnZero = s(:return, s(:lit, 0))
+
+  # A sexp setting class dictionary for included library
+  SetClassDictionary = s(:stmts, s(:asgn, s(:var, :l_classes_dictionary),
+                                     s(:var, :classes_dictionary)))
 
   # A sexp corresponding to allocation of global variables structure
   AllocateSelf = s(:stmts, s(:decl, :'M_Object', :self_s),

@@ -91,31 +91,14 @@ class Compiler
 
   # Creates the object file by starting the C compiler in a child process.
   def spawn_cc(filename)
-    fork_and_wait cc + " #{cflags} -c -o #{object_file filename} #{filename}"
+    system(cc + " #{cflags} -c -o #{object_file filename} #{filename}")
     raise_if_child_failed 'cc failed!'
   end
 
   # Links the object file by starting the C compiler in a child process.
   def spawn_linker(filename)
-    fork_and_wait "#{cc} -o #{@output} #{filename} #{ldflags}"
+    system("#{cc} -o #{@output} #{filename} #{ldflags}")
     raise_if_child_failed 'linker failed!'
-  end
-
-  # Forks, execs the given command and waits for the child process to finish.
-  def fork_and_wait(cmd)
-    if (child = fork).nil?
-      exec_or_exit cmd
-    end
-    Process.wait child
-  end
-
-  # Calls exec and in case of failure calls exit afterwards.
-  def exec_or_exit(cmd)
-    begin
-      exec cmd
-    rescue SystemCallError
-      exit 1
-    end
   end
 
   # Raises a given error if the child exited with a non-zero status.
@@ -136,6 +119,6 @@ class Compiler
   # Returns flags used during linking, including the LDFLAGS environment
   # variable.
   def ldflags
-    "-L#{Configuration::LibDir} -lrubyc #{ENV['LDFLAGS']}"
+    "-L#{Configuration::LibDir} -lrubyc -lgc #{ENV['LDFLAGS']}"
   end
 end

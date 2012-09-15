@@ -4,6 +4,10 @@
 #include <stdlib.h>
 #include <gc.h>
 
+#ifndef alloca
+#define alloca(x) __builtin_alloca(x)
+#endif
+
 #ifdef OBJECT_COUNT
 extern long sa_count;
 extern long ha_count;

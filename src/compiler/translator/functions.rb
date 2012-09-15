@@ -122,7 +122,7 @@ class Translator
               s(:binary_oper, :'->',
                 class_expr.value_sexp,
                 s(:var, :type)),
-              s(:var, :classes_dictionary),
+              s(:var, :l_classes_dictionary),
               s(:lit, @symbol_table.get_function_id(sexp[2])),
               s(:str, sexp[2].to_s),
               s(:lit, sexp[2].length)))),

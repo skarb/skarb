@@ -23,20 +23,20 @@ op = OptionParser.new do |opts|
     options[:dont_link] = true
   end
 
-  opts.on('--math_inline', 'Attempt to use standard C operators in math expressions') do
+  opts.on('--math_inline', 'Use C operators in math expressions') do
     options[:math_inline] = true
   end
 
-  opts.on('--stack_alloc', 'Attempt to use stack allocation for function local objects') do
+  opts.on('--stack_alloc', 'Use stack allocation for local objects') do
     options[:stack_alloc] = true
   end
 
-  opts.on('--stack_alloc_no_loops', 'Attempt to use stack allocation for function local objects, excluding objects created inside loop constructs') do
+  opts.on('--stack_alloc_no_loops', 'Forbid stack allocation inside loops') do
     options[:stack_alloc] = true
     options[:stack_alloc_no_loops] = true
   end
 
-  opts.on('--object_reuse', 'Attempt to reuse memory of no longer accessible local object (compile time garbage collection)') do
+  opts.on('--object_reuse', 'Reuse memory of dead local objects') do
     options[:object_reuse] = true
   end
 
@@ -56,6 +56,12 @@ end
 
 if ARGV.length > 1
   puts "Only one input file should be specified"
+  puts op.help
+  exit 1
+end
+
+if ARGV.empty?
+  puts "No input specified. Use '-' for STDIN."
   puts op.help
   exit 1
 end

@@ -17,7 +17,7 @@ s_Hash vs_Hash = {{{Class_t}, {Hash_t}}};
 static gboolean equal_func(gconstpointer a, gconstpointer b) {
     return boolean_value(
         ( (Object*(*)(Object*,Object*)) find_method(as_object(a)->type,
-           classes_dictionary, _EQ__EQ__id, "==", 2))(as_object(a),
+           l_classes_dictionary, _EQ__EQ__id, "==", 2))(as_object(a),
            as_object(b)));
 }
 

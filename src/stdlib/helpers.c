@@ -16,6 +16,8 @@
 #include "stringclass.h"
 #include "method_cache.h"
 
+dict_elem *l_classes_dictionary;
+
 int boolean_value(Object *object) {
   return object != nil && object != false;
 }
@@ -58,7 +60,7 @@ void finalize() {
   printf("sa_objects: %ld ha_objects:%ld\n", sa_count, ha_count);
 #endif
 }
-void* find_method(int class_id, dict_elem* classes_dictionary,
+void* find_method(int class_id, dict_elem* l_classes_dictionary,
     int fid, char* fname, int len) {
   dict_elem d_elem;
   hash_elem* h_elem;
@@ -71,7 +73,7 @@ void* find_method(int class_id, dict_elem* classes_dictionary,
 
   int id = class_id;
   while(1) {
-    d_elem = classes_dictionary[id];
+    d_elem = l_classes_dictionary[id];
     if( d_elem.msearch != NULL && (h_elem = d_elem.msearch(fname, len)) != 0 )
       break;
     if(d_elem.parent == -1)

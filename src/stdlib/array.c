@@ -120,7 +120,7 @@ Object * Array_join(Object *self, Object *sep) {
         Object *str;
         if(is_a(item, Array)) str = Array_join(item, sep);
         else str = ( (Object*(*)(Object*)) find_method(item->type,
-                 classes_dictionary, to__s_id, "to__s", 5))(item);
+                 l_classes_dictionary, to__s_id, "to__s", 5))(item);
         buf = String__PLUS_(buf, str);
     }
     return buf;
@@ -141,7 +141,7 @@ Object * Array_max(Object *self) {
     for (int i = 1; i < as_array(self)->arr->len; ++i) {
        Object *obj = g_array_index(as_array(self)->arr, Object*, i);
        Object *compar = ((Object*(*)(Object*,Object*)) find_method(max->type,
-              classes_dictionary, _LT__id, "<", 1))(max, obj);
+              l_classes_dictionary, _LT__id, "<", 1))(max, obj);
        if(boolean_value(compar)) max = obj;
     }
     return max;

@@ -1,6 +1,7 @@
 #ifndef HELPERS_H_
 #define HELPERS_H_
 
+
 #include "object.h"
 #include "class.h"
 
@@ -19,7 +20,7 @@ typedef struct {
   void *fields;
 } dict_elem;
 
-extern dict_elem classes_dictionary[];
+extern dict_elem *l_classes_dictionary;
 
 /**
  * Returns the value of a given object in a boolean context.
