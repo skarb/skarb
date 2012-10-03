@@ -8,7 +8,7 @@ ARGV.push '-h' if ARGV.empty?
 options = {}
 
 op = OptionParser.new do |opts|
-  opts.banner = "Usage: rubyc [options] input"
+  opts.banner = "Usage: #{File.basename($0)} [options] input"
   opts.separator "Options:"
 
   opts.on("-o FILE", "Place the output into FILE") do |output|
