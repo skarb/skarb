@@ -4,7 +4,19 @@ Skarb -- README
 Installation
 ------------
 
-Run following commands in order to configure and install Skarb.
+The following software is necessary to compile and install Skarb:
+
+-- GCC
+
+-- Ruby >= 1.9.2
+
+-- Ruby gems: rspec, sexp_processor, ruby_parser, simplecov
+
+-- GLib >= 2.24.1
+
+-- gperf
+
+Run the following commands in order to configure and install Skarb.
 
   ./configure
   make
