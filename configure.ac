@@ -29,18 +29,6 @@ AC_CHECK_PROGS([GPERF], [gperf])
 if test -z "$GPERF"; then
 	AC_MSG_ERROR([cannot find GNU gperf])
 fi
-AC_CHECK_PROGS(RUBBER, [rubber])
-if test -z "$RUBBER"; then
-	AC_CHECK_PROGS(PDFLATEX, [pdflatex])
-	if test -z "$PDFLATEX"; then
-		AC_MSG_NOTICE([cannot find neither rubber nor pdflatex])
-	else
-		AC_SUBST(LATEXC, ["\$(top_srcdir)/scripts/twice.sh $PDFLATEX"])
-	fi
-else
-	AC_SUBST(LATEXC, ["$RUBBER -d"])
-fi
-AM_CONDITIONAL([HAVE_LATEXC], [test x != "x$LATEXC"])
 
 AC_SUBST([rubycincludedir], ["$includedir/rubyc"])
 
