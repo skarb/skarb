@@ -1,4 +1,4 @@
-Skarb -- README
+Skarb – README
 ==============
 
 Installation
@@ -6,25 +6,21 @@ Installation
 
 The following software is necessary to compile and install Skarb:
 
--- GCC
-
--- Ruby >= 1.9.2
-
--- Ruby gems: rspec, sexp_processor, ruby_parser, simplecov
-
--- GLib >= 2.24.1
-
--- gperf
+ - GCC
+ - Ruby >= 1.9.2
+ - Ruby gems: rspec, sexp\_processor, ruby\_parser, simplecov
+ - GLib >= 2.24.1
+ - gperf
 
 Run the following commands in order to configure and install Skarb.
 
-  ./configure
-  make
-  sudo make install
+    ./configure
+    make
+    sudo make install
 
 In order to learn more about the installation procedure run
 
-  ./configure --help
+    ./configure --help
 
 Running
 -------
@@ -32,12 +28,12 @@ Running
 Assuming that the installation path is in your PATH environment variable run the
 following command in order to learn details.
 
-  skarb -h
+    skarb -h
 
 Copyrights
 ----------
 
-Copyright (c) 2010-2012 Jan Stępień, Julian Zubek
+Copyright (c) 2010–2012 Jan Stępień, Julian Zubek
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
