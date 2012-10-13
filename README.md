@@ -12,6 +12,11 @@ The following software is necessary to compile and install Skarb:
  - GLib >= 2.24.1
  - gperf
 
+If you've downloaded Skarb from the VCS you need to set the build system up.
+Begin with the following command.
+
+    autoreconf -is
+
 Run the following commands in order to configure and install Skarb.
 
     ./configure
