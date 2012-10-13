@@ -21,3 +21,5 @@ describe 'Functional test' do
     end
   end
 end
+
+RSpec::Core::Runner.autorun
