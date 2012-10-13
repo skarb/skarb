@@ -25,7 +25,6 @@ AC_CHECK_FUNCS([floor], [AC_SUBST(MATH_LIBS, [""])],
 PKG_CHECK_MODULES([GLib], [glib-2.0 >= 2.24.1])
 
 # Other tests
-AC_PROG_AWK
 AC_CHECK_PROGS([GPERF], [gperf])
 if test -z "$GPERF"; then
 	AC_MSG_ERROR([cannot find GNU gperf])
@@ -42,10 +41,7 @@ else
 	AC_SUBST(LATEXC, ["$RUBBER -d"])
 fi
 AM_CONDITIONAL([HAVE_LATEXC], [test x != "x$LATEXC"])
-AC_CHECK_PROGS(PERL, [perl])
-if test -z "$PERL"; then
-	AC_MSG_ERROR([cannot find Perl])
-fi
+
 AC_SUBST([rubycincludedir], ["$includedir/rubyc"])
 
 # Download, verify and configure libgc
