@@ -11,7 +11,7 @@ describe ConnectionGraphBuilder do
     options = { :object_reuse => true, :stack_alloc => true,
        :stack_alloc_no_loops => true }
     @graph_builder = ConnectionGraphBuilder.new(@translator, options)
-    @stdlib_declarations = File.open('/home/julek/projects/finished/mgr/src/compiler/stdlib.rb').read
+    @stdlib_declarations = File.open('../../src/compiler/stdlib.rb').read
   end
 
   it 'should store node value of any sexp' do

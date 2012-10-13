@@ -8,7 +8,7 @@ describe Translator do
   before do
     @translator = Translator.new
     @rp = RubyParser.new
-    @stdlib_declarations = File.open('/home/julek/projects/finished/mgr/src/compiler/stdlib.rb').read
+    @stdlib_declarations = File.open('../../src/compiler/stdlib.rb').read
   end
 
   # FIXME: Temporal solution
