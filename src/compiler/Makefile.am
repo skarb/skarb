@@ -15,4 +15,4 @@ skarb: rubyc.rb.in
 	sed -e s:RUBY_PATH:$(RUBY):g -e s:RUBYC_LIBDIR:$(pkgdatadir):g $< > $@
 
 clean-local:
-	rm -f config.rb rubyc
+	rm -f config.rb skarb
