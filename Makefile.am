@@ -1,4 +1,5 @@
 SUBDIRS = src test
+EXTRA_DIST = README.md
 .PHONY: coverage rdoc benchmark
 
 coverage: all
