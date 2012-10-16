@@ -1,5 +1,5 @@
 AC_PREREQ([2.65])
-AC_INIT([rubyc], [snapshot])
+AC_INIT([skarb], [snapshot])
 AM_INIT_AUTOMAKE([1.10 foreign color-tests])
 AC_DISABLE_STATIC
 
@@ -30,7 +30,7 @@ if test -z "$GPERF"; then
 	AC_MSG_ERROR([cannot find GNU gperf])
 fi
 
-AC_SUBST([rubycincludedir], ["$includedir/rubyc"])
+AC_SUBST([skarbincludedir], ["$includedir/skarb"])
 
 # Download, verify and configure libgc
 AC_MSG_NOTICE([=== configuring libgc ===])

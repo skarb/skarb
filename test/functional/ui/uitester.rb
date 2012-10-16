@@ -1,6 +1,6 @@
 require 'rspec'
 
-compiler = ENV['RUBYC']
+compiler = ENV['SKARB']
 srcdir = ENV['srcdir']
 tests = ENV['TESTS'].split.map { |f| srcdir + '/' + f }
 
@@ -14,7 +14,7 @@ end
 describe 'UI' do
   tests.each do |file|
     it "should pass #{file}" do
-      output = IO.popen("sed -e 's,rubyc,#{compiler},g' #{file} | sh").read
+      output = IO.popen("sed -e 's,skarb,#{compiler},g' #{file} | sh").read
       output.should == extract_expected_output(file)
     end
   end

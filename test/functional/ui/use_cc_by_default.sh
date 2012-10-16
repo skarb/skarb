@@ -3,4 +3,4 @@
 #acts_as_cc
 ruby_fullpath=`which $RUBY`
 export PATH="$srcdir:`dirname $ruby_fullpath`:$PATH"
-echo 0 | rubyc - || echo fail
+echo 0 | skarb - || echo fail

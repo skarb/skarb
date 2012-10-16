@@ -3,5 +3,5 @@
 #acts_as_cc
 export CFLAGS=this_is_for_testing_purposes
 export CC=$srcdir/cc
-echo 0 | rubyc -
+echo 0 | skarb -
 rm -f a.out

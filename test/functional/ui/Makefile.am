@@ -7,7 +7,7 @@ TESTS_ENVIRONMENT = RUBYLIB="$(top_builddir)/src/compiler:$(top_srcdir)/src/comp
                     RUBY=$(RUBY) CFLAGS="-I$(top_builddir)/src/stdlib" \
                     LD_LIBRARY_PATH="$(top_builddir)/src/stdlib/.libs" \
                     LDFLAGS="-L$(top_builddir)/src/stdlib/.libs" \
-                    RUBYC="$(RUBY) $(top_builddir)/src/compiler/rubyc" \
+                    SKARB="$(RUBY) $(top_builddir)/src/compiler/skarb" \
                     TESTS="$(TESTSCRIPTS)" $(RUBY)
 TESTS = uitester.rb
 dist_noinst_DATA = $(TESTSCRIPTS) $(TESTS) cc errorous_source.rb test_code.rb

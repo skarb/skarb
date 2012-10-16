@@ -8,6 +8,6 @@ Dir.chdir(PROJECT_DIR)
 
 0.upto(LegalSwitches.length) do |i|
    LegalSwitches.combination(i) do |c|
-      `RUBYC_FLAGS="#{c.join(' ')}" make check > check_results_#{c.join('_')}`
+      `SKARB_FLAGS="#{c.join(' ')}" make check > check_results_#{c.join('_')}`
    end
 end

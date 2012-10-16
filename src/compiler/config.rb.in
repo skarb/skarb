@@ -1,4 +1,4 @@
 module Configuration
-  IncludeDir = 'RUBYC_INCLUDE_DIR'
-  LibDir = 'RUBYC_LIB_DIR'
+  IncludeDir = 'SKARB_INCLUDE_DIR'
+  LibDir = 'SKARB_LIB_DIR'
 end

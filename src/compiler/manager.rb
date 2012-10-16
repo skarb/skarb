@@ -42,15 +42,15 @@ class Manager
     translated_code = filtered_ast.map { |x| Emitter.emit(x) }
     dict_builder = ClassesDictionaryBuilder.new translator.symbol_table
     classes_dict_code = dict_builder.emit_classes_dictionary
-    final_code = Header + classes_dict_code.zip(translated_code).join 
+    final_code = Header + classes_dict_code.zip(translated_code).join
     Compiler.new.compile(final_code, options)
   end
 
   private
-  
+
   # Contents of the stdlib.rb file.
   StdlibDeclarations = File.open(File.dirname(__FILE__) + '/stdlib.rb').read
 
-  Header = "#include <rubyc.h>\n"
+  Header = "#include <skarb.h>\n"
 
 end

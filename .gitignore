@@ -33,7 +33,7 @@ libtool
 ltmain.sh
 missing
 src/compiler/config.rb
-src/compiler/rubyc
-src/stdlib/rubyc.h
+src/compiler/skarb
+src/stdlib/skarb.h
 tags
 test/coverage

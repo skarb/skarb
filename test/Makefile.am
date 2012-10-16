@@ -9,7 +9,7 @@ coverage:
 		CFLAGS="-I$(top_srcdir)/src/stdlib" \
 		LD_LIBRARY_PATH="$(top_builddir)/src/stdlib/.libs" \
 		LDFLAGS="-L$(top_builddir)/src/stdlib/.libs" \
-		RUBYC_PATH=$(top_builddir)/src/compiler/rubyc \
+		SKARB_PATH=$(top_builddir)/src/compiler/skarb \
 		$(RSPEC) -I $(top_srcdir)/src/compiler $(srcdir)/coverage.rb
 	@echo See the report: file://$(abs_builddir)/coverage/index.html
 

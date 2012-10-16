@@ -90,7 +90,7 @@ class Compiler
 
   # Writes the code to a temporary file and passes its path to a given block.
   def with_code_in_a_tempfile
-    Tempfile.open ['rubyc', '.c'] do |file|
+    Tempfile.open ['skarb', '.c'] do |file|
       output_code file
       yield file.path
     end
@@ -142,6 +142,6 @@ class Compiler
   # Returns flags used during linking, including the LDFLAGS environment
   # variable.
   def ldflags
-    "-L#{Configuration::LibDir} -lrubyc -lgc #{ENV['LDFLAGS']}"
+    "-L#{Configuration::LibDir} -lskarb -lgc #{ENV['LDFLAGS']}"
   end
 end

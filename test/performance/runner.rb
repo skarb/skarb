@@ -2,8 +2,8 @@ require 'rspec'
 require 'fileutils'
 require 'benchmark'
 
-RUBYC_PATH = ENV['RUBYC_PATH']
-RUBYC_FLAGS = ENV['RUBYC_FLAGS']
+SKARB_PATH = ENV['SKARB_PATH']
+SKARB_FLAGS = ENV['SKARB_FLAGS']
 RUBY = ENV['RUBY']
 SRCDIR = ENV['srcdir']
 TESTS = ENV['TESTS'].split.map { |f| SRCDIR + '/' + f }
@@ -23,13 +23,13 @@ describe 'Compiler' do
     it "should pass #{file}" do
       # Compile the test file, run it in MRI, run the compiled version and
       # compare the results.
-      `#{CFLAGS} #{RUBY} -I#{SRCDIR}/../../src/compiler #{RUBYC_PATH} #{RUBYC_FLAGS} #{file}`
+      `#{CFLAGS} #{RUBY} -I#{SRCDIR}/../../src/compiler #{SKARB_PATH} #{SKARB_FLAGS} #{file}`
       mri = benchmark { `#{RUBY} #{file}` }
-      rubyc = benchmark { `./a.out` }
+      skarb = benchmark { `./a.out` }
       puts file
       puts "mri: #{mri}"
-      puts "rubyc: #{rubyc}"
-      mri.should > rubyc
+      puts "skarb: #{skarb}"
+      mri.should > skarb
     end
   end
 
