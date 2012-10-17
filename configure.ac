@@ -1,5 +1,5 @@
 AC_PREREQ([2.65])
-AC_INIT([skarb], [snapshot])
+AC_INIT([skarb], [snapshot], [https://github.com/skarb/skarb/issues])
 AM_INIT_AUTOMAKE([1.10 foreign color-tests])
 AC_DISABLE_STATIC
 
