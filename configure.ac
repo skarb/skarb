@@ -14,9 +14,8 @@ INZ_CHECK_GEMS([rspec ruby_parser simplecov])
 AC_PROG_CC_C99
 AC_PROG_LIBTOOL
 
-AC_CHECK_FUNCS([floor], [AC_SUBST(MATH_LIBS, [""])],
-               AC_CHECK_LIB([m], [floor], [AC_SUBST(MATH_LIBS, ["-lm"])],
-                            AC_MSG_ERROR([cannot find floor])))
+AC_SEARCH_LIBS([floor], [m], [], [
+  AC_MSG_ERROR([unable to find the floor function])])
 
 PKG_CHECK_MODULES([GLib], [glib-2.0 >= 2.24.1])
 PKG_CHECK_MODULES([BDWGC], [bdw-gc >= 7.1])

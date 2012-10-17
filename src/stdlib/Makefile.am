@@ -7,7 +7,7 @@ libskarb_la_SOURCES=$(public_headers) fixnum.c xalloc.c helpers.c \
                     float.c object.c stringclass.c nil.c array.c hash.c class.c \
 		    false.c true.c blocks.c method_cache.c
 libskarb_la_CFLAGS=-Wall -Werror $(GLib_CFLAGS) $(BDWGC_CFLAGS)
-libskarb_la_LIBADD=$(GLib_LIBS) $(BDWGC_LIBS) $(MATH_LIBS)
+libskarb_la_LIBADD=$(GLib_LIBS) $(BDWGC_LIBS)
 
 skarb.h: $(public_headers)
 	cat $^ | grep -v '#include ".*"' > $@
