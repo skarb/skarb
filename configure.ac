@@ -8,7 +8,7 @@ AC_CHECK_PROGS(RUBY, [ruby])
 if test x = "x$RUBY" -o true != "`$RUBY -e 'puts RUBY_VERSION>="1.9.2"'`"; then
   AC_MSG_ERROR([cannot find Ruby >= 1.9.2])
 fi
-INZ_CHECK_GEMS([rspec sexp_processor ruby_parser simplecov])
+INZ_CHECK_GEMS([rspec ruby_parser simplecov])
 
 # Tests related to C
 AC_PROG_CC_C99

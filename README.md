@@ -8,7 +8,7 @@ The following software is necessary to compile and install Skarb:
 
  - A C compiler (GCC and Clang will do fine)
  - Ruby >= 1.9.2
- - Ruby gems: rspec, sexp\_processor, ruby\_parser, simplecov
+ - Ruby gems: rspec, ruby\_parser, simplecov
  - GLib >= 2.24.1
  - gperf
 
