@@ -6,7 +6,7 @@ AC_DISABLE_STATIC
 # Tests related to Ruby
 AC_CHECK_PROGS(RUBY, [ruby])
 if test x = "x$RUBY" -o true != "`$RUBY -e 'puts RUBY_VERSION>="1.9.2"'`"; then
-	AC_MSG_ERROR([cannot find Ruby >= 1.9.2])
+  AC_MSG_ERROR([cannot find Ruby >= 1.9.2])
 fi
 INZ_CHECK_GEMS([rspec sexp_processor ruby_parser simplecov])
 
@@ -27,7 +27,7 @@ PKG_CHECK_MODULES([GLib], [glib-2.0 >= 2.24.1])
 # Other tests
 AC_CHECK_PROGS([GPERF], [gperf])
 if test -z "$GPERF"; then
-	AC_MSG_ERROR([cannot find GNU gperf])
+  AC_MSG_ERROR([cannot find GNU gperf])
 fi
 
 AC_SUBST([skarbincludedir], ["$includedir/skarb"])
@@ -35,31 +35,31 @@ AC_SUBST([skarbincludedir], ["$includedir/skarb"])
 # Download, verify and configure libgc
 AC_MSG_NOTICE([=== configuring libgc ===])
 if test ! -f gc-7.1.tar.gz; then
-	wget http://www.hpl.hp.com/personal/Hans_Boehm/gc/gc_source/gc-7.1.tar.gz
+  wget http://www.hpl.hp.com/personal/Hans_Boehm/gc/gc_source/gc-7.1.tar.gz
 fi
 gc_sha1sum=e84cba5d18f4ea5ed4e5fd3f1dc6a46bc190ff6f
 if test "x`sha1sum gc-7.1.tar.gz | cut -c-40`" != "x$gc_sha1sum"; then
-	AC_MSG_ERROR([gc-7.1.tar.gz is invalid, please remove it])
+  AC_MSG_ERROR([gc-7.1.tar.gz is invalid, please remove it])
 fi
 tar -xf gc-7.1.tar.gz && cd gc-7.1 && \
-	./configure --disable-threads --disable-cplusplus --disable-shared \
-	CFLAGS="$CFLAGS -fPIC" && \
-	cd .. || AC_MSG_ERROR([failed to configure libgc])
+  ./configure --disable-threads --disable-cplusplus --disable-shared \
+    CFLAGS="$CFLAGS -fPIC" && \
+    cd .. || AC_MSG_ERROR([failed to configure libgc])
 AC_MSG_NOTICE([=== done configuring libgc ===])
 
 AC_CONFIG_FILES([
-				Makefile
-				src/Makefile
-				src/compiler/emitter/Makefile
-				src/compiler/translator/Makefile
-                                src/compiler/optimizations/Makefile
-                                src/compiler/optimizations/connection_graph_builder/Makefile
-				src/compiler/Makefile
-				src/stdlib/Makefile
-				test/Makefile
-				test/functional/Makefile
-				test/functional/ui/Makefile
-				test/performance/Makefile
-				test/unit/Makefile
-				])
+                 Makefile
+                 src/Makefile
+                 src/compiler/emitter/Makefile
+                 src/compiler/translator/Makefile
+                 src/compiler/optimizations/Makefile
+                 src/compiler/optimizations/connection_graph_builder/Makefile
+                 src/compiler/Makefile
+                 src/stdlib/Makefile
+                 test/Makefile
+                 test/functional/Makefile
+                 test/functional/ui/Makefile
+                 test/performance/Makefile
+                 test/unit/Makefile
+                 ])
 AC_OUTPUT
