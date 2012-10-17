@@ -10,6 +10,7 @@ The following software is necessary to compile and install Skarb:
  - Ruby >= 1.9.2
  - Ruby gems: rspec, ruby\_parser, simplecov
  - GLib >= 2.24.1
+ - The Boehm-Demers-Weiser garbage collector >= 7.1
  - gperf
 
 If you've downloaded Skarb from the VCS you need to set the build system up.

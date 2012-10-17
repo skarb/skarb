@@ -19,6 +19,7 @@ AC_CHECK_FUNCS([floor], [AC_SUBST(MATH_LIBS, [""])],
                             AC_MSG_ERROR([cannot find floor])))
 
 PKG_CHECK_MODULES([GLib], [glib-2.0 >= 2.24.1])
+PKG_CHECK_MODULES([BDWGC], [bdw-gc >= 7.1])
 
 # Other tests
 AC_CHECK_PROGS([GPERF], [gperf])
@@ -27,21 +28,6 @@ if test -z "$GPERF"; then
 fi
 
 AC_SUBST([skarbincludedir], ["$includedir/skarb"])
-
-# Download, verify and configure libgc
-AC_MSG_NOTICE([=== configuring libgc ===])
-if test ! -f gc-7.1.tar.gz; then
-  wget http://www.hpl.hp.com/personal/Hans_Boehm/gc/gc_source/gc-7.1.tar.gz
-fi
-gc_sha1sum=e84cba5d18f4ea5ed4e5fd3f1dc6a46bc190ff6f
-if test "x`sha1sum gc-7.1.tar.gz | cut -c-40`" != "x$gc_sha1sum"; then
-  AC_MSG_ERROR([gc-7.1.tar.gz is invalid, please remove it])
-fi
-tar -xf gc-7.1.tar.gz && cd gc-7.1 && \
-  ./configure --disable-threads --disable-cplusplus --disable-shared \
-    CFLAGS="$CFLAGS -fPIC" && \
-    cd .. || AC_MSG_ERROR([failed to configure libgc])
-AC_MSG_NOTICE([=== done configuring libgc ===])
 
 AC_CONFIG_FILES([
                  Makefile

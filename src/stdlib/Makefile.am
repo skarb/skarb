@@ -6,11 +6,8 @@ lib_LTLIBRARIES=libskarb.la
 libskarb_la_SOURCES=$(public_headers) fixnum.c xalloc.c helpers.c \
                     float.c object.c stringclass.c nil.c array.c hash.c class.c \
 		    false.c true.c blocks.c method_cache.c
-libskarb_la_CFLAGS=-I$(top_builddir)/gc-7.1/include -Wall -Werror $(GLib_CFLAGS)
-libskarb_la_LIBADD=$(top_builddir)/gc-7.1/libgc.la $(GLib_LIBS) $(MATH_LIBS)
-
-$(top_builddir)/gc-7.1/libgc.la:
-	make libgc.la -C $(top_builddir)/gc-7.1
+libskarb_la_CFLAGS=-Wall -Werror $(GLib_CFLAGS) $(BDWGC_CFLAGS)
+libskarb_la_LIBADD=$(GLib_LIBS) $(BDWGC_LIBS) $(MATH_LIBS)
 
 skarb.h: $(public_headers)
 	cat $^ | grep -v '#include ".*"' > $@
