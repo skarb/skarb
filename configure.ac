@@ -13,10 +13,6 @@ INZ_CHECK_GEMS([rspec sexp_processor ruby_parser simplecov])
 # Tests related to C
 AC_PROG_CC_C99
 AC_PROG_LIBTOOL
-AC_TYPE_SIZE_T
-AC_TYPE_UINT32_T
-AC_FUNC_MALLOC
-AC_FUNC_REALLOC
 
 AC_CHECK_FUNCS([floor], [AC_SUBST(MATH_LIBS, [""])],
                AC_CHECK_LIB([m], [floor], [AC_SUBST(MATH_LIBS, ["-lm"])],
