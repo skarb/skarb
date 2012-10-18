@@ -31,6 +31,12 @@ else
   test x$with_tests = xtrue && required_gems+=" rspec"
 fi
 
+# When tests are enabled we expect rspec to be in PATH.
+if test x$with_tests = xtrue; then
+  AC_CHECK_PROGS(RSPEC, [rspec])
+  test -z "$RSPEC" && AC_MSG_ERROR([cannot find the rspec script])
+fi
+
 if test x = "x$RUBY" -o true != "`$RUBY -e 'puts RUBY_VERSION>="1.9.2"'`"; then
   AC_MSG_ERROR([cannot find Ruby >= 1.9.2])
 fi
