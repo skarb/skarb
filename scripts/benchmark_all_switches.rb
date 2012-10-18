@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 
-PROJECT_DIR = "/home/julek/projects/mgr/"
+PROJECT_DIR = "../"
 
 LegalSwitches = ["--math_inline", "--stack_alloc", "--object_reuse"]
 
