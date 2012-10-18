@@ -8,10 +8,12 @@ The following software is necessary to compile and install Skarb:
 
  - A C compiler (GCC and Clang will do fine)
  - Ruby >= 1.9.2
- - Ruby gems: rspec, ruby\_parser, simplecov
+ - The ruby\_parser gem
  - GLib >= 2.24.1
  - The Boehm-Demers-Weiser garbage collector >= 7.1
  - gperf
+
+Optional development dependencies are two Ruby gems: rspec and simplecov.
 
 If you've downloaded Skarb from the VCS you need to set the build system up.
 Begin with the following command.
@@ -35,6 +37,11 @@ Assuming that the installation path is in your PATH environment variable run the
 following command in order to learn details.
 
     skarb -h
+
+Running tests
+-------------
+
+Install RSpec, configure Skarb with `--enable-tests` and run `make check`.
 
 Copyrights
 ----------
