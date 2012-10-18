@@ -35,7 +35,6 @@ TESTSCRIPTS = if.rb \
 	      inheritance2.rb \
 	      blocks.rb
 
-RSPEC = rspec
 TESTS_ENVIRONMENT = SKARB_PATH=$(top_builddir)/src/compiler/skarb \
                     CFLAGS="-I$(top_builddir)/src/stdlib" \
                     LD_LIBRARY_PATH="$(top_builddir)/src/stdlib/.libs" \

@@ -2,8 +2,6 @@ SUBDIRS = unit functional performance
 .PHONY: coverage benchmark
 dist_noinst_DATA = coverage.rb
 
-RSPEC = rspec
-
 coverage:
 	srcdir=$(srcdir) builddir=$(builddir) top_srcdir=$(top_srcdir) \
 		CFLAGS="-I$(top_srcdir)/src/stdlib" \
