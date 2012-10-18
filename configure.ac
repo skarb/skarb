@@ -5,10 +5,36 @@ AC_DISABLE_STATIC
 
 # Tests related to Ruby
 AC_CHECK_PROGS(RUBY, [ruby])
+
+required_gems=ruby_parser
+
+with_coverage=false
+AC_ARG_ENABLE([coverage],
+              AC_HELP_STRING([--enable-coverage],
+                             [measure coverage of tests [default=no]]),
+              [ test "$enableval" = "no" || with_coverage=true ])
+test x$with_coverage = xtrue && required_gems+=" rspec simplecov"
+AM_CONDITIONAL(COVERAGE, [test x$with_coverage = xtrue])
+
+# Enabled coverage implies enabling tests. However when the coverage isn't
+# enabled we have to check for coverage-less tests.
+if test x$with_coverage = xtrue; then
+  with_tests=true
+  AM_CONDITIONAL(TESTS, true)
+else
+  with_tests=false
+  AC_ARG_ENABLE([tests],
+                AC_HELP_STRING([--enable-tests],
+                               [enable tests [default=no]]),
+                [ test "$enableval" = "no" || with_tests=true ])
+  AM_CONDITIONAL(TESTS, [test x$with_tests = xtrue])
+  test x$with_tests = xtrue && required_gems+=" rspec"
+fi
+
 if test x = "x$RUBY" -o true != "`$RUBY -e 'puts RUBY_VERSION>="1.9.2"'`"; then
   AC_MSG_ERROR([cannot find Ruby >= 1.9.2])
 fi
-INZ_CHECK_GEMS([rspec ruby_parser simplecov])
+INZ_CHECK_GEMS([$required_gems])
 
 # Tests related to C
 AC_PROG_CC_C99
