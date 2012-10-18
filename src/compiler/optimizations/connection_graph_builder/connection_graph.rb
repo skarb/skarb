@@ -57,7 +57,7 @@ class ConnectionGraph < Hash
    # Node representing abstract object; it has a reference to sexp with translated
    # constructor call.
    class ObjectNode < Node
-      attr_accessor :constructor_sexp, :type, :potential_precursors, :inside_loop
+      attr_accessor :constructor_sexp, :type, :potential_precursors
    end
 
    # Node representing field of an object.

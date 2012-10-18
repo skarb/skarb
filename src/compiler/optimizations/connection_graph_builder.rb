@@ -158,9 +158,7 @@ class ConnectionGraphBuilder
       if @options[:object_reuse]
          succession.each do |line|
             if @options[:stack_alloc]
-               if not @options[:stack_alloc_no_loops] or not line[0].inside_loop
-                  substitute_allocation_sexp(line[0].constructor_sexp.alloc)
-               end
+               substitute_allocation_sexp(line[0].constructor_sexp.alloc)
             end
             for i in 1..(line.length-1)
                line[i].constructor_sexp.alloc[2] = line[i-1].constructor_sexp.alloc[1]
@@ -170,9 +168,7 @@ class ConnectionGraphBuilder
       elsif @options[:stack_alloc]
          succession.each do |line|
             line.each do |o|
-               if not @options[:stack_alloc_no_loops] or not o.inside_loop
-                  substitute_allocation_sexp(o.constructor_sexp.alloc)
-               end
+               substitute_allocation_sexp(o.constructor_sexp.alloc)
             end
          end
       end
@@ -203,8 +199,7 @@ class ConnectionGraphBuilder
       end
       local_objects = objects.select { |o| o[1].escape_state == :no_escape }
       objects_lives = local_objects.map do |o|
-         ObjectLife.new(o[0], o[1].constructor_sexp, o[1].potential_precursors,
-                        o[1].inside_loop)
+         ObjectLife.new(o[0], o[1].constructor_sexp, o[1].potential_precursors)
       end
       succession = find_objects_succession(objects_lives)
       process_succession_lines(succession)
@@ -280,7 +275,6 @@ class ConnectionGraphBuilder
                              extract_type_setter(event.translated_sexp))
       obj_node.type = event.translated_sexp.value_type
       obj_node.potential_precursors = @local_table.find_dead_objects(obj_node.type)
-      obj_node.inside_loop = true if @local_table.last_block.loop_interior
       obj_key = next_key(:o)
       @local_table.abstract_objects << obj_key
       @local_table.last_graph[obj_key] = obj_node
