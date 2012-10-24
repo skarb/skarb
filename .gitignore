@@ -5,6 +5,7 @@
 .*.swp
 .deps
 .libs
+.yardoc
 Makefile
 Makefile.in
 aclocal.m4
@@ -15,6 +16,7 @@ config.status
 config.sub
 configure
 depcomp
+doc/
 gc-7.1
 gc-7.1.tar.gz
 install-sh
