@@ -6,4 +6,5 @@ before_install:
   - sudo apt-get install automake gperf libgc-dev libglib2.0-dev
   # TODO: This should be done a) with Bundler, b) without sudo.
   - sudo gem install rspec
+  - sudo gem install sexp_processor -v '< 4'
   - sudo gem install ruby_parser -v '< 3'
