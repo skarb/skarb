@@ -1,0 +1,9 @@
+language: ruby
+rvm:
+  - 1.9.3
+script: autoreconf -fis && ./configure --enable-tests && make check
+before_install:
+  - sudo apt-get install automake gperf libgc-dev libglib2.0-dev
+  # TODO: This should be done a) with Bundler, b) without sudo.
+  - sudo gem install rspec
+  - sudo gem install ruby_parser -v '< 3'
