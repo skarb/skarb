@@ -1,6 +1,8 @@
 Skarb – README
 ==============
 
+[![Build Status](https://travis-ci.org/skarb/skarb.png)](https://travis-ci.org/skarb/skarb)
+
 Installation
 ------------
 
